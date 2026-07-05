@@ -1,4 +1,4 @@
-name: Deploy to AWS (DayPoo)
+name: Deploy to Oracle Cloud (DayPoo)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── Job 1: 백엔드 & AI 서비스 Docker 이미지 빌드 및 푸시 ──
+  # ── Job 1: 백엔드, AI, 프론트엔드 Docker 이미지 빌드 및 푸시 ──
   build-and-push-images:
     runs-on: ubuntu-latest
     steps:
@@ -34,85 +34,59 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-ai:latest
 
-  # ── Job 2: 프론트엔드 빌드 및 S3 업로드 ──
-  build-and-sync-frontend:
+      # 프론트엔드 이미지 빌드 (Nginx 포함)
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-frontend:latest
+
+  # ── Job 2: OCI 인스턴스에 Docker 컨테이너 배포 ──
+  deploy-to-oci:
     needs: [build-and-push-images]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Prepare directory on OCI
+        uses: appleboy/ssh-action@v1
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
+          host: ${{ secrets.OCI_HOST }}
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+          script: |
+            sudo mkdir -p /opt/daypoo
+            sudo chown -R ubuntu:ubuntu /opt/daypoo
 
-      - name: Install dependencies and Build
-        run: |
-          cd frontend
-          npm ci
-          npm run build
-        env:
-          VITE_TOSS_CLIENT_KEY: ${{ secrets.VITE_TOSS_CLIENT_KEY }}
-          VITE_KAKAO_MAP_KEY: ${{ secrets.VITE_KAKAO_MAP_KEY }}
-          VITE_API_URL: '/api'
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Sync to S3
-        run: |
-          aws s3 sync frontend/dist s3://daypoo-frontend-static --delete
-
-      - name: Invalidate CloudFront
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
-
-  # ── Job 3: EC2에 Docker 컨테이너 배포 ──
-  deploy-to-ec2:
-    needs: [build-and-push-images]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Copy docker-compose to EC2
+      - name: Copy docker-compose to OCI
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          host: ${{ secrets.OCI_HOST }}
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
           source: "docker-compose.prod.yml"
           target: "/opt/daypoo/"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          envs: DB_PASSWORD,DB_USERNAME,DB_HOST,DOCKERHUB_USERNAME,AWS_REGION,APP_CORS_ALLOWED_ORIGINS,APP_FRONTEND_URL,VITE_TOSS_CLIENT_KEY,VITE_KAKAO_MAP_KEY
+          host: ${{ secrets.OCI_HOST }}
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
           script: |
             set -e
-            # 디렉토리 권한 확인 및 설정
-            sudo mkdir -p /opt/daypoo
-            sudo chown -R ec2-user:ec2-user /opt/daypoo
 
             # 새 이미지 가져오기 및 컨테이너 가동 (신규 설정 주입)
             cd /opt/daypoo
             
-            # .env 파일 생성 (리눅스 인코딩 오류 방지를 위해 printf 사용)
+            # .env 파일 생성
             printf "DOCKERHUB_USERNAME=%s\n" "${{ secrets.DOCKERHUB_USERNAME }}" > .env
             printf "DB_HOST=%s\n" "${{ secrets.DB_HOST }}" >> .env
             printf "DB_PORT=5432\n" >> .env
             printf "POSTGRES_DB=daypoo_db\n" >> .env
             printf "POSTGRES_USER=daypoo\n" >> .env
             printf "POSTGRES_PASSWORD=%s\n" "${{ secrets.DB_PASSWORD }}" >> .env
-            printf "AWS_REGION=%s\n" "${{ secrets.AWS_REGION }}" >> .env
             printf "ALLOWED_ORIGINS=%s\n" "${{ secrets.APP_CORS_ALLOWED_ORIGINS }}" >> .env
             printf "FRONTEND_URL=%s\n" "${{ secrets.APP_FRONTEND_URL }}" >> .env
             printf "JWT_SECRET_KEY=%s\n" "${{ secrets.JWT_SECRET_KEY }}" >> .env
@@ -131,24 +105,25 @@ jobs:
             printf "REDIS_HOST=redis\n" >> .env
             printf "REDIS_PORT=6379\n" >> .env
             
-            # 기존 컨테이너 이름 충돌 방지 (프로젝트 무관하게 이름으로 찾아 삭제)
-            docker rm -f daypoo-backend daypoo-ai daypoo-redis 2>/dev/null || true
+            # 기존 컨테이너 이름 충돌 방지 (프론트엔드 추가)
+            docker rm -f daypoo-frontend daypoo-backend daypoo-ai daypoo-redis 2>/dev/null || true
 
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down --remove-orphans
             docker compose -f docker-compose.prod.yml up -d
 
-            # 백엔드 헬스체크 - EC2 호스트에서 직접 HTTP 체크 (최대 3분 대기)
+            # 백엔드 헬스체크 (내부 통신용으로 포트가 노출되지 않았으므로 도커 컨테이너 내부 헬스체크 활용)
             echo "⏳ Waiting for backend to become healthy..."
             for i in $(seq 1 18); do
-              if curl -sf http://localhost/actuator/health > /dev/null 2>&1; then
+              HEALTH_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' daypoo-backend || echo '"unhealthy"')
+              if [ "$HEALTH_STATUS" = '"healthy"' ]; then
                 echo "✅ Backend is healthy! [$i/18]"
                 break
               fi
-              echo "  [$i/18] Not ready yet..."
+              echo "  [$i/18] Health status is $HEALTH_STATUS, not ready yet..."
               if [ $i -eq 18 ]; then
                 echo "❌ Backend failed to respond after 3 minutes. Last 50 lines of logs:"
-                docker compose -f docker-compose.prod.yml logs backend --tail=50
+                docker compose -f docker-compose.prod.yml logs daypoo-backend --tail=50
                 exit 1
               fi
               sleep 10
