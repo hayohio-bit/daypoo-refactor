@@ -1,0 +1,32 @@
+{
+  "name": "daypoo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.2"
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,jsx,ts,tsx,css}": [
+      "frontend/node_modules/.bin/prettier --write"
+    ],
+    "ai-service/**/*.py": [
+      "python3 -m black",
+      "python3 -m isort"
+    ],
+    "backend/**/*.java": [
+      "bash -c 'cd backend && ./gradlew spotlessApply'"
+    ]
+  }
+}

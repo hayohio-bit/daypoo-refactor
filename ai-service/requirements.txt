@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+langchain
+langchain-openai
+pydantic
+pydantic-settings
+python-dotenv
+python-multipart
+redis
+httpx
+jinja2
+loguru
+pytest
+pytest-asyncio

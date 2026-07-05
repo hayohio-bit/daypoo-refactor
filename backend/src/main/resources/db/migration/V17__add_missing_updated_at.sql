@@ -1,0 +1,3 @@
+-- V17__add_missing_updated_at.sql
+ALTER TABLE visit_logs ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE health_report_snapshots ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;

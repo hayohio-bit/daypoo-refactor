@@ -1,0 +1,1 @@
+ALTER TABLE items ADD COLUMN discount_price BIGINT NULL;

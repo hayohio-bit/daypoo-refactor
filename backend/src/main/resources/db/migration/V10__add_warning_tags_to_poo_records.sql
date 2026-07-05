@@ -1,0 +1,1 @@
+ALTER TABLE poo_records ADD COLUMN IF NOT EXISTS warning_tags VARCHAR(255);

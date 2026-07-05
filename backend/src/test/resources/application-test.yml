@@ -1,0 +1,36 @@
+spring:
+  # 테스트용 Flyway 비활성화 → Hibernate DDL로 스키마 자동 생성
+  flyway:
+    enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+  # 테스트용 메일 더미값 (빈 컨텍스트 로딩 오류 방지)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: test@daypoo.com
+    password: dummy_mail_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# 외부 서비스 더미값 (CI에서 실제 호출 없음)
+public-data:
+  api-key: dummy_public_data_key
+  url: https://apis.data.go.kr/1741000/public_restroom_info/info
+
+ai-service:
+  url: http://localhost:19999
+
+opensearch:
+  url: http://localhost:9200
+
+app:
+  self-check:
+    mail-enabled: false

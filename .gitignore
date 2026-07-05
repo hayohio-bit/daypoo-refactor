@@ -1,0 +1,154 @@
+# ================================================
+# 🌍 공통 (OS / 시스템 파일)
+# ================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+
+# ================================================
+# 🏗️ Terraform
+# ================================================
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfplan
+*tfplan*
+.terraformrc
+terraform.rc
+terraform.exe
+terraform_*_windows_amd64/
+# .terraform.lock.hcl은 의도적으로 커밋 (provider 버전 고정)
+
+
+# ================================================
+# 🔐 환경 변수 및 시크릿
+# ================================================
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+secrets/
+credentials/
+
+
+# ================================================
+# 📦 의존성 패키지
+# ================================================
+**/node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+
+
+# ================================================
+# 🖥️ Frontend (Vite / React)
+# ================================================
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+
+# ================================================
+# ☕ Backend (Spring Boot / Gradle)
+# ================================================
+backend/build/
+backend/.gradle/
+backend/out/
+backend/bin/
+backend/HELP.md
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache/
+.factorypath
+
+
+# ================================================
+# 🐍 AI Service (Python)
+# ================================================
+**/__pycache__/
+**/.venv/
+**/venv/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.python-version
+*.pyc
+*.pyo
+ai-service/dist/
+ai-service/build/
+ai-service/*.egg-info/
+
+
+# ================================================
+# 🐳 Docker
+# ================================================
+.docker/
+docker-compose.override.yml
+
+
+# ================================================
+# 💻 IDE / 에디터
+# ================================================
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+*.iml
+*.sw?
+
+
+# ================================================
+# 📝 로그 파일
+# ================================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+deploy_log.txt
+gh_failed_log.txt
+
+
+# ================================================
+# 🧪 테스트 / 커버리지 리포트
+# ================================================
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+*.cover
+
+
+# ================================================
+# 🔧 빌드 / 캐시
+# ================================================
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+
+# ================================================
+# 🗂️ 임시 파일
+# ================================================
+tmp/
