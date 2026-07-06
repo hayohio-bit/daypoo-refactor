@@ -1,10 +1,13 @@
 # Build stage
-FROM node:20-alpine as build-stage
+FROM node:20-alpine AS build-stage
 
 WORKDIR /app
 
 # Copy package.json and package-lock.json first for better cache on npm ci
 COPY package*.json ./
+
+# Install build dependencies for native modules (e.g. gifsicle)
+RUN apk add --no-cache python3 make g++ autoconf automake libtool pkgconfig nasm
 
 # Install dependencies
 RUN npm ci
