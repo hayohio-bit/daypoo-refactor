@@ -1,6 +1,7 @@
 FROM amazoncorretto:21-alpine AS builder
 WORKDIR /app
 COPY . .
+RUN chmod +x ./gradlew
 RUN ./gradlew bootJar -x test
 
 FROM amazoncorretto:21-alpine
