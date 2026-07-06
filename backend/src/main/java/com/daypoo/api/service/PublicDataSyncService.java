@@ -83,8 +83,8 @@ public class PublicDataSyncService {
     this.toiletRepository = toiletRepository;
   }
 
-  /** 매일 새벽 3시에 공공데이터 전체 동기화를 실행합니다. 서버 시작 시에는 toilet 데이터가 없는 경우에만 소규모 동기화를 수행합니다. */
-  @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 3 * * *")
+  /** 매주 일요일 새벽 3시에 공공데이터 전체 동기화를 실행합니다. 서버 시작 시에는 toilet 데이터가 없는 경우에만 대규모 동기화를 수행합니다. */
+  @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 3 * * SUN")
   public void scheduledSync() {
     log.info("🕒 [Scheduled] Starting daily public data sync...");
     systemLogService.info("System", "Scheduled toilet data sync started");
@@ -115,9 +115,9 @@ public class PublicDataSyncService {
   public void initSyncOnStartup() {
     long count = toiletRepository.count();
     if (count == 0) {
-      log.info("ℹ️ DB에 화장실 데이터가 없습니다. 초기 동기화를 시작합니다 (1-100페이지)...");
+      log.info("ℹ️ DB에 화장실 데이터가 없습니다. 초기 동기화를 시작합니다 (1-550페이지)...");
       systemLogService.info("System", "Initial toilet sync triggered on startup (DB empty)");
-      syncAllToiletsAsync(1, 100);
+      syncAllToiletsAsync(1, 550);
     } else {
       log.info("✅ DB에 {}개의 화장실 데이터가 존재합니다. 초기 동기화를 스킵합니다.", count);
     }
