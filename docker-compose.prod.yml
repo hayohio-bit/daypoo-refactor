@@ -43,7 +43,21 @@ services:
       start_period: 60s
     depends_on:
       - redis
+      - postgres
     restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: daypoo-postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   ai:
     image: ${DOCKERHUB_USERNAME}/daypoo-ai:latest
@@ -66,3 +80,4 @@ services:
 
 volumes:
   redis_data:
+  postgres_data:

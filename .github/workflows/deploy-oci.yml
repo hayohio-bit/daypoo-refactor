@@ -82,7 +82,7 @@ jobs:
             
             # .env 파일 생성
             printf "DOCKERHUB_USERNAME=%s\n" "${{ secrets.DOCKERHUB_USERNAME }}" > .env
-            printf "DB_HOST=%s\n" "${{ secrets.DB_HOST }}" >> .env
+            printf "DB_HOST=postgres\n" >> .env
             printf "DB_PORT=5432\n" >> .env
             printf "POSTGRES_DB=daypoo_db\n" >> .env
             printf "POSTGRES_USER=daypoo\n" >> .env
@@ -105,8 +105,8 @@ jobs:
             printf "REDIS_HOST=redis\n" >> .env
             printf "REDIS_PORT=6379\n" >> .env
             
-            # 기존 컨테이너 이름 충돌 방지 (프론트엔드 추가)
-            docker rm -f daypoo-frontend daypoo-backend daypoo-ai daypoo-redis 2>/dev/null || true
+            # 기존 컨테이너 이름 충돌 방지 (프론트엔드 및 DB 추가)
+            docker rm -f daypoo-frontend daypoo-backend daypoo-ai daypoo-redis daypoo-postgres 2>/dev/null || true
 
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down --remove-orphans
