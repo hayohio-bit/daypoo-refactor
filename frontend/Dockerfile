@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install build dependencies for native modules (e.g. gifsicle)
-RUN apk add --no-cache python3 make g++ autoconf automake libtool pkgconfig nasm
+RUN apk add --no-cache python3 make g++ autoconf automake libtool pkgconfig nasm zlib-dev
 
 # Install dependencies
 RUN npm ci
