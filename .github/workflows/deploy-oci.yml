@@ -34,13 +34,16 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-ai:latest
 
-      # 프론트엔드 이미지 빌드 (Nginx 포함)
+      # 프론트엔드 이미지 빌드 (VITE 환경변수 빌드타임 주입)
       - name: Build and push Frontend Image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-frontend:latest
+          build-args: |
+            VITE_TOSS_CLIENT_KEY=${{ secrets.VITE_TOSS_CLIENT_KEY }}
+            VITE_KAKAO_MAP_KEY=${{ secrets.VITE_KAKAO_MAP_KEY }}
 
   # ── Job 2: OCI 인스턴스에 Docker 컨테이너 배포 ──
   deploy-to-oci:
@@ -49,13 +52,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare directory on OCI
+      - name: Prepare directory and ensure Docker on OCI
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.OCI_HOST }}
           username: ubuntu
           key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
+            # Docker 설치 여부 확인 및 자동 설치 (Ubuntu 공식 방법)
+            if ! command -v docker &> /dev/null; then
+              echo "🔧 Docker not found. Installing..."
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq ca-certificates curl gnupg
+              sudo install -m 0755 -d /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              sudo chmod a+r /etc/apt/keyrings/docker.gpg
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              sudo systemctl enable docker
+              sudo systemctl start docker
+              sudo usermod -aG docker ubuntu
+              echo "✅ Docker installed successfully."
+            fi
+
+            # Docker Compose v2 플러그인 확인
+            if ! docker compose version &> /dev/null; then
+              echo "🔧 Docker Compose plugin not found. Installing..."
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq docker-compose-plugin
+              echo "✅ Docker Compose plugin installed."
+            fi
+
+            # 버전 확인 출력
+            docker --version
+            docker compose version
+
             sudo mkdir -p /opt/daypoo
             sudo chown -R ubuntu:ubuntu /opt/daypoo
 
@@ -70,52 +104,72 @@ jobs:
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          APP_CORS_ALLOWED_ORIGINS: ${{ secrets.APP_CORS_ALLOWED_ORIGINS }}
+          APP_FRONTEND_URL: ${{ secrets.APP_FRONTEND_URL }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PUBLIC_DATA_API_KEY: ${{ secrets.PUBLIC_DATA_API_KEY }}
+          TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
+          VITE_TOSS_CLIENT_KEY: ${{ secrets.VITE_TOSS_CLIENT_KEY }}
+          VITE_KAKAO_MAP_KEY: ${{ secrets.VITE_KAKAO_MAP_KEY }}
+          OPENSEARCH_URL: ${{ secrets.OPENSEARCH_URL }}
         with:
           host: ${{ secrets.OCI_HOST }}
           username: ubuntu
           key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+          envs: DOCKERHUB_USERNAME,DB_PASSWORD,APP_CORS_ALLOWED_ORIGINS,APP_FRONTEND_URL,JWT_SECRET_KEY,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,MAIL_USERNAME,MAIL_PASSWORD,OPENAI_API_KEY,PUBLIC_DATA_API_KEY,TOSS_SECRET_KEY,VITE_TOSS_CLIENT_KEY,VITE_KAKAO_MAP_KEY,OPENSEARCH_URL
           script: |
             set -e
 
-            # 새 이미지 가져오기 및 컨테이너 가동 (신규 설정 주입)
             cd /opt/daypoo
-            
-            # .env 파일 생성
-            printf "DOCKERHUB_USERNAME=%s\n" "${{ secrets.DOCKERHUB_USERNAME }}" > .env
-            printf "DB_HOST=postgres\n" >> .env
-            printf "DB_PORT=5432\n" >> .env
-            printf "POSTGRES_DB=daypoo_db\n" >> .env
-            printf "POSTGRES_USER=daypoo\n" >> .env
-            printf "POSTGRES_PASSWORD=%s\n" "${{ secrets.DB_PASSWORD }}" >> .env
-            printf "ALLOWED_ORIGINS=%s\n" "${{ secrets.APP_CORS_ALLOWED_ORIGINS }}" >> .env
-            printf "FRONTEND_URL=%s\n" "${{ secrets.APP_FRONTEND_URL }}" >> .env
-            printf "JWT_SECRET_KEY=%s\n" "${{ secrets.JWT_SECRET_KEY }}" >> .env
-            printf "KAKAO_CLIENT_ID=%s\n" "${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-            printf "KAKAO_CLIENT_SECRET=%s\n" "${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-            printf "GOOGLE_CLIENT_ID=%s\n" "${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            printf "GOOGLE_CLIENT_SECRET=%s\n" "${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            printf "MAIL_USERNAME=%s\n" "${{ secrets.MAIL_USERNAME }}" >> .env
-            printf "MAIL_PASSWORD=%s\n" "${{ secrets.MAIL_PASSWORD }}" >> .env
-            printf "OPENAI_API_KEY=%s\n" "${{ secrets.OPENAI_API_KEY }}" >> .env
-            printf "PUBLIC_DATA_API_KEY=%s\n" "${{ secrets.PUBLIC_DATA_API_KEY }}" >> .env
-            printf "TOSS_SECRET_KEY=%s\n" "${{ secrets.TOSS_SECRET_KEY }}" >> .env
-            printf "VITE_TOSS_CLIENT_KEY=%s\n" "${{ secrets.VITE_TOSS_CLIENT_KEY }}" >> .env
-            printf "VITE_KAKAO_MAP_KEY=%s\n" "${{ secrets.VITE_KAKAO_MAP_KEY }}" >> .env
-            printf "OPENSEARCH_URL=%s\n" "${{ secrets.OPENSEARCH_URL }}" >> .env
-            printf "REDIS_HOST=redis\n" >> .env
-            printf "REDIS_PORT=6379\n" >> .env
-            
-            # 기존 컨테이너 이름 충돌 방지 (프론트엔드 및 DB 추가)
+
+            # envs 파라미터로 전달받은 환경변수를 활용하여 .env 생성 (특수문자 쉘 인젝션 방지)
+            cat > .env << ENVEOF
+            DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
+            DB_HOST=postgres
+            DB_PORT=5432
+            POSTGRES_DB=daypoo_db
+            POSTGRES_USER=daypoo
+            POSTGRES_PASSWORD=$DB_PASSWORD
+            ALLOWED_ORIGINS=$APP_CORS_ALLOWED_ORIGINS
+            FRONTEND_URL=$APP_FRONTEND_URL
+            JWT_SECRET_KEY=$JWT_SECRET_KEY
+            KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
+            KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+            MAIL_USERNAME=$MAIL_USERNAME
+            MAIL_PASSWORD=$MAIL_PASSWORD
+            OPENAI_API_KEY=$OPENAI_API_KEY
+            PUBLIC_DATA_API_KEY=$PUBLIC_DATA_API_KEY
+            TOSS_SECRET_KEY=$TOSS_SECRET_KEY
+            VITE_TOSS_CLIENT_KEY=$VITE_TOSS_CLIENT_KEY
+            VITE_KAKAO_MAP_KEY=$VITE_KAKAO_MAP_KEY
+            OPENSEARCH_URL=$OPENSEARCH_URL
+            REDIS_HOST=redis
+            REDIS_PORT=6379
+            ENVEOF
+
+            # 기존 컨테이너 이름 충돌 방지
             docker rm -f daypoo-frontend daypoo-backend daypoo-ai daypoo-redis daypoo-postgres 2>/dev/null || true
 
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down --remove-orphans
             docker compose -f docker-compose.prod.yml up -d
 
-            # 백엔드 헬스체크 (내부 통신용으로 포트가 노출되지 않았으므로 도커 컨테이너 내부 헬스체크 활용)
+            # 백엔드 헬스체크 (docker inspect 기반)
             echo "⏳ Waiting for backend to become healthy..."
             for i in $(seq 1 18); do
-              HEALTH_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' daypoo-backend || echo '"unhealthy"')
+              HEALTH_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' daypoo-backend 2>/dev/null || echo '"starting"')
               if [ "$HEALTH_STATUS" = '"healthy"' ]; then
                 echo "✅ Backend is healthy! [$i/18]"
                 break
@@ -123,11 +177,11 @@ jobs:
               echo "  [$i/18] Health status is $HEALTH_STATUS, not ready yet..."
               if [ $i -eq 18 ]; then
                 echo "❌ Backend failed to respond after 3 minutes. Last 50 lines of logs:"
-                docker compose -f docker-compose.prod.yml logs daypoo-backend --tail=50
+                docker compose -f docker-compose.prod.yml logs backend --tail=50
                 exit 1
               fi
               sleep 10
             done
 
-            # 미사용 이미지 정리 (용량 확보)
+            # 미사용 이미지 정리
             docker image prune -f

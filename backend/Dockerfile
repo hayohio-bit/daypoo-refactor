@@ -6,6 +6,8 @@ RUN ./gradlew bootJar -x test
 
 FROM amazoncorretto:21-alpine
 WORKDIR /app
+# healthcheck에서 wget을 사용하므로 설치 필요 (alpine 기본 미포함)
+RUN apk add --no-cache wget
 COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8080
 # t2.micro(1GB RAM)를 고려한 JVM 메모리 최적화 설정
