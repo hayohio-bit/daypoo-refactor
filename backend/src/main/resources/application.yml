@@ -132,8 +132,11 @@ management:
   endpoint:
     health:
       show-details: always
-    prometheus:
-      enabled: true
+  health:
+    mail:
+      enabled: false
+  prometheus:
+    enabled: true
 
 springdoc:
   swagger-ui:
