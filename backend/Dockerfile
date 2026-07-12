@@ -1,4 +1,4 @@
-FROM amazoncorretto:21-alpine AS builder
+FROM --platform=$BUILDPLATFORM amazoncorretto:21-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN chmod +x ./gradlew
