@@ -50,7 +50,7 @@ services:
     restart: always
 
   postgres:
-    image: postgres:15-alpine
+    image: postgis/postgis:15-3.4-alpine
     container_name: daypoo-postgres
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
