@@ -50,8 +50,7 @@ services:
     restart: always
 
   postgres:
-    image: postgis/postgis:15-3.4
-    platform: linux/arm64
+    image: ${DOCKERHUB_USERNAME}/daypoo-postgres:latest
     container_name: daypoo-postgres
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
