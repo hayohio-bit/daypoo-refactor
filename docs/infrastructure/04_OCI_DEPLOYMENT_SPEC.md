@@ -118,3 +118,16 @@ GitHub Actions Runner(AMD64)에서 OCI 대상(ARM64) 이미지를 생성할 때,
 ### 5.2 헬스체크 경로 호출 실패
 * **현상**: docker-compose.prod.yml 내부의 healthcheck wget 경로가 응답하지 않음.
 * **확인 사항**: 백엔드 포트(8080)와 Actuator 헬스 엔드포인트(`/actuator/health`) 활성화 여부를 확인합니다.
+
+### 5.3 OCI 인스턴스 외부 접속 불가 (도메인 접속 타임아웃)
+* **현상**: 배포 완료 메시지는 정상적이나 도메인(예: `daypoo.ssunhy.com`) 또는 IP 주소로 접속 시 `Connection timed out` 발생.
+* **원인**: OCI VCN의 수신 규칙(Ingress Rules) 또는 VM 내부 `iptables` 방화벽 정책에 의해 80(HTTP)/443(HTTPS) 포트 접근이 차단된 상태.
+* **조치**:
+  1. **OCI VCN 수신 규칙 추가**: OCI 콘솔 -> 가상 클라우드 네트워크(VCN) -> 보안 목록(Security List)에서 `0.0.0.0/0` 대상 TCP `80`, `443` 포트 허용 규칙을 추가합니다.
+  2. **VM OS 방화벽 개방**: 인스턴스 내부 SSH 접속 후 다음 명령을 실행하여 포트를 허용하고 규칙을 영구히 저장합니다.
+     ```bash
+     sudo iptables -I INPUT 6 -p tcp --dport 80 -j ACCEPT
+     sudo iptables -I INPUT 6 -p tcp --dport 443 -j ACCEPT
+     sudo netfilter-persistent save
+     sudo netfilter-persistent reload
+     ```
