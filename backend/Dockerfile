@@ -1,10 +1,10 @@
-FROM amazoncorretto:21-alpine AS builder
+FROM --platform=$BUILDPLATFORM amazoncorretto:21-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar -x test
 
-FROM amazoncorretto:21-alpine
+FROM --platform=$TARGETPLATFORM amazoncorretto:21-alpine
 WORKDIR /app
 # healthcheck에서 wget을 사용하므로 설치 필요 (alpine 기본 미포함)
 RUN apk add --no-cache wget

@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS build-stage
+FROM --platform=$BUILDPLATFORM node:20-alpine AS build-stage
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ ENV VITE_KAKAO_MAP_KEY=$VITE_KAKAO_MAP_KEY
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM --platform=$TARGETPLATFORM nginx:alpine
 
 # Nginx 설정 복사
 COPY nginx.conf /etc/nginx/conf.d/default.conf

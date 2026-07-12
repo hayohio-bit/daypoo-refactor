@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM --platform=$TARGETPLATFORM python:3.12-slim
 WORKDIR /app
 
 # 빌드 속도 향상을 위한 의존성 캐싱
