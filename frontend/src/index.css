@@ -158,3 +158,9 @@ button, a, input, select, textarea, [role="button"] {
 .animate-text-shimmer {
   animation: text-shimmer 8s ease-in-out infinite;
 }
+
+/* [P8] ReportCard_Glass.tsx에서 이동: inline <style> 태그 제거 후 전역 스타일시트 관리 */
+@keyframes borderGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}

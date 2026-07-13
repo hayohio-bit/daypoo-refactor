@@ -78,6 +78,11 @@ export function useToilets({
     favoriteIdsRef.current = favoriteIds;
   }, [favoriteIds]);
 
+  // [P7] boundsKey: JSON.stringify 대신 안정적 문자열로 변환 (ESLint 훅 rules 준수)
+  const boundsKey = bounds
+    ? `${bounds.swLat},${bounds.swLng},${bounds.neLat},${bounds.neLng}`
+    : 'null';
+
   const fetchToilets = useCallback(async () => {
     if (!lat || !lng) return;
 
@@ -153,7 +158,7 @@ export function useToilets({
     } finally {
       setLoading(false);
     }
-  }, [lat, lng, radius, JSON.stringify(bounds), level]);
+  }, [lat, lng, radius, boundsKey, level]);
 
   // ★ 성능 최적화: 디바운스 적용 (300ms 동안Bounds 변화가 없을 때만 호출)
   useEffect(() => {

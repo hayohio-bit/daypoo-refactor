@@ -347,12 +347,6 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
         </motion.button>
       </div>
 
-      <style>{`
-        @keyframes borderGlow {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-      `}</style>
     </section>
   );
 }

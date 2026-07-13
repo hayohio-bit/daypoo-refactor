@@ -3,10 +3,10 @@ import { BrowserRouter, Route, Routes, Navigate, useLocation, useNavigate } from
 import { LazyMotion, m } from 'framer-motion';
 
 // Lazy load all pages
-import { SplashPage } from './pages/SplashPage';
-import { MainPage } from './pages/MainPage';
-import { MapPage } from './pages/MapPage';
-import { RankingPage } from './pages/RankingPage';
+const SplashPage = lazy(() => import('./pages/SplashPage').then((m) => ({ default: m.SplashPage })));
+const MainPage = lazy(() => import('./pages/MainPage').then((m) => ({ default: m.MainPage })));
+const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
+const RankingPage = lazy(() => import('./pages/RankingPage').then((m) => ({ default: m.RankingPage })));
 const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -24,13 +24,13 @@ const SupportPage = lazy(() =>
 const PaymentSuccessPage = lazy(() =>
   import('./pages/PaymentSuccessPage').then((m) => ({ default: m.PaymentSuccessPage })),
 );
-import { AuthCallback } from './pages/AuthCallback';
+const AuthCallback = lazy(() => import('./pages/AuthCallback').then((m) => ({ default: m.AuthCallback })));
 const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
-import { SocialSignupPage } from './pages/SocialSignupPage';
+const SocialSignupPage = lazy(() => import('./pages/SocialSignupPage').then((m) => ({ default: m.SocialSignupPage })));
 const PremiumPage = lazy(() =>
   import('./pages/PremiumPage').then((m) => ({ default: m.PremiumPage })),
 );
-import { ServerErrorPage } from './pages/ServerErrorPage';
+const ServerErrorPage = lazy(() => import('./pages/ServerErrorPage').then((m) => ({ default: m.ServerErrorPage })));
 import { LoadingPage } from './pages/LoadingPage';
 
 import { TransitionProvider } from './context/TransitionContext';
@@ -66,14 +66,6 @@ function LoginPage({
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
-  console.log('[AdminRoute] Debug:', {
-    loading,
-    user,
-    userRole: user?.role,
-    hasUser: !!user,
-    accessToken: !!(localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')),
-  });
-
   if (loading) {
     return <LoadingPage />;
   }
@@ -85,16 +77,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
         user.role.some((r: string) => r.toUpperCase().includes('ADMIN'))));
 
   if (!isAdmin) {
-    console.error('[AdminRoute] ❌ Access denied. Redirecting to /main.', {
-      userRole: user?.role,
-      hasToken: !!(localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')),
-    });
     return <Navigate to="/main" replace />;
   }
 
-  console.log('[AdminRoute] ✅ Access granted. User is admin.');
   return <>{children}</>;
 }
+
 
 function App() {
   const [onAuthSuccess, setOnAuthSuccess] = useState<(() => void) | null>(null);
