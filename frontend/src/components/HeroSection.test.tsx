@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ── 의존 모듈 모킹 ──────────────────────────────────────────────
 vi.mock('../context/AuthContext', () => ({
@@ -29,7 +29,9 @@ vi.mock('../hooks/useToilets', () => ({
 // 하위 컴포넌트 stub (독립 렌더링)
 vi.mock('./WaveButton', () => ({
   default: ({ children, onClick }: any) => (
-    <button onClick={onClick} data-testid="wave-button">{children}</button>
+    <button onClick={onClick} data-testid="wave-button">
+      {children}
+    </button>
   ),
 }));
 vi.mock('./TimelineSteps', () => ({
@@ -48,7 +50,8 @@ vi.mock('framer-motion', async () => {
   return {
     ...actual,
     m: new Proxy({} as any, {
-      get: (_: any, tag: string) =>
+      get:
+        (_: any, tag: string) =>
         ({ children, className, style, onClick, ...rest }: any) =>
           React.createElement(tag, { className, style, onClick, 'data-motion': true }, children),
     }),
@@ -66,7 +69,7 @@ const renderHero = () =>
   render(
     <MemoryRouter>
       <HeroSection onCtaClick={vi.fn()} openAuth={vi.fn()} />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
 describe('HeroSection 성능 최적화 검증', () => {
@@ -74,7 +77,9 @@ describe('HeroSection 성능 최적화 검증', () => {
     vi.useFakeTimers();
     mockUseToilets.mockClear();
     Object.defineProperty(window, 'innerWidth', {
-      writable: true, configurable: true, value: 1200,
+      writable: true,
+      configurable: true,
+      value: 1200,
     });
   });
 
@@ -119,7 +124,9 @@ describe('HeroSection 성능 최적화 검증', () => {
   describe('[P5] isMobile lazy initializer', () => {
     it('window.innerWidth=375 → 모바일 모드로 첫 렌더되어야 한다 (깜박임 없음)', () => {
       Object.defineProperty(window, 'innerWidth', {
-        writable: true, configurable: true, value: 375,
+        writable: true,
+        configurable: true,
+        value: 375,
       });
       // 렌더 중에 상태 업데이트가 없어야 함 (lazy init이면 첫 렌더에서 바로 올바른 값)
       const renderSpy = vi.fn();
@@ -130,7 +137,9 @@ describe('HeroSection 성능 최적화 검증', () => {
 
     it('window.innerWidth=1200 → 데스크톱 모드로 첫 렌더되어야 한다', () => {
       Object.defineProperty(window, 'innerWidth', {
-        writable: true, configurable: true, value: 1200,
+        writable: true,
+        configurable: true,
+        value: 1200,
       });
       expect(() => renderHero()).not.toThrow();
     });

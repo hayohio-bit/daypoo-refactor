@@ -1,9 +1,9 @@
 import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { useTransitionContext } from '../context/TransitionContext';
+import { useEffect, useState } from 'react';
 import { BlobBackground } from '../components/BlobBackground';
 import { CustomCursor } from '../components/CustomCursor';
 import { FramerSlideInButton } from '../components/FramerSlideInButton';
+import { useTransitionContext } from '../context/TransitionContext';
 
 const containerVariants = {
   initial: { opacity: 0, y: 40 },
@@ -35,12 +35,8 @@ export function SplashPage() {
     setIsReady(true);
   }, []);
 
-  const mouseX = useMotionValue(
-    typeof window !== 'undefined' ? window.innerWidth / 2 : 0
-  );
-  const mouseY = useMotionValue(
-    typeof window !== 'undefined' ? window.innerHeight / 2 : 0
-  );
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
 
   const handleStart = () => {
     transitionTo('/main');
@@ -117,15 +113,16 @@ export function SplashPage() {
               </motion.div>
 
               <motion.div variants={fadeUp} className="mt-8 text-white">
-                <FramerSlideInButton onClick={handleStart} primary className="px-16 py-5 text-lg md:text-xl">
+                <FramerSlideInButton
+                  onClick={handleStart}
+                  primary
+                  className="px-16 py-5 text-lg md:text-xl"
+                >
                   시작하기
                 </FramerSlideInButton>
               </motion.div>
 
-              <motion.p
-                variants={fadeUp}
-                className="mt-5 text-[15px] md:text-base text-white/40"
-              >
+              <motion.p variants={fadeUp} className="mt-5 text-[15px] md:text-base text-white/40">
                 계정이 없어도 괜찮아요
               </motion.p>
             </motion.div>

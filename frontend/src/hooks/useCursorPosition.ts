@@ -34,4 +34,3 @@ export function useCursorPosition() {
 
   return { position, isMobile };
 }
-

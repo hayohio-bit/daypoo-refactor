@@ -1,8 +1,8 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bell, CheckCheck, Info, MessageSquare, Sparkles, Trash2, Trophy, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, X, Trash2, Info, Trophy, MessageSquare, Sparkles, CheckCheck } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
-import { useState, useMemo } from 'react';
 
 type FilterType = 'all' | 'unread';
 
@@ -34,9 +34,7 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
   };
 
   const filteredNotifications = useMemo(() => {
-    return filter === 'unread'
-      ? notifications.filter(n => !n.isRead)
-      : notifications;
+    return filter === 'unread' ? notifications.filter((n) => !n.isRead) : notifications;
   }, [notifications, filter]);
 
   const getNotificationIcon = (type: string) => {
@@ -71,10 +69,10 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
 
   // 개발자 모드 토글 (헤더 3번 클릭)
   const handleHeaderClick = () => {
-    setClickCount(prev => {
+    setClickCount((prev) => {
       const newCount = prev + 1;
       if (newCount >= 3) {
-        setShowDevTools(prev => !prev);
+        setShowDevTools((prev) => !prev);
         return 0;
       }
       setTimeout(() => setClickCount(0), 1000);
@@ -103,7 +101,8 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed top-0 right-0 z-[2001] w-full max-w-[420px] h-full flex flex-col"
             style={{
-              background: 'linear-gradient(to bottom, rgba(248,250,249,0.98), rgba(255,255,255,0.95))',
+              background:
+                'linear-gradient(to bottom, rgba(248,250,249,0.98), rgba(255,255,255,0.95))',
               backdropFilter: 'blur(20px)',
               boxShadow: '-10px 0 50px rgba(0,0,0,0.08)',
             }}
@@ -118,10 +117,7 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                   >
                     <Bell size={22} />
                   </motion.div>
-                  <div
-                    onClick={handleHeaderClick}
-                    className="cursor-pointer select-none relative"
-                  >
+                  <div onClick={handleHeaderClick} className="cursor-pointer select-none relative">
                     <h2 className="font-black text-xl text-[#1a2b22]">알림</h2>
                     {unreadCount > 0 && (
                       <p className="text-xs font-bold text-[#7a9e8a]">
@@ -160,7 +156,9 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                 >
                   전체
                   {notifications.length > 0 && (
-                    <span className={`ml-2 text-xs ${filter === 'all' ? 'text-white/70' : 'text-gray-400'}`}>
+                    <span
+                      className={`ml-2 text-xs ${filter === 'all' ? 'text-white/70' : 'text-gray-400'}`}
+                    >
                       {notifications.length}
                     </span>
                   )}
@@ -175,11 +173,11 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                 >
                   미읽음
                   {unreadCount > 0 && (
-                    <span className={`ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                      filter === 'unread'
-                        ? 'bg-white/20 text-white'
-                        : 'bg-red-100 text-red-600'
-                    }`}>
+                    <span
+                      className={`ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                        filter === 'unread' ? 'bg-white/20 text-white' : 'bg-red-100 text-red-600'
+                      }`}
+                    >
                       {unreadCount}
                     </span>
                   )}
@@ -208,7 +206,9 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                             : 'bg-white backdrop-blur-md shadow-md hover:shadow-lg'
                         }`}
                         style={{
-                          border: n.isRead ? '1px solid rgba(0,0,0,0.05)' : '1px solid rgba(45,106,79,0.1)',
+                          border: n.isRead
+                            ? '1px solid rgba(0,0,0,0.05)'
+                            : '1px solid rgba(45,106,79,0.1)',
                         }}
                       >
                         {/* Unread indicator */}
@@ -218,8 +218,12 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
 
                         <div className="flex gap-3">
                           {/* Icon */}
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${bg}`}>
-                            <div className={`bg-gradient-to-br ${gradient} bg-clip-text text-transparent`}>
+                          <div
+                            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${bg}`}
+                          >
+                            <div
+                              className={`bg-gradient-to-br ${gradient} bg-clip-text text-transparent`}
+                            >
                               <Icon size={24} strokeWidth={2.5} />
                             </div>
                           </div>
@@ -227,15 +231,19 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-1">
-                              <h3 className={`text-sm font-black leading-tight ${
-                                n.isRead ? 'text-gray-400' : 'text-[#1a2b22]'
-                              }`}>
+                              <h3
+                                className={`text-sm font-black leading-tight ${
+                                  n.isRead ? 'text-gray-400' : 'text-[#1a2b22]'
+                                }`}
+                              >
                                 {n.title}
                               </h3>
                             </div>
-                            <p className={`text-xs leading-relaxed mb-2 ${
-                              n.isRead ? 'text-gray-400' : 'text-gray-600'
-                            }`}>
+                            <p
+                              className={`text-xs leading-relaxed mb-2 ${
+                                n.isRead ? 'text-gray-400' : 'text-gray-600'
+                              }`}
+                            >
                               {n.content}
                             </p>
                             <div className="flex items-center gap-2">
@@ -271,12 +279,12 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                   <motion.div
                     animate={{
                       scale: [1, 1.05, 1],
-                      rotate: [0, 5, -5, 0]
+                      rotate: [0, 5, -5, 0],
                     }}
                     transition={{
                       duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut"
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
                     }}
                     className="w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-6"
                   >
@@ -288,12 +296,14 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                   <p className="text-sm text-[#7a9e8a] leading-relaxed">
                     {filter === 'unread' ? (
                       <>
-                        모든 알림을 읽었습니다.<br />
+                        모든 알림을 읽었습니다.
+                        <br />
                         새로운 소식이 있으면 알려드릴게요!
                       </>
                     ) : (
                       <>
-                        오늘 변은 어떠셨나요?<br />
+                        오늘 변은 어떠셨나요?
+                        <br />
                         새로운 알림이 도착하면 알려드릴게요!
                       </>
                     )}
@@ -311,9 +321,10 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                     disabled={unreadCount === 0}
                     className="w-full py-3 px-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     style={{
-                      background: unreadCount > 0
-                        ? 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)'
-                        : '#f3f4f6',
+                      background:
+                        unreadCount > 0
+                          ? 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)'
+                          : '#f3f4f6',
                       color: unreadCount > 0 ? 'white' : '#9ca3af',
                       boxShadow: unreadCount > 0 ? '0 4px 16px rgba(27,67,50,0.2)' : 'none',
                     }}
@@ -349,53 +360,83 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
                       <div className="grid grid-cols-3 gap-2">
                         <button
                           onClick={() => {
-                            showToast('레벨업!', '축하합니다! 새로운 등급을 획득하셨습니다.', 'achievement');
-                            setNotifications(prev => [{
-                              id: Date.now(),
-                              type: 'ACHIEVEMENT',
-                              title: '레벨업!',
-                              content: '축하합니다! 새로운 등급을 획득하셨습니다.',
-                              isRead: false,
-                              createdAt: new Date().toISOString()
-                            }, ...prev]);
+                            showToast(
+                              '레벨업!',
+                              '축하합니다! 새로운 등급을 획득하셨습니다.',
+                              'achievement',
+                            );
+                            setNotifications((prev) => [
+                              {
+                                id: Date.now(),
+                                type: 'ACHIEVEMENT',
+                                title: '레벨업!',
+                                content: '축하합니다! 새로운 등급을 획득하셨습니다.',
+                                isRead: false,
+                                createdAt: new Date().toISOString(),
+                              },
+                              ...prev,
+                            ]);
                           }}
                           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white border border-gray-100 hover:border-amber-200 hover:shadow-md transition-all group active:scale-95"
                         >
-                          <Trophy size={16} className="text-amber-500 group-hover:scale-110 transition-transform" />
+                          <Trophy
+                            size={16}
+                            className="text-amber-500 group-hover:scale-110 transition-transform"
+                          />
                           <span className="text-[10px] font-bold text-gray-600">성취</span>
                         </button>
                         <button
                           onClick={() => {
-                            showToast('문의 답변', '문의하신 내용에 대해 답변이 도착했습니다.', 'message');
-                            setNotifications(prev => [{
-                              id: Date.now(),
-                              type: 'INQUIRY_REPLY',
-                              title: '문의 답변',
-                              content: '문의하신 내용에 대해 답변이 도착했습니다.',
-                              isRead: false,
-                              createdAt: new Date().toISOString()
-                            }, ...prev]);
+                            showToast(
+                              '문의 답변',
+                              '문의하신 내용에 대해 답변이 도착했습니다.',
+                              'message',
+                            );
+                            setNotifications((prev) => [
+                              {
+                                id: Date.now(),
+                                type: 'INQUIRY_REPLY',
+                                title: '문의 답변',
+                                content: '문의하신 내용에 대해 답변이 도착했습니다.',
+                                isRead: false,
+                                createdAt: new Date().toISOString(),
+                              },
+                              ...prev,
+                            ]);
                           }}
                           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all group active:scale-95"
                         >
-                          <MessageSquare size={16} className="text-blue-500 group-hover:scale-110 transition-transform" />
+                          <MessageSquare
+                            size={16}
+                            className="text-blue-500 group-hover:scale-110 transition-transform"
+                          />
                           <span className="text-[10px] font-bold text-gray-600">메시지</span>
                         </button>
                         <button
                           onClick={() => {
-                            showToast('근처 화장실', '현재 위치 150m 이내에 화장실이 있습니다.', 'info');
-                            setNotifications(prev => [{
-                              id: Date.now(),
-                              type: 'INFO',
-                              title: '근처 화장실',
-                              content: '현재 위치 150m 이내에 화장실이 있습니다.',
-                              isRead: false,
-                              createdAt: new Date().toISOString()
-                            }, ...prev]);
+                            showToast(
+                              '근처 화장실',
+                              '현재 위치 150m 이내에 화장실이 있습니다.',
+                              'info',
+                            );
+                            setNotifications((prev) => [
+                              {
+                                id: Date.now(),
+                                type: 'INFO',
+                                title: '근처 화장실',
+                                content: '현재 위치 150m 이내에 화장실이 있습니다.',
+                                isRead: false,
+                                createdAt: new Date().toISOString(),
+                              },
+                              ...prev,
+                            ]);
                           }}
                           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white border border-gray-100 hover:border-emerald-200 hover:shadow-md transition-all group active:scale-95"
                         >
-                          <Info size={16} className="text-emerald-500 group-hover:scale-110 transition-transform" />
+                          <Info
+                            size={16}
+                            className="text-emerald-500 group-hover:scale-110 transition-transform"
+                          />
                           <span className="text-[10px] font-bold text-gray-600">시스템</span>
                         </button>
                       </div>

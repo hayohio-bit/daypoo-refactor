@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { getDistance } from '../utils/geoUtils';
-import { ToiletData } from '../types/toilet';
-import { api } from '../services/apiClient';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/apiClient';
+import type { ToiletData } from '../types/toilet';
+import { getDistance } from '../utils/geoUtils';
 
 interface GeoPosition {
   lat: number;
@@ -22,7 +22,7 @@ const DEFAULT_POS: GeoPosition = { lat: 37.5172, lng: 127.0473 };
 export function useGeoTracking(
   toilets: ToiletData[],
   onAutoCheckIn?: (remainedSeconds: number) => void,
-  isEnabled: boolean = true
+  isEnabled = true,
 ) {
   const [position, setPosition] = useState<GeoPosition | null>(null);
   const [granted, setGranted] = useState(false);
@@ -58,7 +58,9 @@ export function useGeoTracking(
             localStorage.setItem('location_prompted', 'true');
           }
 
-          const isLogged = !!(localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken'));
+          const isLogged = !!(
+            localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')
+          );
           if (!isLogged) return;
 
           toiletsRef.current.forEach((toilet) => {
@@ -68,22 +70,25 @@ export function useGeoTracking(
               const lastTime = lastCheckInRef.current.get(toilet.id) || 0;
               if (now - lastTime > 120000) {
                 lastCheckInRef.current.set(toilet.id, now);
-                console.log(`[Fast Check-in] ${toilet.name} 진입 감지 (${Math.round(dist)}m). 체크인 핑 전송.`);
+                console.log(
+                  `[Fast Check-in] ${toilet.name} 진입 감지 (${Math.round(dist)}m). 체크인 핑 전송.`,
+                );
 
-                api.post('/records/check-in', {
-                  toiletId: Number(toilet.id),
-                  latitude: newPos.lat,
-                  longitude: newPos.lng
-                })
-                .then(async (res: any) => {
-                  await refreshUser();
-                  if (onAutoCheckIn && res && typeof res.remainedSeconds === 'number') {
-                    onAutoCheckIn(res.remainedSeconds);
-                  }
-                })
-                .catch(err => {
-                  console.warn('[Fast Check-in] 체크인 API 호출 실패:', err.message);
-                });
+                api
+                  .post('/records/check-in', {
+                    toiletId: Number(toilet.id),
+                    latitude: newPos.lat,
+                    longitude: newPos.lng,
+                  })
+                  .then(async (res: any) => {
+                    await refreshUser();
+                    if (onAutoCheckIn && res && typeof res.remainedSeconds === 'number') {
+                      onAutoCheckIn(res.remainedSeconds);
+                    }
+                  })
+                  .catch((err) => {
+                    console.warn('[Fast Check-in] 체크인 API 호출 실패:', err.message);
+                  });
               }
             }
           });
@@ -92,9 +97,9 @@ export function useGeoTracking(
           console.error('[GeoTracking] 위치 추적 실패:', err);
           setGranted(false);
           // functional update로 stale closure 방지
-          setPosition(prev => prev ?? DEFAULT_POS);
+          setPosition((prev) => prev ?? DEFAULT_POS);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
       );
     };
 
@@ -102,14 +107,16 @@ export function useGeoTracking(
     const initTracking = async () => {
       if ('permissions' in navigator) {
         try {
-          permissionStatus = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+          permissionStatus = await navigator.permissions.query({
+            name: 'geolocation' as PermissionName,
+          });
 
           if (permissionStatus.state === 'granted') {
             startWatching();
           } else if (permissionStatus.state === 'denied') {
             // 권한 거부 상태 → fallback 좌표 즉시 설정
             setGranted(false);
-            setPosition(prev => prev ?? DEFAULT_POS);
+            setPosition((prev) => prev ?? DEFAULT_POS);
           } else {
             // 'prompt' 상태 → onchange 대기하되, iOS에서 onchange 미발화 대비 안전 타임아웃
             fallbackTimer = setTimeout(() => {
@@ -120,16 +127,22 @@ export function useGeoTracking(
           permissionStatus.onchange = () => {
             console.log('[GeoTracking] Permission state changed:', permissionStatus?.state);
             if (permissionStatus?.state === 'granted') {
-              if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+              if (fallbackTimer) {
+                clearTimeout(fallbackTimer);
+                fallbackTimer = null;
+              }
               startWatching();
             } else if (permissionStatus?.state === 'denied') {
-              if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+              if (fallbackTimer) {
+                clearTimeout(fallbackTimer);
+                fallbackTimer = null;
+              }
               if (watchId !== null) {
                 navigator.geolocation.clearWatch(watchId);
                 watchId = null;
               }
               setGranted(false);
-              setPosition(prev => prev ?? DEFAULT_POS);
+              setPosition((prev) => prev ?? DEFAULT_POS);
             }
           };
         } catch (e) {
@@ -151,13 +164,13 @@ export function useGeoTracking(
       // Case 1: 사용자가 커스텀 모달에서 명시적으로 동의하고 OS 프롬프트도 허용한 이력
       // → 즉시 추적 시작
       initTracking();
-
     } else if (hasBeenPrompted) {
       // Case 2: 커스텀 모달은 봤지만 동의하지 않았거나, OS 프롬프트를 거부한 경우
       // → 브라우저의 실제 권한 상태를 확인하여, 가능하면 추적 시작
       //   (iOS Safari에서는 permissions.query 미지원이므로 catch에서 직접 시도)
       if ('permissions' in navigator) {
-        navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        navigator.permissions
+          .query({ name: 'geolocation' as PermissionName })
           .then((perm) => {
             if (perm.state === 'granted') {
               // 브라우저가 이미 위치를 허용한 상태 → localStorage 동기화 후 추적 시작
@@ -165,7 +178,7 @@ export function useGeoTracking(
               initTracking();
             } else {
               // 미허용(denied 또는 prompt) → 폴백 좌표만 설정
-              setPosition(prev => prev ?? DEFAULT_POS);
+              setPosition((prev) => prev ?? DEFAULT_POS);
             }
           })
           .catch(() => {
@@ -177,11 +190,10 @@ export function useGeoTracking(
         // permissions API 자체가 없는 브라우저 → 직접 시도
         initTracking();
       }
-
     } else {
       // Case 3: 아직 커스텀 모달도 안 뜬 완전 첫 방문 상태
       // → 폴백 좌표만 설정하고, LocationConsentBanner가 뜨기를 대기
-      setPosition(prev => prev ?? DEFAULT_POS);
+      setPosition((prev) => prev ?? DEFAULT_POS);
     }
 
     // LocationConsentBanner에서 동의 이벤트를 발생시키면 Tracking 시작

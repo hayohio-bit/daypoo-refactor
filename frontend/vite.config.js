@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import viteImagemin from 'vite-plugin-imagemin';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
+import viteImagemin from 'vite-plugin-imagemin';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
@@ -13,7 +13,13 @@ export default defineConfig({
       includeAssets: ['favicon.png', 'icons/favicon.ico', 'icons/icon.svg', 'icons/og-image.png'],
       workbox: {
         // 이 경로들은 서비스 워커가 가로채지 않고 서버로 직접 요청을 보냅니다.
-        navigateFallbackDenylist: [/^\/api/, /^\/oauth2/, /^\/login/, /^\/swagger-ui/, /^\/v3\/api-docs/],
+        navigateFallbackDenylist: [
+          /^\/api/,
+          /^\/oauth2/,
+          /^\/login/,
+          /^\/swagger-ui/,
+          /^\/v3\/api-docs/,
+        ],
         runtimeCaching: [
           {
             // 카카오맵 SDK (dapi.kakao.com) — iOS PWA에서 외부 스크립트 로드 실패 방지
@@ -116,11 +122,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: [
-        'src/hooks/useToilets.ts',
-        'src/components/HeroSection.tsx',
-        'src/App.tsx',
-      ],
+      include: ['src/hooks/useToilets.ts', 'src/components/HeroSection.tsx', 'src/App.tsx'],
       thresholds: {
         lines: 70,
         branches: 60,

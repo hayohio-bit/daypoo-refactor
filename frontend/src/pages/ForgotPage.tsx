@@ -1,7 +1,15 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  KeyRound,
+  Mail,
+} from 'lucide-react';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Mail, KeyRound, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react';
 import { api } from '../services/apiClient';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
@@ -43,10 +51,10 @@ function PageHeader() {
 // ── 애니메이션 빔 배경 ──────────────────────────────────────────────────
 function AnimatedBeamBackground() {
   const paths = [
-    "M-100,200 C150,150 350,450 500,300 C650,150 850,450 1100,200",
-    "M1100,800 C850,750 650,950 500,800 C350,650 150,850 -100,800",
-    "M200,-100 C150,150 450,350 300,500 C150,650 450,850 200,1100",
-    "M800,1100 C750,850 950,650 800,500 C650,350 850,150 800,-100",
+    'M-100,200 C150,150 350,450 500,300 C650,150 850,450 1100,200',
+    'M1100,800 C850,750 650,950 500,800 C350,650 150,850 -100,800',
+    'M200,-100 C150,150 450,350 300,500 C150,650 450,850 200,1100',
+    'M800,1100 C750,850 950,650 800,500 C650,350 850,150 800,-100',
   ];
 
   return (
@@ -64,7 +72,7 @@ function AnimatedBeamBackground() {
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
-        
+
         {paths.map((d, i) => (
           <g key={i}>
             <path d={d} fill="none" stroke="rgba(27,67,50,0.04)" strokeWidth="1.5" />
@@ -76,16 +84,16 @@ function AnimatedBeamBackground() {
               strokeLinecap="round"
               filter="url(#glow)"
               initial={{ pathLength: 0, pathOffset: 0, opacity: 0 }}
-              animate={{ 
+              animate={{
                 pathLength: [0.15, 0.25, 0.15],
                 pathOffset: [0, 1],
-                opacity: [0, 0.8, 0]
+                opacity: [0, 0.8, 0],
               }}
               transition={{
                 duration: 7 + i * 2,
-                repeat: Infinity,
+                repeat: Number.POSITIVE_INFINITY,
                 delay: i * 2.5,
-                ease: "linear"
+                ease: 'linear',
               }}
             />
           </g>
@@ -97,12 +105,24 @@ function AnimatedBeamBackground() {
 
 // ── 공통 Input ────────────────────────────────────────────────────────
 function InputField({
-  label, type = 'text', value, onChange, placeholder,
-  error, hint, autoComplete, rightEl,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  error,
+  hint,
+  autoComplete,
+  rightEl,
 }: {
-  label: string; type?: string; value: string;
-  onChange: (v: string) => void; placeholder?: string;
-  error?: string; hint?: string; autoComplete?: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  error?: string;
+  hint?: string;
+  autoComplete?: string;
   rightEl?: React.ReactNode;
 }) {
   const [focused, setFocused] = useState(false);
@@ -118,13 +138,14 @@ function InputField({
           border: error
             ? '1.5px solid rgba(232,93,93,0.55)'
             : focused
-            ? '1.5px solid #1B4332'
-            : '1.5px solid #d4e8db',
+              ? '1.5px solid #1B4332'
+              : '1.5px solid #d4e8db',
           boxShadow: focused ? '0 0 0 3px rgba(27,67,50,0.06)' : 'none',
         }}
       >
         <input
-          type={type} value={value}
+          type={type}
+          value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -137,9 +158,15 @@ function InputField({
       </div>
       <AnimatePresence>
         {error && (
-          <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="flex items-center gap-1.5 text-xs" style={{ color: '#E85D5D' }}>
-            <AlertCircle size={11} />{error}
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-1.5 text-xs"
+            style={{ color: '#E85D5D' }}
+          >
+            <AlertCircle size={11} />
+            {error}
           </motion.p>
         )}
       </AnimatePresence>
@@ -148,14 +175,20 @@ function InputField({
 }
 
 // ── 생년월일 드랍다운 ───────────────────────────────────────────────────
-function BirthDropdowns({ 
-  year, month, day, 
-  onYearChange, onMonthChange, onDayChange 
-}: { 
-  year: string; month: string; day: string; 
-  onYearChange: (v: string) => void; 
-  onMonthChange: (v: string) => void; 
-  onDayChange: (v: string) => void; 
+function BirthDropdowns({
+  year,
+  month,
+  day,
+  onYearChange,
+  onMonthChange,
+  onDayChange,
+}: {
+  year: string;
+  month: string;
+  day: string;
+  onYearChange: (v: string) => void;
+  onMonthChange: (v: string) => void;
+  onDayChange: (v: string) => void;
 }) {
   const years = Array.from({ length: 2026 - 1920 + 1 }, (_, i) => 2026 - i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -169,8 +202,15 @@ function BirthDropdowns({
         className="w-full bg-[#f4faf6] outline-none text-sm font-medium px-4 py-3.5 rounded-xl appearance-none border border-[#d4e8db] focus:border-[#1B4332] focus:bg-white transition-all cursor-pointer"
         style={{ color: '#1a2b22' }}
       >
-        <option value="" disabled>{placeholder}</option>
-        {options.map((opt: any) => <option key={opt} value={opt}>{opt}{suffix}</option>)}
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {options.map((opt: any) => (
+          <option key={opt} value={opt}>
+            {opt}
+            {suffix}
+          </option>
+        ))}
       </select>
       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#7a9e8a]">
         <ChevronDown size={14} />
@@ -180,9 +220,27 @@ function BirthDropdowns({
 
   return (
     <div className="flex gap-2">
-      <SelectWrapper value={year} onChange={onYearChange} options={years} placeholder="년" suffix="년" />
-      <SelectWrapper value={month} onChange={onMonthChange} options={months} placeholder="월" suffix="월" />
-      <SelectWrapper value={day} onChange={onDayChange} options={days} placeholder="일" suffix="일" />
+      <SelectWrapper
+        value={year}
+        onChange={onYearChange}
+        options={years}
+        placeholder="년"
+        suffix="년"
+      />
+      <SelectWrapper
+        value={month}
+        onChange={onMonthChange}
+        options={months}
+        placeholder="월"
+        suffix="월"
+      />
+      <SelectWrapper
+        value={day}
+        onChange={onDayChange}
+        options={days}
+        placeholder="일"
+        suffix="일"
+      />
     </div>
   );
 }
@@ -221,15 +279,26 @@ function PasswordForgot({ onBack }: { onBack: () => void }) {
   return (
     <AnimatePresence mode="wait">
       {step === 'input' ? (
-        <motion.div key="input" variants={slideVar} initial="enter" animate="center" exit="exit"
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div
+          key="input"
+          variants={slideVar}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: '#e8f3ec' }}>
+            <div
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ background: '#e8f3ec' }}
+            >
               <KeyRound size={20} style={{ color: '#1B4332' }} />
             </div>
             <div>
-              <h2 className="font-black text-lg" style={{ color: '#1a2b22', letterSpacing: '-0.03em' }}>
+              <h2
+                className="font-black text-lg"
+                style={{ color: '#1a2b22', letterSpacing: '-0.03em' }}
+              >
                 비밀번호 찾기
               </h2>
               <p className="text-sm" style={{ color: '#7a9e8a' }}>
@@ -239,36 +308,74 @@ function PasswordForgot({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="flex flex-col gap-4">
-            <InputField label="이메일" type="email" value={email} onChange={setEmail}
-              placeholder="가입한 이메일 주소" error={errors.email} autoComplete="email" />
+            <InputField
+              label="이메일"
+              type="email"
+              value={email}
+              onChange={setEmail}
+              placeholder="가입한 이메일 주소"
+              error={errors.email}
+              autoComplete="email"
+            />
 
             <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              onClick={handleReset} disabled={loading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleReset}
+              disabled={loading}
               className="w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2"
               style={{
-                background: loading ? 'rgba(27,67,50,0.4)' : 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
+                background: loading
+                  ? 'rgba(27,67,50,0.4)'
+                  : 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
                 color: '#fff',
                 boxShadow: loading ? 'none' : '0 4px 18px rgba(27,67,50,0.22)',
                 cursor: loading ? 'not-allowed' : 'pointer',
               }}
             >
-              {loading ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>💩</motion.span> : <>임시 비밀번호 발송 <ArrowRight size={14} /></>}
+              {loading ? (
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+                >
+                  💩
+                </motion.span>
+              ) : (
+                <>
+                  임시 비밀번호 발송 <ArrowRight size={14} />
+                </>
+              )}
             </motion.button>
           </div>
         </motion.div>
       ) : (
-        <motion.div key="done" variants={slideVar} initial="enter" animate="center" exit="exit"
-          className="flex flex-col items-center text-center py-4">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: '#e8f3ec' }}>
+        <motion.div
+          key="done"
+          variants={slideVar}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className="flex flex-col items-center text-center py-4"
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+            style={{ background: '#e8f3ec' }}
+          >
             <CheckCircle2 size={32} style={{ color: '#1B4332' }} />
           </div>
           <h2 className="font-black text-xl mb-2">메일 발송 완료!</h2>
           <p className="text-sm mb-6 text-[#7a9e8a]">
-            입력하신 이메일로 8자리 임시 비밀번호가 발송되었습니다.<br />로그인 후 비밀번호를 꼭 변경해주세요!
+            입력하신 이메일로 8자리 임시 비밀번호가 발송되었습니다.
+            <br />
+            로그인 후 비밀번호를 꼭 변경해주세요!
           </p>
-          <button onClick={() => navigate('/main')} className="w-full py-3.5 rounded-xl font-black text-sm transition-all"
-            style={{ background: '#E8A838', color: '#1B4332' }}>로그인하러 가기 →</button>
+          <button
+            onClick={() => navigate('/main')}
+            className="w-full py-3.5 rounded-xl font-black text-sm transition-all"
+            style={{ background: '#E8A838', color: '#1B4332' }}
+          >
+            로그인하러 가기 →
+          </button>
         </motion.div>
       )}
     </AnimatePresence>
@@ -316,15 +423,26 @@ function EmailForgot() {
   return (
     <AnimatePresence mode="wait">
       {step === 'input' ? (
-        <motion.div key="input" variants={slideVar} initial="enter" animate="center" exit="exit"
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div
+          key="input"
+          variants={slideVar}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: '#fdf3de' }}>
+            <div
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ background: '#fdf3de' }}
+            >
               <Mail size={20} style={{ color: '#b5810f' }} />
             </div>
             <div>
-              <h2 className="font-black text-lg" style={{ color: '#1a2b22', letterSpacing: '-0.03em' }}>
+              <h2
+                className="font-black text-lg"
+                style={{ color: '#1a2b22', letterSpacing: '-0.03em' }}
+              >
                 이메일 찾기
               </h2>
               <p className="text-sm" style={{ color: '#7a9e8a' }}>
@@ -334,32 +452,71 @@ function EmailForgot() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <InputField label="닉네임" value={nickname} onChange={setNickname}
-              placeholder="가입 시 등록한 닉네임" error={errors.nickname} />
+            <InputField
+              label="닉네임"
+              value={nickname}
+              onChange={setNickname}
+              placeholder="가입 시 등록한 닉네임"
+              error={errors.nickname}
+            />
 
             <div className="opacity-60">
-              <label className="text-xs font-bold block mb-1.5" style={{ color: '#5a7a6a' }}>생년월일 (선택)</label>
-              <BirthDropdowns year={birthYear} month={birthMonth} day={birthDay}
-                onYearChange={setBirthYear} onMonthChange={setBirthMonth} onDayChange={setBirthDay} />
+              <label className="text-xs font-bold block mb-1.5" style={{ color: '#5a7a6a' }}>
+                생년월일 (선택)
+              </label>
+              <BirthDropdowns
+                year={birthYear}
+                month={birthMonth}
+                day={birthDay}
+                onYearChange={setBirthYear}
+                onMonthChange={setBirthMonth}
+                onDayChange={setBirthDay}
+              />
             </div>
 
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              onClick={handleFind} disabled={loading}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleFind}
+              disabled={loading}
               className="w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2"
               style={{
-                background: loading ? 'rgba(27,67,50,0.4)' : 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
+                background: loading
+                  ? 'rgba(27,67,50,0.4)'
+                  : 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
                 color: '#fff',
                 boxShadow: loading ? 'none' : '0 4px 18px rgba(27,67,50,0.22)',
                 cursor: loading ? 'not-allowed' : 'pointer',
-              }}>
-              {loading ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>💩</motion.span> : <>이메일 찾기 <ArrowRight size={14} /></>}
+              }}
+            >
+              {loading ? (
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+                >
+                  💩
+                </motion.span>
+              ) : (
+                <>
+                  이메일 찾기 <ArrowRight size={14} />
+                </>
+              )}
             </motion.button>
           </div>
         </motion.div>
       ) : (
-        <motion.div key="done" variants={slideVar} initial="enter" animate="center" exit="exit"
-          className="flex flex-col items-center text-center py-4">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: '#fdf3de' }}>
+        <motion.div
+          key="done"
+          variants={slideVar}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className="flex flex-col items-center text-center py-4"
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+            style={{ background: '#fdf3de' }}
+          >
             <Mail size={28} style={{ color: '#b5810f' }} />
           </div>
           <h2 className="font-black text-xl mb-2">이메일을 찾았어요!</h2>
@@ -367,8 +524,13 @@ function EmailForgot() {
             <p className="font-black text-lg text-[#1B4332]">{foundEmail}</p>
             <p className="text-xs mt-1 text-[#7a9e8a]">일부 정보가 마스킹 되었습니다.</p>
           </div>
-          <button onClick={() => navigate('/main')} className="w-full py-3.5 rounded-xl font-black text-sm transition-all"
-            style={{ background: '#E8A838', color: '#1B4332' }}>로그인하러 가기 →</button>
+          <button
+            onClick={() => navigate('/main')}
+            className="w-full py-3.5 rounded-xl font-black text-sm transition-all"
+            style={{ background: '#E8A838', color: '#1B4332' }}
+          >
+            로그인하러 가기 →
+          </button>
         </motion.div>
       )}
     </AnimatePresence>
@@ -395,18 +557,35 @@ export function ForgotPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden bg-[#F8FAF9]">
       <AnimatedBeamBackground />
-      <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}
-        className="relative z-10 w-full max-w-[540px]">
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.65 }}
+        className="relative z-10 w-full max-w-[540px]"
+      >
         <PageHeader />
         <div className="rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 bg-white border border-[#d4e8db] shadow-xl">
           <div className="flex rounded-2xl p-1 mb-5 bg-[#f4faf6] border border-[#d4e8db]">
             {[
-              { key: 'email' as ForgotMode,    label: '이메일 찾기', icon: <Mail size={15} /> },
-              { key: 'password' as ForgotMode, label: '비밀번호 찾기', icon: <KeyRound size={15} /> },
+              { key: 'email' as ForgotMode, label: '이메일 찾기', icon: <Mail size={15} /> },
+              {
+                key: 'password' as ForgotMode,
+                label: '비밀번호 찾기',
+                icon: <KeyRound size={15} />,
+              },
             ].map((t) => (
-              <button key={t.key} onClick={() => switchMode(t.key)} className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all relative flex items-center justify-center gap-1.5"
-                style={{ color: mode === t.key ? '#1B4332' : '#7a9e8a' }}>
-                {mode === t.key && <motion.div layoutId="tabBg" className="absolute inset-0 rounded-xl bg-white border border-[#d4e8db] shadow-sm" />}
+              <button
+                key={t.key}
+                onClick={() => switchMode(t.key)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all relative flex items-center justify-center gap-1.5"
+                style={{ color: mode === t.key ? '#1B4332' : '#7a9e8a' }}
+              >
+                {mode === t.key && (
+                  <motion.div
+                    layoutId="tabBg"
+                    className="absolute inset-0 rounded-xl bg-white border border-[#d4e8db] shadow-sm"
+                  />
+                )}
                 <div className="relative z-10 flex items-center gap-1.5">
                   {t.icon}
                   <span>{t.label}</span>
@@ -416,14 +595,28 @@ export function ForgotPage() {
           </div>
 
           <AnimatePresence mode="wait" custom={modeDir}>
-            <motion.div key={mode} custom={modeDir} variants={modeVar} initial="enter" animate="center" exit="exit"
-              transition={{ duration: 0.3 }}>
-              {mode === 'password' ? <PasswordForgot onBack={() => navigate(-1)} /> : <EmailForgot />}
+            <motion.div
+              key={mode}
+              custom={modeDir}
+              variants={modeVar}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              {mode === 'password' ? (
+                <PasswordForgot onBack={() => navigate(-1)} />
+              ) : (
+                <EmailForgot />
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
         <p className="text-center mt-4 text-sm text-[#7a9e8a]">
-          계정이 기억나셨나요? <Link to="/main" className="font-bold text-[#1B4332] no-underline">로그인하기</Link>
+          계정이 기억나셨나요?{' '}
+          <Link to="/main" className="font-bold text-[#1B4332] no-underline">
+            로그인하기
+          </Link>
         </p>
       </motion.div>
     </div>

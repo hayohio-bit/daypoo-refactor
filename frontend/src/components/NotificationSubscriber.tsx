@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { api } from '../services/apiClient';
@@ -19,7 +20,8 @@ export const NotificationSubscriber: React.FC = () => {
     const SSE_ENABLED = true;
     if (!SSE_ENABLED) return;
 
-    const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const accessToken =
+      localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     if (!accessToken || !user) return;
 
     // 기존 연결 정리
@@ -29,7 +31,7 @@ export const NotificationSubscriber: React.FC = () => {
 
     try {
       const BASE_URL = import.meta.env.VITE_API_URL || '';
-      
+
       // SSE 전용 단기 토큰 발급 시도 (백엔드 미구현 시 에러 발생 가능)
       let subToken = accessToken;
       try {
@@ -40,7 +42,9 @@ export const NotificationSubscriber: React.FC = () => {
         console.warn('SSE 전용 토큰 발급 실패, 기존 토큰 사용:', err);
       }
 
-      const eventSource = new EventSource(`${BASE_URL}/api/v1/notifications/subscribe?token=${subToken}`);
+      const eventSource = new EventSource(
+        `${BASE_URL}/api/v1/notifications/subscribe?token=${subToken}`,
+      );
       eventSourceRef.current = eventSource;
 
       // F4: 연결 성공 시 재시도 카운트 리셋
@@ -54,13 +58,13 @@ export const NotificationSubscriber: React.FC = () => {
           const data = JSON.parse(event.data);
           if (data.message) {
             showToast(
-              data.title || '새로운 알림', 
-              data.message, 
-              data.type?.toLowerCase() || 'info', 
-              data.icon
+              data.title || '새로운 알림',
+              data.message,
+              data.type?.toLowerCase() || 'info',
+              data.icon,
             );
-            fetchNotifications(); 
-            refreshUser(); 
+            fetchNotifications();
+            refreshUser();
           }
         } catch (err) {
           console.error('알림 파싱 실패:', err);
@@ -77,7 +81,7 @@ export const NotificationSubscriber: React.FC = () => {
           showToast(
             '알림 연결 실패',
             '알림 서비스에 연결할 수 없습니다. 나중에 다시 시도해주세요.',
-            'info'
+            'info',
           );
           return;
         }
@@ -88,10 +92,9 @@ export const NotificationSubscriber: React.FC = () => {
 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-          setRetryCount(prev => prev + 1);
+          setRetryCount((prev) => prev + 1);
         }, delay);
       };
-
     } catch (err) {
       console.error('SSE 연결 실패:', err);
     }

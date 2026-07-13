@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
+import { ArrowRight, Brain, MapPin, Sparkles, Zap } from 'lucide-react';
 import { useRef } from 'react';
-import { MapPin, Zap, Brain, Sparkles, ArrowRight } from 'lucide-react';
 
 interface Step {
   icon: React.ReactNode;

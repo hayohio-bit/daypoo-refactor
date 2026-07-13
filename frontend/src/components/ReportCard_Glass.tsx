@@ -1,12 +1,20 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Droplets, Lock, Moon, Sparkles, TrendingUp, Utensils } from 'lucide-react';
 import { useRef } from 'react';
-import { Lock, TrendingUp, Sparkles, ArrowRight, Utensils, Droplets, Moon } from 'lucide-react';
-import { HighlightReveal } from './HighlightReveal';
+import { useNavigate } from 'react-router-dom';
 import {
-  PieChart, Pie, Cell, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
+import { HighlightReveal } from './HighlightReveal';
 
 const PIE_DATA = [
   { name: 'Healthy', value: 85 },
@@ -47,7 +55,7 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
+    offset: ['start end', 'end start'],
   });
 
   const y1 = useTransform(scrollYProgress, [0, 1], [100, -100]);
@@ -71,15 +79,11 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
     >
       {/* 배경 그라데이션 블롭 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/4 -right-48 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-full opacity-15 will-change-transform"
-        >
+        <div className="absolute top-1/4 -right-48 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-full opacity-15 will-change-transform">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-[#2d6a4f] via-[#52b788] to-[#95d5b2] blur-[40px] sm:blur-[80px]" />
         </div>
 
-        <div
-          className="absolute bottom-1/4 -left-48 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-full opacity-12 will-change-transform"
-        >
+        <div className="absolute bottom-1/4 -left-48 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-full opacity-12 will-change-transform">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-[#1b4332] via-[#2d6a4f] to-[#40916c] blur-[40px] sm:blur-[80px]" />
         </div>
       </div>
@@ -102,7 +106,8 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
             className="text-2xl sm:text-3xl md:text-5xl font-black"
             style={{ color: 'var(--text-main)', letterSpacing: '-0.02em' }}
           >
-            당신의 <HighlightReveal
+            당신의{' '}
+            <HighlightReveal
               text="장이 말하고 있어요"
               highlightColor="#E8A838"
               highlightStyle="underline"
@@ -120,14 +125,15 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
+          transition={{ duration: 1.2, delay: 0.3, ease: 'easeOut' }}
           className="relative mb-8"
         >
           {/* 글로우 효과 */}
           <div
             className="absolute -inset-4 rounded-[48px] opacity-15 blur-3xl"
             style={{
-              background: 'radial-gradient(circle at top right, rgba(45,106,79,0.4) 0%, rgba(232,168,56,0.2) 50%, transparent 100%)',
+              background:
+                'radial-gradient(circle at top right, rgba(45,106,79,0.4) 0%, rgba(232,168,56,0.2) 50%, transparent 100%)',
             }}
           />
 
@@ -145,7 +151,8 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
             <div
               className="absolute inset-0 rounded-[40px] opacity-40 pointer-events-none"
               style={{
-                background: 'linear-gradient(135deg, rgba(45,106,79,0.2) 0%, rgba(232,168,56,0.25) 50%, rgba(45,106,79,0.2) 100%)',
+                background:
+                  'linear-gradient(135deg, rgba(45,106,79,0.2) 0%, rgba(232,168,56,0.25) 50%, rgba(45,106,79,0.2) 100%)',
                 backgroundSize: '200% 200%',
                 animation: 'borderGlow 4s ease-in-out infinite',
               }}
@@ -157,16 +164,20 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-sec)' }}>
                     2026년 3월 3주차
                   </p>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-1" style={{ color: 'var(--text-main)' }}>
+                  <h3
+                    className="text-xl sm:text-2xl font-bold mt-1"
+                    style={{ color: 'var(--text-main)' }}
+                  >
                     이번 주 쾌변 리포트
                   </h3>
                 </div>
                 <motion.span
                   animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                   className="px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(232,168,56,0.15), rgba(232,168,56,0.08))',
+                    background:
+                      'linear-gradient(135deg, rgba(232,168,56,0.15), rgba(232,168,56,0.08))',
                     color: '#c8941f',
                     border: '1px solid rgba(232,168,56,0.25)',
                     boxShadow: '0 2px 8px rgba(232,168,56,0.15)',
@@ -184,11 +195,14 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
                       <PieChart>
                         <Pie
                           data={PIE_DATA}
-                          cx="50%" cy="50%"
-                          innerRadius={85} outerRadius={115}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={85}
+                          outerRadius={115}
                           paddingAngle={10}
                           dataKey="value"
-                          startAngle={90} endAngle={450}
+                          startAngle={90}
+                          endAngle={450}
                         >
                           <Cell fill="var(--amber)" />
                           <Cell fill="rgba(0,0,0,0.08)" />
@@ -200,13 +214,18 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
                         <motion.span
                           initial={{ scale: 0 }}
                           whileInView={{ scale: 1 }}
-                          transition={{ type: "spring", delay: 0.5, stiffness: 100 }}
+                          transition={{ type: 'spring', delay: 0.5, stiffness: 100 }}
                           className="text-3xl sm:text-5xl md:text-7xl font-black leading-none"
                           style={{ color: 'var(--text-main)', letterSpacing: '-0.05em' }}
                         >
                           85
                         </motion.span>
-                        <span className="text-sm font-bold mt-1 opacity-70" style={{ color: 'var(--text-sec)' }}>쾌변 점수</span>
+                        <span
+                          className="text-sm font-bold mt-1 opacity-70"
+                          style={{ color: 'var(--text-sec)' }}
+                        >
+                          쾌변 점수
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -216,11 +235,20 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
                 <div className="col-span-12 md:col-span-7 w-full">
                   <div className="w-full h-[200px] px-2">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={BAR_DATA} margin={{ top: 10, right: 10, bottom: 0, left: 10 }} barGap={4}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                      <BarChart
+                        data={BAR_DATA}
+                        margin={{ top: 10, right: 10, bottom: 0, left: 10 }}
+                        barGap={4}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="rgba(0,0,0,0.06)"
+                        />
                         <XAxis
                           dataKey="day"
-                          axisLine={false} tickLine={false}
+                          axisLine={false}
+                          tickLine={false}
                           tick={{ fill: 'var(--text-sec)', fontSize: 12 }}
                         />
                         <YAxis hide />
@@ -253,7 +281,8 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
                 transition={{ delay: 0.4 }}
                 className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(232,168,56,0.12), rgba(45,106,79,0.08))',
+                  background:
+                    'linear-gradient(135deg, rgba(232,168,56,0.12), rgba(45,106,79,0.08))',
                   border: '1px solid rgba(232,168,56,0.2)',
                   boxShadow: '0 2px 12px rgba(232,168,56,0.08)',
                 }}
@@ -265,7 +294,9 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
                   <Sparkles size={22} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold mb-1" style={{ color: 'var(--amber)' }}>AI 한줄 조언</p>
+                  <p className="text-xs font-bold mb-1" style={{ color: 'var(--amber)' }}>
+                    AI 한줄 조언
+                  </p>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-main)' }}>
                     매운 음식 줄이면 쾌변 점수 더 올라가요. 수분 섭취도 늘려보세요!
                   </p>
@@ -283,7 +314,7 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.05 }}
-              transition={{ delay: 0.3, duration: 0.5, ease: "easeOut" }}
+              transition={{ delay: 0.3, duration: 0.5, ease: 'easeOut' }}
               whileHover={{ y: -8, scale: 1.02 }}
               className="relative p-4 sm:p-6 rounded-[20px] sm:rounded-[28px] overflow-hidden group will-change-transform h-full flex flex-col justify-start min-h-[100px] sm:min-h-[130px]"
               style={{
@@ -297,7 +328,8 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: 'radial-gradient(circle at center, rgba(45,106,79,0.08), rgba(232,168,56,0.06), transparent 70%)',
+                  background:
+                    'radial-gradient(circle at center, rgba(45,106,79,0.08), rgba(232,168,56,0.06), transparent 70%)',
                 }}
               />
 
@@ -305,20 +337,29 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
               <div
                 className="absolute inset-0 flex items-center justify-center z-10 rounded-[32px]"
                 style={{
-                  backgroundColor: 'rgba(248,250,249,0.88)'
+                  backgroundColor: 'rgba(248,250,249,0.88)',
                 }}
               >
                 <div className="flex flex-col items-center gap-1">
                   <Lock size={16} style={{ color: 'var(--green-mid)' }} />
-                  <span className="text-[10px] font-black uppercase tracking-tighter" style={{ color: 'var(--green-mid)' }}>Check after JOIN</span>
+                  <span
+                    className="text-[10px] font-black uppercase tracking-tighter"
+                    style={{ color: 'var(--green-mid)' }}
+                  >
+                    Check after JOIN
+                  </span>
                 </div>
               </div>
 
               <div className="relative flex items-start gap-4">
                 <span>{item.icon}</span>
                 <div>
-                  <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-main)' }}>{item.label}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-sec)' }}>{item.preview}</p>
+                  <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-main)' }}>
+                    {item.label}
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-sec)' }}>
+                    {item.preview}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -338,15 +379,14 @@ export function ReportCard({ openAuth }: { openAuth: (mode: 'login' | 'signup') 
           style={{
             background: 'linear-gradient(135deg, #E8A838 0%, #d99a2e 100%)',
             color: 'var(--green-deep)',
-            boxShadow: '0 8px 32px rgba(232,168,56,0.35), 0 4px 12px rgba(45,106,79,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
+            boxShadow:
+              '0 8px 32px rgba(232,168,56,0.35), 0 4px 12px rgba(45,106,79,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
           }}
         >
-          <TrendingUp size={20} />
-          내 배변 패턴 리포트 보기
+          <TrendingUp size={20} />내 배변 패턴 리포트 보기
           <ArrowRight size={18} />
         </motion.button>
       </div>
-
     </section>
   );
 }

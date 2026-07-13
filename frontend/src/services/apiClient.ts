@@ -37,13 +37,18 @@ class ApiClient {
   private baseUrl = BASE_URL;
   private refreshPromise: Promise<boolean> | null = null; // F3: 토큰 리프레시 뮤텍스
 
-  private async request<T>(method: string, endpoint: string, body?: any, timeout: number = 30000): Promise<T> {
+  private async request<T>(
+    method: string,
+    endpoint: string,
+    body?: any,
+    timeout = 30000,
+  ): Promise<T> {
     const token = getToken('accessToken');
 
     // 헤더 설정
     const headers: Record<string, string> = {
       'Content-Type': 'application/json; charset=UTF-8',
-      'Accept': 'application/json; charset=UTF-8',
+      Accept: 'application/json; charset=UTF-8',
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -86,7 +91,7 @@ class ApiClient {
           try {
             const guestHeaders: Record<string, string> = { ...headers };
             delete guestHeaders['Authorization'];
-            
+
             const guestResponse = await fetch(`${this.baseUrl}${endpoint}`, {
               method,
               headers: guestHeaders,
@@ -110,8 +115,10 @@ class ApiClient {
 
       if (!response.ok) {
         const data = await this.parseResponse<any>(response);
-        const error = new Error(typeof data === 'object' && data.message ? data.message : '요청 처리에 실패했습니다.') as ApiError;
-        error.code = typeof data === 'object' ? (data.code || 'UNKNOWN') : 'UNKNOWN';
+        const error = new Error(
+          typeof data === 'object' && data.message ? data.message : '요청 처리에 실패했습니다.',
+        ) as ApiError;
+        error.code = typeof data === 'object' ? data.code || 'UNKNOWN' : 'UNKNOWN';
         error.status = response.status;
         throw error;
       }
@@ -159,7 +166,6 @@ class ApiClient {
     return data && typeof data === 'object' && 'data' in data ? data.data : data;
   }
 
-
   private async tryRefreshToken(): Promise<boolean> {
     // F3: 뮤텍스 패턴 - 이미 리프레시 중이면 기존 Promise 재사용
     if (this.refreshPromise) {
@@ -181,18 +187,22 @@ class ApiClient {
 
     try {
       // 백엔드 사양(@RequestParam)에 맞추어 쿼리 스트링으로 전달
-      const response = await fetch(`${this.baseUrl}/auth/refresh?refreshToken=${encodeURIComponent(refreshToken)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.baseUrl}/auth/refresh?refreshToken=${encodeURIComponent(refreshToken)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       if (!response.ok) return false;
 
       const resData = await response.json();
       // resData가 ApiResponse 구조일 수 있으므로 유연하게 대응
-      const data = (resData && typeof resData === 'object' && 'data' in resData) ? resData.data : resData;
+      const data =
+        resData && typeof resData === 'object' && 'data' in resData ? resData.data : resData;
 
       if (data && data.accessToken) {
         const storage = getTokenStorage();
@@ -214,12 +224,12 @@ class ApiClient {
     method: string,
     endpoint: string,
     body?: any,
-    maxRetries: number = 3,
-    retryDelay: number = 1000
+    maxRetries = 3,
+    retryDelay = 1000,
   ): Promise<T> {
     // 재시도하지 않아야 하는 엔드포인트
     const noRetryEndpoints = ['/auth/login', '/auth/signup', '/auth/refresh'];
-    const shouldSkipRetry = noRetryEndpoints.some(path => endpoint.includes(path));
+    const shouldSkipRetry = noRetryEndpoints.some((path) => endpoint.includes(path));
 
     if (shouldSkipRetry) {
       // 로그인/회원가입 등은 재시도하지 않음
@@ -250,9 +260,7 @@ class ApiClient {
 
         // 재시도 가능한 에러 (5xx, 네트워크, 타임아웃)
         const shouldRetry =
-          error.status >= 500 ||
-          error.code === 'NETWORK_ERROR' ||
-          error.code === 'TIMEOUT';
+          error.status >= 500 || error.code === 'NETWORK_ERROR' || error.code === 'TIMEOUT';
 
         if (!shouldRetry) {
           throw error;
@@ -261,7 +269,7 @@ class ApiClient {
         // 지수 백오프
         const delay = retryDelay * Math.pow(2, attempt);
         console.warn(`재시도 ${attempt + 1}/${maxRetries} (${delay}ms 후)`, error.message);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
 
@@ -290,4 +298,3 @@ class ApiClient {
 }
 
 export const api = new ApiClient();
-

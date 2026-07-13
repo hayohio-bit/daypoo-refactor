@@ -6,12 +6,7 @@
  * @param lng2 두 번째 지점의 경도
  * @returns 거리 (미터 단위)
  */
-export function calculateDistance(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
+export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371e3; // 지구 반경 (미터)
   const φ1 = (lat1 * Math.PI) / 180;
   const φ2 = (lat2 * Math.PI) / 180;

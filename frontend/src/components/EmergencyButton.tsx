@@ -36,8 +36,16 @@ const SquishyClayEffect = ({ isHovered }: { isHovered: boolean }) => {
           backgroundColor: isHovered ? '#E85D5D' : '#FF7F7F', // 호버 시 강렬한 레드-코랄, 평상시 선명한 소프트 코랄
         }}
         transition={{
-          borderRadius: { duration: isHovered ? 0.7 : 6, repeat: Infinity, ease: 'easeInOut' },
-          scale: { duration: isHovered ? 1.2 : 6, repeat: Infinity, ease: 'easeInOut' },
+          borderRadius: {
+            duration: isHovered ? 0.7 : 6,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
+          },
+          scale: {
+            duration: isHovered ? 1.2 : 6,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
+          },
           backgroundColor: { duration: 0.3 },
         }}
         className="absolute inset-0 shadow-2xl"
@@ -53,7 +61,11 @@ const SquishyClayEffect = ({ isHovered }: { isHovered: boolean }) => {
             scale: isHovered ? [1.1, 0.8, 1.2, 1] : [0.98, 1.02, 0.98],
             opacity: isHovered ? [0.4, 0.7, 0.4] : [0.15, 0.25, 0.15],
           }}
-          transition={{ duration: isHovered ? 1.5 : 8, repeat: Infinity, ease: 'linear' }}
+          transition={{
+            duration: isHovered ? 1.5 : 8,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'linear',
+          }}
           className={`absolute inset-6 rounded-full blur-md ${isHovered ? 'bg-white/30' : 'bg-white/10'}`}
         />
       </motion.div>
@@ -71,7 +83,12 @@ const SquishyClayEffect = ({ isHovered }: { isHovered: boolean }) => {
                 x: [0, Math.cos((i * 60 * Math.PI) / 180) * 60],
                 y: [0, Math.sin((i * 60 * Math.PI) / 180) * 60],
               }}
-              transition={{ duration: 1, repeat: Infinity, delay: i * 0.12, ease: 'anticipate' }}
+              transition={{
+                duration: 1,
+                repeat: Number.POSITIVE_INFINITY,
+                delay: i * 0.12,
+                ease: 'anticipate',
+              }}
               className="absolute w-5 h-5 bg-[#E85D5D] blur-[2px] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
             />
           ))}
@@ -93,7 +110,7 @@ export function EmergencyButton({ onClick }: EmergencyButtonProps) {
         }}
         transition={{
           duration: hovered ? 0.3 : 4,
-          repeat: Infinity,
+          repeat: Number.POSITIVE_INFINITY,
           ease: 'easeInOut',
         }}
         whileHover={{ scale: 1.25 }}
@@ -125,7 +142,7 @@ export function EmergencyButton({ onClick }: EmergencyButtonProps) {
             }
             transition={{
               duration: 0.6,
-              repeat: Infinity,
+              repeat: Number.POSITIVE_INFINITY,
             }}
             className="mb-1 text-4xl select-none"
             aria-hidden="true"

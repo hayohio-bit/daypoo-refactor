@@ -1,7 +1,7 @@
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { Sparkles, MapPin, Activity, ShieldCheck } from 'lucide-react';
-import WaveButton from '../WaveButton';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { Activity, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import { NovaGlow } from '../NovaGlow';
+import WaveButton from '../WaveButton';
 
 interface HeroProps {
   onCtaClick: () => void;
@@ -57,7 +57,7 @@ export function HeroOption1({ onCtaClick, openAuth }: HeroProps) {
             }}
             transition={{
               duration: 8 + i,
-              repeat: Infinity,
+              repeat: Number.POSITIVE_INFINITY,
               delay: i * 0.5,
             }}
             style={{

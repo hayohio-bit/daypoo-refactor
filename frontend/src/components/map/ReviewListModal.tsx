@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { ToiletData, EMOJI_TAG_MAP } from '../../types/toilet';
-import { getReviews, getReviewSummary, ToiletReviewPageResponse, ToiletReviewSummaryResponse } from '../../services/reviewService';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Loader2, Star, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  type ToiletReviewPageResponse,
+  type ToiletReviewSummaryResponse,
+  getReviewSummary,
+  getReviews,
+} from '../../services/reviewService';
+import { EMOJI_TAG_MAP, type ToiletData } from '../../types/toilet';
 
 interface ReviewListModalProps {
   toilet: ToiletData;
@@ -21,7 +26,7 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
       setLoading(true);
       const [reviews, summary] = await Promise.all([
         getReviews(Number(toilet.id), page, pageSize, 'latest'),
-        currentPage === 0 ? getReviewSummary(Number(toilet.id)) : Promise.resolve(summaryData)
+        currentPage === 0 ? getReviewSummary(Number(toilet.id)) : Promise.resolve(summaryData),
       ]);
       setReviewData(reviews);
       if (currentPage === 0 && summary) {
@@ -109,7 +114,9 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
                 <div className="mb-6 p-4 rounded-2xl" style={{ background: '#f4faf6' }}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-base">✨</span>
-                    <span className="text-sm font-bold" style={{ color: '#2D6A4F' }}>AI 요약</span>
+                    <span className="text-sm font-bold" style={{ color: '#2D6A4F' }}>
+                      AI 요약
+                    </span>
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: '#5a7a6a' }}>
                     {summaryData.aiSummary}
@@ -126,7 +133,9 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
                         key={i}
                         size={18}
                         fill={i <= Math.round(summaryData?.avgRating ?? 0) ? '#E8A838' : 'none'}
-                        stroke={i <= Math.round(summaryData?.avgRating ?? 0) ? '#E8A838' : '#d4e8db'}
+                        stroke={
+                          i <= Math.round(summaryData?.avgRating ?? 0) ? '#E8A838' : '#d4e8db'
+                        }
                       />
                     ))}
                     <span className="ml-1.5 text-base font-bold" style={{ color: '#1B4332' }}>
@@ -212,7 +221,7 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
               className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: currentPage === 0 ? '#f4faf6' : '#e8f3ec',
-                color: currentPage === 0 ? '#95a99e' : '#2D6A4F'
+                color: currentPage === 0 ? '#95a99e' : '#2D6A4F',
               }}
             >
               <ChevronLeft size={16} />
@@ -229,7 +238,7 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
               className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: currentPage >= reviewData.totalPages - 1 ? '#f4faf6' : '#e8f3ec',
-                color: currentPage >= reviewData.totalPages - 1 ? '#95a99e' : '#2D6A4F'
+                color: currentPage >= reviewData.totalPages - 1 ? '#95a99e' : '#2D6A4F',
               }}
             >
               다음

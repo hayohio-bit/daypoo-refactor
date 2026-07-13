@@ -40,7 +40,7 @@ export interface ToiletReviewPageResponse {
  */
 export async function createReview(
   toiletId: number,
-  data: ToiletReviewCreateRequest
+  data: ToiletReviewCreateRequest,
 ): Promise<ToiletReviewResponse> {
   return api.post<ToiletReviewResponse>(`/toilets/${toiletId}/reviews`, data);
 }
@@ -49,9 +49,7 @@ export async function createReview(
  * 최근 리뷰 5개 조회
  * GET /api/v1/toilets/{toiletId}/reviews/recent
  */
-export async function getRecentReviews(
-  toiletId: number
-): Promise<ToiletReviewResponse[]> {
+export async function getRecentReviews(toiletId: number): Promise<ToiletReviewResponse[]> {
   return api.get<ToiletReviewResponse[]>(`/toilets/${toiletId}/reviews/recent`);
 }
 
@@ -61,12 +59,12 @@ export async function getRecentReviews(
  */
 export async function getReviews(
   toiletId: number,
-  page: number = 0,
-  size: number = 10,
-  sort: 'latest' | 'oldest' = 'latest'
+  page = 0,
+  size = 10,
+  sort: 'latest' | 'oldest' = 'latest',
 ): Promise<ToiletReviewPageResponse> {
   return api.get<ToiletReviewPageResponse>(
-    `/toilets/${toiletId}/reviews?page=${page}&size=${size}&sort=${sort}`
+    `/toilets/${toiletId}/reviews?page=${page}&size=${size}&sort=${sort}`,
   );
 }
 
@@ -74,8 +72,6 @@ export async function getReviews(
  * 리뷰 요약 정보 조회 (AI 요약 + 평균별점 + 최근리뷰)
  * GET /api/v1/toilets/{toiletId}/reviews/summary
  */
-export async function getReviewSummary(
-  toiletId: number
-): Promise<ToiletReviewSummaryResponse> {
+export async function getReviewSummary(toiletId: number): Promise<ToiletReviewSummaryResponse> {
   return api.get<ToiletReviewSummaryResponse>(`/toilets/${toiletId}/reviews/summary`);
 }

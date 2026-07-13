@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, CheckCircle2, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
-import { api } from '../services/apiClient';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, ArrowRight, CheckCircle2, Sparkles, User } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/apiClient';
 
 export function SocialSignupPage() {
   const [searchParams] = useSearchParams();
@@ -13,14 +13,16 @@ export function SocialSignupPage() {
   const navigatedRef = useRef(false);
 
   const [nickname, setNickname] = useState('');
-  const [status, setStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable' | 'error'>(
+    'idle',
+  );
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 토큰이 없으면 메인으로 리다이렉트
   useEffect(() => {
     if (navigatedRef.current) return;
-    
+
     if (!registrationToken) {
       navigatedRef.current = true;
       const returnUrl = localStorage.getItem('returnUrl') || '/main';
@@ -60,16 +62,16 @@ export function SocialSignupPage() {
     try {
       const response = await api.post<any>('/auth/social/signup', {
         registrationToken: registrationToken, // camelCase로 수정
-        nickname: nickname
+        nickname: nickname,
       });
-      
+
       // 성공 시 토큰 저장 및 메인 이동
       if (response.accessToken) {
         navigatedRef.current = true;
-        
+
         // login 함수를 통해 토큰 저장 및 유저 정보 갱신 수행
         await login(response.accessToken, response.refreshToken);
-        
+
         const returnUrl = localStorage.getItem('returnUrl') || '/main';
         localStorage.removeItem('returnUrl');
         navigate(returnUrl, { replace: true });
@@ -88,7 +90,7 @@ export function SocialSignupPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#52B788] blur-[120px] rounded-full opacity-[0.08]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#E8A838] blur-[120px] rounded-full opacity-[0.05]" />
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md relative z-10"
@@ -101,7 +103,9 @@ export function SocialSignupPage() {
             </div>
             <h1 className="text-3xl font-black text-[#1A2B27] mb-2 tracking-tight">반가워요! 💩</h1>
             <p className="text-[#5C6B68] text-sm leading-relaxed font-medium">
-              마지막 단계입니다. DayPoo에서 사용할<br />멋진 닉네임을 설정해주세요.
+              마지막 단계입니다. DayPoo에서 사용할
+              <br />
+              멋진 닉네임을 설정해주세요.
             </p>
           </div>
 
@@ -114,7 +118,7 @@ export function SocialSignupPage() {
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5C6B68]/30 group-focus-within:text-[#2D6A4F] transition-colors">
                   <User size={18} />
                 </div>
-                <input 
+                <input
                   type="text"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
@@ -126,8 +130,10 @@ export function SocialSignupPage() {
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
                   <AnimatePresence mode="wait">
                     {status === 'checking' && (
-                      <motion.div 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         className="w-5 h-5 border-2 border-[#52B788]/30 border-t-[#52B788] rounded-full animate-spin"
                       />
                     )}
@@ -144,11 +150,11 @@ export function SocialSignupPage() {
                   </AnimatePresence>
                 </div>
               </div>
-              
+
               <div className="min-h-[20px]">
                 <AnimatePresence>
                   {status === 'unavailable' && (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
@@ -158,7 +164,7 @@ export function SocialSignupPage() {
                     </motion.p>
                   )}
                   {status === 'available' && (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
@@ -181,7 +187,9 @@ export function SocialSignupPage() {
                   : 'bg-[#f4f9f6] text-[#5C6B68]/30 cursor-not-allowed border border-[#e2e8e6]'
               }`}
             >
-              {isSubmitting ? '가입 중...' : (
+              {isSubmitting ? (
+                '가입 중...'
+              ) : (
                 <>
                   시작하기 <ArrowRight size={16} />
                 </>
@@ -190,8 +198,11 @@ export function SocialSignupPage() {
           </form>
 
           <p className="mt-8 text-center text-[11px] text-[#5C6B68]/50 font-medium leading-relaxed">
-            회원가입 시 DayPoo의 <span className="underline cursor-pointer hover:text-[#2D6A4F]">서비스 이용약관</span> 및 <br />
-            <span className="underline cursor-pointer hover:text-[#2D6A4F]">개인정보 처리방침</span>에 동의하게 됩니다.
+            회원가입 시 DayPoo의{' '}
+            <span className="underline cursor-pointer hover:text-[#2D6A4F]">서비스 이용약관</span>{' '}
+            및 <br />
+            <span className="underline cursor-pointer hover:text-[#2D6A4F]">개인정보 처리방침</span>
+            에 동의하게 됩니다.
           </p>
         </div>
       </motion.div>

@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Loader2, Sparkles, Home } from 'lucide-react';
-import { api } from '../services/apiClient';
+import { CheckCircle2, Home, Loader2, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/apiClient';
 
 export function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
@@ -36,7 +36,7 @@ export function PaymentSuccessPage() {
     const verifyPayment = async () => {
       try {
         setLoading(true);
-        
+
         if (!paymentKey || !orderId || !amount) {
           throw new Error('결제 정보가 누락되었습니다. 다시 시도해 주세요.');
         }
@@ -53,12 +53,11 @@ export function PaymentSuccessPage() {
         setLoading(false);
       } catch (err: any) {
         console.error('Payment verification failed:', err);
-        
+
         const errorMsg = err.message || '';
 
         // "이미 처리중인 요청" = 이전 요청이 이미 성공적으로 처리 중 → 성공 처리
-        if (errorMsg.includes('ALREADY_PROCESSING_REQUEST') ||
-            errorMsg.includes('이미 처리중')) {
+        if (errorMsg.includes('ALREADY_PROCESSING_REQUEST') || errorMsg.includes('이미 처리중')) {
           console.warn('중복 요청 감지 — 이미 처리 중이므로 성공 처리합니다.');
           await refreshUser();
           setLoading(false);
@@ -78,11 +77,8 @@ export function PaymentSuccessPage() {
           setLoading(false);
           return;
         }
-        
-        setError(
-          err.message || 
-          '결제 승인 중 오류가 발생했습니다. 고객센터로 문의 바랍니다.'
-        );
+
+        setError(err.message || '결제 승인 중 오류가 발생했습니다. 고객센터로 문의 바랍니다.');
         setLoading(false);
       }
     };
@@ -121,13 +117,15 @@ export function PaymentSuccessPage() {
           <div className="py-4">
             <div className="relative w-24 h-24 mx-auto mb-8">
               <motion.div
-                initial={{ scale: 0 }} animate={{ scale: 1 }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
                 className="w-full h-full bg-[#1B4332] rounded-full flex items-center justify-center text-white"
               >
                 <CheckCircle2 size={48} />
               </motion.div>
               <motion.div
-                animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
                 className="absolute inset-[-10px] border-2 border-dashed border-[#52b788]/20 rounded-full"
               />
               <Sparkles className="absolute top-0 right-[-10px] text-amber-400" size={24} />
@@ -137,18 +135,26 @@ export function PaymentSuccessPage() {
             <p className="text-gray-500 font-medium mb-10">
               {paymentType === 'PRO' ? (
                 <>
-                  <span className="text-[#E8A838] font-black">PRO 멤버십</span> 구독이 완료되었습니다!<br />
+                  <span className="text-[#E8A838] font-black">PRO 멤버십</span> 구독이
+                  완료되었습니다!
+                  <br />
                   7일/30일 리포트를 이용하실 수 있습니다.
                 </>
               ) : paymentType === 'PREMIUM' ? (
                 <>
-                  <span className="text-[#1B4332] font-black">PREMIUM 멤버십</span> 구독이 완료되었습니다!<br />
+                  <span className="text-[#1B4332] font-black">PREMIUM 멤버십</span> 구독이
+                  완료되었습니다!
+                  <br />
                   모든 프리미엄 기능을 이용하실 수 있습니다.
                 </>
               ) : (
                 <>
-                  포인트 충전이 정상적으로 완료되었습니다.<br />
-                  <span className="text-[#52b788] font-bold">{Number(amount).toLocaleString()}P</span>가 지급되었습니다.
+                  포인트 충전이 정상적으로 완료되었습니다.
+                  <br />
+                  <span className="text-[#52b788] font-bold">
+                    {Number(amount).toLocaleString()}P
+                  </span>
+                  가 지급되었습니다.
                 </>
               )}
             </p>
@@ -157,7 +163,9 @@ export function PaymentSuccessPage() {
               {(paymentType === 'PRO' || paymentType === 'PREMIUM') && (
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-400">구독 플랜</span>
-                  <span className={`font-black ${paymentType === 'PRO' ? 'text-[#E8A838]' : 'text-[#1B4332]'}`}>
+                  <span
+                    className={`font-black ${paymentType === 'PRO' ? 'text-[#E8A838]' : 'text-[#1B4332]'}`}
+                  >
                     {paymentType} 멤버십
                   </span>
                 </div>

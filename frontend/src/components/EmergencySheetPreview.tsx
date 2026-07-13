@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Navigation, Clock, MapPin, Sparkles, Flame } from 'lucide-react';
+import { Clock, Flame, MapPin, Navigation, Sparkles } from 'lucide-react';
 
 interface ToiletItem {
   id: string;
@@ -89,7 +89,8 @@ export function EmergencySheetPreview({ processedToilets, openNav }: EmergencySh
               <div
                 className="absolute top-0 left-0 right-0 h-px"
                 style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                  background:
+                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
                 }}
               />
 
@@ -97,7 +98,8 @@ export function EmergencySheetPreview({ processedToilets, openNav }: EmergencySh
               <div
                 className="absolute inset-0 opacity-40 pointer-events-none"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 40%, transparent 100%)',
+                  background:
+                    'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 40%, transparent 100%)',
                 }}
               />
 
@@ -108,7 +110,8 @@ export function EmergencySheetPreview({ processedToilets, openNav }: EmergencySh
                     whileHover={{ scale: 1.05, rotate: 5 }}
                     className="flex-shrink-0 w-10 h-10 rounded-xl font-black text-xs flex items-center justify-center backdrop-blur-xl relative overflow-hidden"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)',
+                      background:
+                        'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)',
                       border: '1px solid rgba(255,255,255,0.4)',
                       boxShadow: `0 8px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.6), 0 0 20px ${config.glowColor}`,
                     }}
@@ -120,20 +123,26 @@ export function EmergencySheetPreview({ processedToilets, openNav }: EmergencySh
                         background: `radial-gradient(circle at 30% 30%, ${config.glowColor} 0%, transparent 70%)`,
                       }}
                     />
-                    <Icon size={18} style={{
-                      color: config.iconColor,
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
-                      position: 'relative',
-                      zIndex: 1,
-                    }} />
+                    <Icon
+                      size={18}
+                      style={{
+                        color: config.iconColor,
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
+                        position: 'relative',
+                        zIndex: 1,
+                      }}
+                    />
                   </motion.div>
 
                   {/* 정보 영역 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <h4 className="text-sm font-black text-white leading-tight truncate" style={{
-                        textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                      }}>
+                      <h4
+                        className="text-sm font-black text-white leading-tight truncate"
+                        style={{
+                          textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                        }}
+                      >
                         {item.name}
                       </h4>
                       {item.isOpen24h && (
@@ -141,10 +150,12 @@ export function EmergencySheetPreview({ processedToilets, openNav }: EmergencySh
                           whileHover={{ scale: 1.05 }}
                           className="flex-shrink-0 px-2 py-0.5 rounded-lg text-[8px] font-black backdrop-blur-xl relative overflow-hidden"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(250,204,21,0.4) 0%, rgba(234,179,8,0.3) 100%)',
+                            background:
+                              'linear-gradient(135deg, rgba(250,204,21,0.4) 0%, rgba(234,179,8,0.3) 100%)',
                             border: '1px solid rgba(250,204,21,0.6)',
                             color: '#FFF',
-                            boxShadow: '0 4px 12px rgba(250,204,21,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
+                            boxShadow:
+                              '0 4px 12px rgba(250,204,21,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
                             textShadow: '0 1px 2px rgba(0,0,0,0.3)',
                           }}
                         >
@@ -164,9 +175,7 @@ export function EmergencySheetPreview({ processedToilets, openNav }: EmergencySh
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={10} className="text-white/70" />
-                        <span className="text-white text-[11px] font-semibold">
-                          {item.timeStr}
-                        </span>
+                        <span className="text-white text-[11px] font-semibold">{item.timeStr}</span>
                       </div>
                     </div>
 

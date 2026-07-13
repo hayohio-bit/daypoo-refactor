@@ -1,20 +1,20 @@
-import { useState, useCallback } from 'react';
+import { AnimatePresence, Variants, motion, useReducedMotion } from 'framer-motion';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
-import { HeroSection } from '../components/HeroSection';
-import { ReportCard } from '../components/ReportCard_Glass';
-import { MapSection } from '../components/MapSection';
-import { Footer } from '../components/Footer';
 import { EmergencyButton } from '../components/EmergencyButton';
 import { EmergencySheet } from '../components/EmergencySheet';
-import { WaveDivider } from '../components/WaveDivider';
+import { Footer } from '../components/Footer';
+import { HeroSection } from '../components/HeroSection';
+import { MapSection } from '../components/MapSection';
+import { Navbar } from '../components/Navbar';
 import { NovaGlow } from '../components/NovaGlow';
-import { HealthLogModal, HealthLogResult } from '../components/map/HealthLogModal';
+import { ReportCard } from '../components/ReportCard_Glass';
+import { WaveDivider } from '../components/WaveDivider';
+import { HealthLogModal, type HealthLogResult } from '../components/map/HealthLogModal';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../services/apiClient';
-import { CreateRecordRequest } from '../types/api';
-import { motion, AnimatePresence, useReducedMotion, Variants } from "framer-motion";
 import { useTransitionContext } from '../context/TransitionContext';
+import { api } from '../services/apiClient';
+import type { CreateRecordRequest } from '../types/api';
 
 export function MainPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => void }) {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -59,10 +59,7 @@ export function MainPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') =>
 
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <HeroSection
-          onCtaClick={() => navigate('/map?openNearest=true')}
-          openAuth={openAuth}
-        />
+        <HeroSection onCtaClick={() => navigate('/map?openNearest=true')} openAuth={openAuth} />
       </div>
 
       {/* AI Health Report Section */}

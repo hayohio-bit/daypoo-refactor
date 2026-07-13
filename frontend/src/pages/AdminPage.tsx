@@ -1,94 +1,94 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  LayoutDashboard,
-  Users,
-  MapPin,
-  MessageSquare,
-  ShoppingBag,
-  Settings,
-  ChevronRight,
-  ChevronLeft,
-  TrendingUp,
-  AlertTriangle,
   Activity,
-  DollarSign,
-  LogOut,
+  AlertTriangle,
   Bell,
-  RefreshCw,
-  Plus,
-  Shield,
-  Zap,
-  Search,
-  Clock,
+  BrainCircuit,
   Calendar,
-  Navigation,
-  Star,
-  Maximize2,
-  Home,
-  Trash2,
-  Database,
-  Sparkles,
-  Lock,
-  X,
-  Server,
   CheckCircle,
-  XCircle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Database,
+  DollarSign,
   Eye,
   FileText,
-  Power,
-  UserPlus,
-  BrainCircuit,
+  Home,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  MapPin,
+  Maximize2,
   MessageCircle,
+  MessageSquare,
+  Navigation,
   Pencil,
   PieChart as PieChartIcon,
+  Plus,
+  Power,
+  RefreshCw,
+  Search,
+  Server,
+  Settings,
+  Shield,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Trash2,
+  TrendingUp,
+  UserPlus,
+  Users,
+  X,
+  XCircle,
+  Zap,
 } from 'lucide-react';
-import WaveButtonComponent from '../components/WaveButton';
-import { generateItemAvatar, parseDicebearUrl, AvatarStyle } from '../utils/avatar';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import {
-  AreaChart,
   Area,
-  PieChart,
-  Pie,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
   Cell,
+  ComposedChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  ComposedChart,
-  Bar,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
 } from 'recharts';
+import WaveButtonComponent from '../components/WaveButton';
+import { useAuth } from '../context/AuthContext';
 import { useToilets } from '../hooks/useToilets';
-import { ToiletData } from '../types/toilet';
 import { api } from '../services/apiClient';
 import {
-  AdminUserListResponse,
-  AdminUserDetailResponse,
-  AdminInquiryListResponse,
-  AdminInquiryDetailResponse,
-  AdminToiletListResponse,
-  PageResponse,
-  Role,
-  InquiryStatus,
-  ItemResponse,
-  ItemType,
-  AdminStatsResponse,
-  AdminTitleResponse,
+  type AchievementType,
+  type AdminInquiryDetailResponse,
+  type AdminInquiryListResponse,
+  type AdminItemCreateRequest,
+  type AdminStatsResponse,
   AdminTitleCreateRequest,
+  type AdminTitleResponse,
   AdminTitleUpdateRequest,
-  AdminItemCreateRequest,
-  AchievementType,
-  SyncStatusResponse,
+  type AdminToiletListResponse,
+  type AdminUserDetailResponse,
+  type AdminUserListResponse,
+  type InquiryStatus,
+  type ItemResponse,
+  type ItemType,
+  type PageResponse,
+  type Role,
+  type SyncStatusResponse,
 } from '../types/admin';
+import type { ToiletData } from '../types/toilet';
+import { type AvatarStyle, generateItemAvatar, parseDicebearUrl } from '../utils/avatar';
 
 // ── Shared Constants & Types ──────────────────────────────────────────
 type AdminTab =
@@ -211,7 +211,7 @@ const StatWidget = ({ title, value, trend, isUp, icon: Icon, color, progress = 0
           >
             <motion.div
               animate={{ opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
               className="absolute inset-0 bg-white/20"
             />
           </motion.div>
@@ -241,12 +241,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <div key={index} className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-12">
                 <span className="text-[12px] font-black text-black/70 flex items-center gap-2.5">
-                  <div 
-                    className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]" 
-                    style={{ 
+                  <div
+                    className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+                    style={{
                       background: entry.color,
-                      boxShadow: `0 0 12px ${entry.color}40`
-                    }} 
+                      boxShadow: `0 0 12px ${entry.color}40`,
+                    }}
                   />
                   {entry.name}
                 </span>
@@ -255,16 +255,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 </span>
               </div>
               <div className="h-1.5 w-full bg-black/5 rounded-full overflow-hidden mt-0.5">
-                <motion.div 
+                <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(100, (entry.value / 10000) * 100)}%` }}
-                  transition={{ duration: 1, ease: "easeOut", delay: index * 0.1 }}
+                  transition={{ duration: 1, ease: 'easeOut', delay: index * 0.1 }}
                   className="h-full rounded-full relative overflow-hidden"
                   style={{ background: entry.color }}
                 >
                   <motion.div
                     animate={{ x: ['-100%', '100%'] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                   />
                 </motion.div>
@@ -306,11 +306,12 @@ const DashboardView = ({
   }, [totalUsersCount]);
 
   const trendData = useMemo(() => {
-    const baseData = stats?.weeklyTrend.map((d) => ({
-      name: d.date,
-      users: d.users,
-      sales: d.sales,
-    })) || [];
+    const baseData =
+      stats?.weeklyTrend.map((d) => ({
+        name: d.date,
+        users: d.users,
+        sales: d.sales,
+      })) || [];
 
     if (chartRange === '30D') {
       // 30일 데이터 시각적 최적화: 격일(Every other day) 샘플링으로 밀도 조절
@@ -335,15 +336,21 @@ const DashboardView = ({
     if (!stats?.weeklyTrend || stats.weeklyTrend.length < 2) return { val: '0%', up: true };
     const today = stats.weeklyTrend[stats.weeklyTrend.length - 1];
     const yesterday = stats.weeklyTrend[stats.weeklyTrend.length - 2];
-    
+
     let tVal = 0;
-    if (type === 'users') tVal = yesterday.users > 0 ? ((today.users - yesterday.users) / yesterday.users) * 100 : 0;
-    if (type === 'sales') tVal = yesterday.sales > 0 ? ((today.sales - yesterday.sales) / yesterday.sales) * 100 : 0;
-    if (type === 'inquiries') tVal = yesterday.inquiries > 0 ? ((today.inquiries - yesterday.inquiries) / yesterday.inquiries) * 100 : 0;
+    if (type === 'users')
+      tVal = yesterday.users > 0 ? ((today.users - yesterday.users) / yesterday.users) * 100 : 0;
+    if (type === 'sales')
+      tVal = yesterday.sales > 0 ? ((today.sales - yesterday.sales) / yesterday.sales) * 100 : 0;
+    if (type === 'inquiries')
+      tVal =
+        yesterday.inquiries > 0
+          ? ((today.inquiries - yesterday.inquiries) / yesterday.inquiries) * 100
+          : 0;
 
     return {
       val: `${Math.abs(Math.round(tVal))}%`,
-      up: tVal >= 0
+      up: tVal >= 0,
     };
   };
 
@@ -351,17 +358,16 @@ const DashboardView = ({
   const inquiryTrend = getTrend('inquiries');
 
   const inquiriesSpark = (stats?.weeklyTrend || []).map((d) => ({ v: d.inquiries }));
-  const toiletSpark = (stats?.weeklyTrend || []).map((d) => ({ v: d.users || 0 })); 
+  const toiletSpark = (stats?.weeklyTrend || []).map((d) => ({ v: d.users || 0 }));
 
-  const pieData = (stats?.userDistribution && stats.totalUsers > 0)
-    ? [
-        { name: '프리미엄 (PRO)', value: stats.userDistribution.pro, color: COLORS.primary },
-        { name: '베이직', value: stats.userDistribution.basic, color: '#52b788' },
-        { name: '무료', value: stats.userDistribution.free, color: COLORS.accent },
-      ]
-    : [
-        { name: '대기 중', value: 1, color: '#eee' },
-      ];
+  const pieData =
+    stats?.userDistribution && stats.totalUsers > 0
+      ? [
+          { name: '프리미엄 (PRO)', value: stats.userDistribution.pro, color: COLORS.primary },
+          { name: '베이직', value: stats.userDistribution.basic, color: '#52b788' },
+          { name: '무료', value: stats.userDistribution.free, color: COLORS.accent },
+        ]
+      : [{ name: '대기 중', value: 1, color: '#eee' }];
 
   if (loading)
     return (
@@ -374,10 +380,10 @@ const DashboardView = ({
     );
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
       className="space-y-8 pb-20"
     >
       {/* 🔮 Dashboard Header Info */}
@@ -397,8 +403,19 @@ const DashboardView = ({
           </h2>
         </div>
         <div className="flex flex-col items-start md:items-end opacity-40">
-          <span className="text-[10px] font-black uppercase tracking-widest">Global Status Node</span>
-          <span className="text-xs font-bold">{new Date().toLocaleString('ko-KR', { hour12: true, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">
+            Global Status Node
+          </span>
+          <span className="text-xs font-bold">
+            {new Date().toLocaleString('ko-KR', {
+              hour12: true,
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            })}
+          </span>
         </div>
       </div>
 
@@ -431,7 +448,7 @@ const DashboardView = ({
           <StatWidget
             title="관리 화장실"
             value={(stats?.totalToilets || 0).toLocaleString()}
-            trend={`+${(stats?.weeklyTrend && stats.weeklyTrend.length > 0) ? (stats.weeklyTrend[stats.weeklyTrend.length - 1].users || 0) : 0}`}
+            trend={`+${stats?.weeklyTrend && stats.weeklyTrend.length > 0 ? stats.weeklyTrend[stats.weeklyTrend.length - 1].users || 0 : 0}`}
             isUp
             color={COLORS.accent}
             icon={MapPin}
@@ -461,7 +478,7 @@ const DashboardView = ({
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,#1B4332,transparent)]" />
             <div className="absolute inset-0 bg-[#1B4332]/5 [mask-image:linear-gradient(to_bottom,white,transparent)]" />
           </div>
-          
+
           <div className="relative z-10 p-2">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-8">
               <div>
@@ -470,40 +487,46 @@ const DashboardView = ({
                     <Activity size={20} className="animate-pulse" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-black tracking-tighter leading-none mb-1">성장 엔진 리포트</h3>
+                    <h3 className="text-2xl font-black text-black tracking-tighter leading-none mb-1">
+                      성장 엔진 리포트
+                    </h3>
                     <div className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em]">Real-time Cluster Analysis</span>
+                      <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em]">
+                        Real-time Cluster Analysis
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-10">
                 <div className="flex flex-col items-end">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 text-[9px] font-black tracking-tighter uppercase">
                       Momentum +12.4%
                     </span>
-                    <span className="text-[10px] font-black text-black/20 uppercase tracking-widest">Peak Traffic</span>
+                    <span className="text-[10px] font-black text-black/20 uppercase tracking-widest">
+                      Peak Traffic
+                    </span>
                   </div>
                   <span className="text-2xl font-black text-black tracking-tighter">
-                    {Math.max(...trendData.map(d => d.users)).toLocaleString()}
+                    {Math.max(...trendData.map((d) => d.users)).toLocaleString()}
                   </span>
                 </div>
                 <div className="h-8 w-[1px] bg-black/5" />
                 <div className="flex p-1.5 bg-black/[0.03] rounded-2xl border border-black/5">
                   {['7D', '30D'].map((range) => (
-                    <button 
+                    <button
                       key={range}
                       onClick={() => setChartRange(range as any)}
                       className={`relative px-6 py-2.5 rounded-xl text-[11px] font-black transition-all duration-500 ${chartRange === range ? 'text-white' : 'text-black/30 hover:text-black/60'}`}
                     >
                       {chartRange === range && (
-                        <motion.div 
+                        <motion.div
                           layoutId="activeRange"
                           className="absolute inset-0 bg-black rounded-xl shadow-xl z-0"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                         />
                       )}
                       <span className="relative z-10">{range}</span>
@@ -515,20 +538,27 @@ const DashboardView = ({
 
             <div className="h-[440px] w-full relative">
               {/* Floating Value Indicator */}
-              <motion.div 
+              <motion.div
                 key={chartRange}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="absolute left-6 top-0 z-20 flex flex-col gap-1 pointer-events-none"
               >
-                <span className="text-[10px] font-black text-emerald-600/60 uppercase tracking-[0.4em]">Current Growth Velocity</span>
+                <span className="text-[10px] font-black text-emerald-600/60 uppercase tracking-[0.4em]">
+                  Current Growth Velocity
+                </span>
                 <span className="text-7xl font-black text-black tracking-[calc(-0.06em)] tabular-nums">
-                  {trendData.length > 0 ? trendData[trendData.length - 1].users.toLocaleString() : 0}
+                  {trendData.length > 0
+                    ? trendData[trendData.length - 1].users.toLocaleString()
+                    : 0}
                 </span>
               </motion.div>
 
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={trendData} margin={{ top: 100, right: 30, left: -20, bottom: 0 }}>
+                <ComposedChart
+                  data={trendData}
+                  margin={{ top: 100, right: 30, left: -20, bottom: 0 }}
+                >
                   <defs>
                     <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="6" result="blur" />
@@ -544,10 +574,20 @@ const DashboardView = ({
                       <stop offset="100%" stopColor="#E8A838" stopOpacity={0.1} />
                     </linearGradient>
                     <filter id="barShadow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#E8A838" floodOpacity="0.2" />
+                      <feDropShadow
+                        dx="0"
+                        dy="8"
+                        stdDeviation="12"
+                        floodColor="#E8A838"
+                        floodOpacity="0.2"
+                      />
                     </filter>
                   </defs>
-                  <CartesianGrid strokeDasharray="12 12" vertical={false} stroke="rgba(0,0,0,0.02)" />
+                  <CartesianGrid
+                    strokeDasharray="12 12"
+                    vertical={false}
+                    stroke="rgba(0,0,0,0.02)"
+                  />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
@@ -555,13 +595,8 @@ const DashboardView = ({
                     tick={{ fontSize: 11, fontWeight: 900, fill: 'rgba(0,0,0,0.2)' }}
                     dy={25}
                   />
-                  <YAxis
-                    hide
-                  />
-                  <Tooltip
-                    content={<CustomTooltip />}
-                    cursor={{ fill: 'rgba(0,0,0,0.02)' }}
-                  />
+                  <YAxis hide />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
                   <Bar
                     dataKey="sales"
                     name="유료 결제"
@@ -581,27 +616,33 @@ const DashboardView = ({
                     fill="url(#mainGradient)"
                     animationDuration={800}
                     style={{ filter: chartRange === '30D' ? 'none' : 'url(#neonGlow)' }}
-                    activeDot={{ r: 8, strokeWidth: 0, fill: "#000" }}
+                    activeDot={{ r: 8, strokeWidth: 0, fill: '#000' }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-            
+
             <div className="flex items-center justify-between mt-10 px-6">
               <div className="flex items-center gap-10">
                 <div className="flex items-center gap-4 group/leg">
                   <div className="w-4 h-1.5 rounded-full bg-[#1B4332] group-hover:w-8 transition-all duration-500" />
-                  <span className="text-[12px] font-black text-black/40 uppercase tracking-[0.2em]">Active Traffic</span>
+                  <span className="text-[12px] font-black text-black/40 uppercase tracking-[0.2em]">
+                    Active Traffic
+                  </span>
                 </div>
                 <div className="flex items-center gap-4 group/leg">
                   <div className="w-4 h-1.5 rounded-full bg-[#E8A838] group-hover:w-8 transition-all duration-500" />
-                  <span className="text-[12px] font-black text-black/40 uppercase tracking-[0.2em]">Revenue Flow</span>
+                  <span className="text-[12px] font-black text-black/40 uppercase tracking-[0.2em]">
+                    Revenue Flow
+                  </span>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-black/5">
                 <RefreshCw size={12} className="animate-spin duration-10s text-black/20" />
-                <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">Auto Sync On</span>
+                <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">
+                  Auto Sync On
+                </span>
               </div>
             </div>
           </div>
@@ -612,7 +653,7 @@ const DashboardView = ({
           <GlassCard className="h-fit group relative overflow-hidden">
             {/* Dynamic Orbit Background Effect */}
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#1B4332]/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-            
+
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 rounded-xl bg-black/5">
@@ -622,7 +663,9 @@ const DashboardView = ({
                   <h3 className="text-[17px] font-black text-black">사용자 분포</h3>
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] font-black text-black/30 uppercase tracking-widest">Real-time Map</span>
+                    <span className="text-[9px] font-black text-black/30 uppercase tracking-widest">
+                      Real-time Map
+                    </span>
                   </div>
                 </div>
               </div>
@@ -641,14 +684,20 @@ const DashboardView = ({
                       animationDuration={2000}
                     >
                       {pieData.map((entry, index) => (
-                        <Cell key={index} fill={entry.color} style={{ filter: `drop-shadow(0 4px 8px ${entry.color}30)` }} />
+                        <Cell
+                          key={index}
+                          fill={entry.color}
+                          style={{ filter: `drop-shadow(0 4px 8px ${entry.color}30)` }}
+                        />
                       ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[11px] font-black text-black/20 uppercase tracking-[0.2em] mb-1">Total Hub</span>
+                  <span className="text-[11px] font-black text-black/20 uppercase tracking-[0.2em] mb-1">
+                    Total Hub
+                  </span>
                   <span className="text-3xl font-black text-black tracking-tight scale-110">
                     {totalUsersCount.toLocaleString()}
                   </span>
@@ -669,17 +718,27 @@ const DashboardView = ({
                     className="flex items-center justify-between p-3.5 rounded-[20px] bg-black/[0.03] border border-transparent hover:border-black/5 hover:bg-white transition-all shadow-sm group/item"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-3.5 h-3.5 rounded-full shadow-lg" style={{ background: item.color }} />
+                      <div
+                        className="w-3.5 h-3.5 rounded-full shadow-lg"
+                        style={{ background: item.color }}
+                      />
                       <div className="flex flex-col">
                         <span className="text-[13px] font-black text-black/80">{item.name}</span>
-                        <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">Active Segment</span>
+                        <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">
+                          Active Segment
+                        </span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-[14px] font-black text-black">
-                        {totalUsersCount > 0 ? ((item.value / totalUsersCount) * 100).toFixed(1) : 0}%
+                        {totalUsersCount > 0
+                          ? ((item.value / totalUsersCount) * 100).toFixed(1)
+                          : 0}
+                        %
                       </div>
-                      <div className="text-[9px] font-bold text-black/20">{item.value.toLocaleString()} Users</div>
+                      <div className="text-[9px] font-bold text-black/20">
+                        {item.value.toLocaleString()} Users
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -737,7 +796,14 @@ const DashboardView = ({
               >
                 <div
                   className="p-2.5 rounded-xl bg-black/5"
-                  style={{ color: log.level === 'ERROR' ? COLORS.error : log.level === 'WARN' ? COLORS.warning : COLORS.primary }}
+                  style={{
+                    color:
+                      log.level === 'ERROR'
+                        ? COLORS.error
+                        : log.level === 'WARN'
+                          ? COLORS.warning
+                          : COLORS.primary,
+                  }}
                 >
                   {log.level === 'ERROR' ? <AlertTriangle size={18} /> : <Activity size={18} />}
                 </div>
@@ -750,7 +816,12 @@ const DashboardView = ({
                       {log.source || 'SYSTEM'}
                     </span>
                     <span className="text-[9px] text-black/30 font-bold">
-                      {log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '방금 전'}
+                      {log.timestamp
+                        ? new Date(log.timestamp).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : '방금 전'}
                     </span>
                   </div>
                   <p className="text-[13px] font-bold text-black/80 truncate">{log.message}</p>
@@ -934,11 +1005,23 @@ const UsersView = () => {
   const getPlanBadge = (plan: 'BASIC' | 'PRO' | 'PREMIUM') => {
     switch (plan) {
       case 'PRO':
-        return <span className="bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">PRO</span>;
+        return (
+          <span className="bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
+            PRO
+          </span>
+        );
       case 'PREMIUM':
-        return <span className="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">PREMIUM</span>;
+        return (
+          <span className="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
+            PREMIUM
+          </span>
+        );
       default:
-        return <span className="bg-black/5 text-black/40 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">BASIC</span>;
+        return (
+          <span className="bg-black/5 text-black/40 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
+            BASIC
+          </span>
+        );
     }
   };
 
@@ -1077,9 +1160,7 @@ const UsersView = () => {
                       <td className="px-8 py-5 text-sm font-bold text-black/60">
                         {formatDate(u.createdAt)}
                       </td>
-                      <td className="px-8 py-5">
-                        {getPlanBadge(u.plan)}
-                      </td>
+                      <td className="px-8 py-5">{getPlanBadge(u.plan)}</td>
                       <td className="px-8 py-5 font-black text-[#2D6A4F]">Lv.{u.level}</td>
                       <td className="px-8 py-5 font-black text-[#E8A838]">
                         {u.points.toLocaleString()} P
@@ -1220,9 +1301,7 @@ const UsersView = () => {
                       <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
                         구독 플랜
                       </p>
-                      <div>
-                        {getPlanBadge(userDetail.plan)}
-                      </div>
+                      <div>{getPlanBadge(userDetail.plan)}</div>
                     </div>
                     <div className="bg-black/[0.02] rounded-2xl p-4">
                       <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
@@ -1418,7 +1497,8 @@ const ToiletsView = () => {
   useEffect(() => {
     if (!selectedToilet) return;
     setLoadingDetail(true);
-    api.get(`/toilets/${selectedToilet.id}/reviews/summary`)
+    api
+      .get(`/toilets/${selectedToilet.id}/reviews/summary`)
       .then((res: any) => {
         setReviewSummary(res);
         setToiletReviews(Array.isArray(res?.recentReviews) ? res.recentReviews : []);
@@ -1455,7 +1535,9 @@ const ToiletsView = () => {
           clearInterval(pollingRef.current!);
           pollingRef.current = null;
           setSyncing(false);
-          setSyncResult(`동기화 완료! 총 ${status.totalCount}건 처리 (신규 ${status.insertedCount ?? 0}건 / 업데이트 ${status.updatedCount ?? 0}건)`);
+          setSyncResult(
+            `동기화 완료! 총 ${status.totalCount}건 처리 (신규 ${status.insertedCount ?? 0}건 / 업데이트 ${status.updatedCount ?? 0}건)`,
+          );
           refetch();
         } else if (status.status === 'FAILED') {
           clearInterval(pollingRef.current!);
@@ -1587,7 +1669,12 @@ const ToiletsView = () => {
               {/* 전체목록 버튼 제거됨 */}
               <button
                 onClick={async () => {
-                  if (!confirm('리뷰 5개 이상 & AI 요약 미생성 화장실에 대해 일괄 생성합니다. 진행할까요?')) return;
+                  if (
+                    !confirm(
+                      '리뷰 5개 이상 & AI 요약 미생성 화장실에 대해 일괄 생성합니다. 진행할까요?',
+                    )
+                  )
+                    return;
                   try {
                     const res: any = await api.post('/admin/toilets/ai-summaries/generate');
                     alert(`AI 요약 ${res?.generated ?? 0}건 생성 완료`);
@@ -1750,7 +1837,9 @@ const ToiletsView = () => {
                   {/* AI 리뷰 요약 */}
                   {reviewSummary?.aiSummary && (
                     <div className="mb-6 p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100">
-                      <p className="text-[10px] font-black text-emerald-600 mb-1 uppercase">AI 리뷰 요약</p>
+                      <p className="text-[10px] font-black text-emerald-600 mb-1 uppercase">
+                        AI 리뷰 요약
+                      </p>
                       <p className="text-xs font-bold text-[#1A2B27]">{reviewSummary.aiSummary}</p>
                     </div>
                   )}
@@ -1759,18 +1848,31 @@ const ToiletsView = () => {
                   <div>
                     <p className="text-[10px] font-black text-black/30 mb-3 uppercase">최근 리뷰</p>
                     {loadingDetail ? (
-                      <p className="text-xs text-black/40 font-bold py-4 text-center">불러오는 중...</p>
+                      <p className="text-xs text-black/40 font-bold py-4 text-center">
+                        불러오는 중...
+                      </p>
                     ) : toiletReviews.length > 0 ? (
                       <div className="space-y-2">
                         {toiletReviews.slice(0, 5).map((review: any, i: number) => (
-                          <div key={i} className="p-3 rounded-xl bg-black/[0.02] border flex items-start gap-3">
-                            <div className="flex-shrink-0 text-[#E8A838] text-xs font-black">★ {review.rating}</div>
+                          <div
+                            key={i}
+                            className="p-3 rounded-xl bg-black/[0.02] border flex items-start gap-3"
+                          >
+                            <div className="flex-shrink-0 text-[#E8A838] text-xs font-black">
+                              ★ {review.rating}
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-[#1A2B27] truncate">{review.comment || '댓글 없음'}</p>
+                              <p className="text-xs font-bold text-[#1A2B27] truncate">
+                                {review.comment || '댓글 없음'}
+                              </p>
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[10px] text-black/40 font-bold">{review.nickname || '익명'}</span>
+                                <span className="text-[10px] text-black/40 font-bold">
+                                  {review.nickname || '익명'}
+                                </span>
                                 {review.emojiTags && (
-                                  <span className="text-[10px] text-black/30">{review.emojiTags}</span>
+                                  <span className="text-[10px] text-black/30">
+                                    {review.emojiTags}
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -1778,7 +1880,9 @@ const ToiletsView = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-black/30 font-bold py-4 text-center">리뷰가 없습니다</p>
+                      <p className="text-xs text-black/30 font-bold py-4 text-center">
+                        리뷰가 없습니다
+                      </p>
                     )}
                   </div>
                 </GlassCard>
@@ -2309,7 +2413,9 @@ const StoreView = ({
       const result = await api.post<{ publishedCount: number }>('/admin/shop/items/publish-all');
       const count = result?.publishedCount ?? 0;
       if (count > 0) {
-        alert(`${count}개의 아이템이 공개되었습니다.\n마이페이지의 [상점] 탭에서 확인하실 수 있습니다.`);
+        alert(
+          `${count}개의 아이템이 공개되었습니다.\n마이페이지의 [상점] 탭에서 확인하실 수 있습니다.`,
+        );
       } else {
         alert('공개할 미공개 아이템이 없습니다.');
       }
@@ -2373,17 +2479,23 @@ const StoreView = ({
       const testItems: AdminItemCreateRequest[] = [];
 
       // 1. 아바타 10개
-      const avatarStyles: AvatarStyle[] = ['avataaars', 'bottts', 'lorelei', 'pixelArt', 'funEmoji'];
+      const avatarStyles: AvatarStyle[] = [
+        'avataaars',
+        'bottts',
+        'lorelei',
+        'pixelArt',
+        'funEmoji',
+      ];
       avatarItems.forEach((item, index) => {
         const randomStyle = avatarStyles[Math.floor(Math.random() * avatarStyles.length)];
         const randomSeed = `test-avatar-${index}-${Math.random().toString(36).substring(7)}`;
-        
+
         testItems.push({
           name: item.name,
           type: 'AVATAR',
           price: Math.floor(Math.random() * 20) * 100 + 500,
           description: `[헤드] ${item.desc}`,
-          imageUrl: `dicebear:${randomStyle}:${randomSeed}`, 
+          imageUrl: `dicebear:${randomStyle}:${randomSeed}`,
         });
       });
 
@@ -2421,7 +2533,7 @@ const StoreView = ({
     }
 
     const confirmed = confirm(
-      `현재 표시된 ${items.length}개의 아이템을 전부 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다!`
+      `현재 표시된 ${items.length}개의 아이템을 전부 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다!`,
     );
     if (!confirmed) return;
 
@@ -2440,9 +2552,7 @@ const StoreView = ({
         }
       }
 
-      alert(
-        `삭제 완료!\n성공: ${successCount}개 / 실패: ${failCount}개`
-      );
+      alert(`삭제 완료!\n성공: ${successCount}개 / 실패: ${failCount}개`);
       fetchItems();
     } catch (error) {
       console.error('일괄 삭제 실패:', error);
@@ -2574,14 +2684,21 @@ const StoreView = ({
             {(items || []).map((item) => {
               const color = getItemTypeColor(item.type);
               return (
-                <GlassCard key={item.id} className="group cursor-pointer w-full h-full flex flex-col">
+                <GlassCard
+                  key={item.id}
+                  className="group cursor-pointer w-full h-full flex flex-col"
+                >
                   <div className="w-full aspect-square rounded-[24px] mb-4 bg-black/[0.02] flex items-center justify-center relative overflow-hidden flex-shrink-0">
                     <div
                       className="w-16 h-16 rounded-full blur-3xl opacity-20 absolute"
                       style={{ background: color }}
                     />
                     <div className="w-full h-full flex items-center justify-center transition-transform group-hover:scale-105 duration-500">
-                      {item.imageUrl && (isEmoji(item.imageUrl) || (!item.imageUrl.includes(':') && !item.imageUrl.startsWith('http') && !item.imageUrl.startsWith('/'))) ? (
+                      {item.imageUrl &&
+                      (isEmoji(item.imageUrl) ||
+                        (!item.imageUrl.includes(':') &&
+                          !item.imageUrl.startsWith('http') &&
+                          !item.imageUrl.startsWith('/'))) ? (
                         <span className="text-6xl select-none leading-none">{item.imageUrl}</span>
                       ) : (
                         <img
@@ -2732,7 +2849,7 @@ const SystemView = ({
   stats,
   logs,
   loading,
-  onRefresh
+  onRefresh,
 }: {
   stats: AdminStatsResponse | null;
   logs: SystemLog[];
@@ -2783,19 +2900,27 @@ const SystemView = ({
 
   const getLogIcon = (level: SystemLog['level']) => {
     switch (level) {
-      case 'INFO': return <Activity size={16} className="text-blue-500" />;
-      case 'WARN': return <AlertTriangle size={16} className="text-yellow-500" />;
-      case 'ERROR': return <XCircle size={16} className="text-red-500" />;
-      default: return <Activity size={16} />;
+      case 'INFO':
+        return <Activity size={16} className="text-blue-500" />;
+      case 'WARN':
+        return <AlertTriangle size={16} className="text-yellow-500" />;
+      case 'ERROR':
+        return <XCircle size={16} className="text-red-500" />;
+      default:
+        return <Activity size={16} />;
     }
   };
 
   const getLogBgColor = (level: SystemLog['level']) => {
     switch (level) {
-      case 'INFO': return 'bg-blue-50 border-blue-200';
-      case 'WARN': return 'bg-yellow-50 border-yellow-200';
-      case 'ERROR': return 'bg-red-50 border-red-200';
-      default: return 'bg-white border-gray-200';
+      case 'INFO':
+        return 'bg-blue-50 border-blue-200';
+      case 'WARN':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'ERROR':
+        return 'bg-red-50 border-red-200';
+      default:
+        return 'bg-white border-gray-200';
     }
   };
 
@@ -2813,7 +2938,9 @@ const SystemView = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-black tracking-tight mb-2">시스템 통합 관제</h2>
-          <p className="text-sm font-bold text-black/40">기반 인프라 설정 및 실시간 엔진 모니터링</p>
+          <p className="text-sm font-bold text-black/40">
+            기반 인프라 설정 및 실시간 엔진 모니터링
+          </p>
         </div>
         <button
           onClick={onRefresh}
@@ -2831,7 +2958,9 @@ const SystemView = ({
               <Eye size={24} className="text-blue-500" />
             </div>
             <div>
-              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">실시간 접속자</p>
+              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">
+                실시간 접속자
+              </p>
               <p className="text-3xl font-black text-blue-500">{stats?.totalUsers || 0}</p>
             </div>
           </div>
@@ -2843,7 +2972,9 @@ const SystemView = ({
               <UserPlus size={24} className="text-green-500" />
             </div>
             <div>
-              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">금일 신규 가입</p>
+              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">
+                금일 신규 가입
+              </p>
               <p className="text-3xl font-black text-green-500">+{stats?.todayNewUsers || 0}</p>
             </div>
           </div>
@@ -2855,7 +2986,9 @@ const SystemView = ({
               <MessageSquare size={24} className="text-purple-500" />
             </div>
             <div>
-              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">미답변 문의</p>
+              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">
+                미답변 문의
+              </p>
               <p className="text-3xl font-black text-purple-500">{stats?.pendingInquiries || 0}</p>
             </div>
           </div>
@@ -2867,8 +3000,12 @@ const SystemView = ({
               <MapPin size={24} className="text-yellow-500" />
             </div>
             <div>
-              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">전체 화장실</p>
-              <p className="text-3xl font-black text-yellow-500">{(stats?.totalToilets || 0).toLocaleString()}</p>
+              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">
+                전체 화장실
+              </p>
+              <p className="text-3xl font-black text-yellow-500">
+                {(stats?.totalToilets || 0).toLocaleString()}
+              </p>
             </div>
           </div>
         </GlassCard>
@@ -2896,7 +3033,9 @@ const SystemView = ({
                   onClick={() => handleToggle('noticeEnabled')}
                   className={`w-12 h-6 rounded-full transition-colors relative ${settings.noticeEnabled ? 'bg-[#1B4332]' : 'bg-gray-300'}`}
                 >
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.noticeEnabled ? 'left-7' : 'left-1'}`} />
+                  <div
+                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.noticeEnabled ? 'left-7' : 'left-1'}`}
+                  />
                 </button>
               </div>
               {settings.noticeEnabled && (
@@ -2909,12 +3048,24 @@ const SystemView = ({
                         onChange={(e) => setTempNoticeMessage(e.target.value)}
                         className="flex-1 text-sm font-bold bg-transparent border-none focus:ring-0"
                       />
-                      <button onClick={handleNoticeMessageSave} className="text-xs font-black text-blue-500">저장</button>
+                      <button
+                        onClick={handleNoticeMessageSave}
+                        className="text-xs font-black text-blue-500"
+                      >
+                        저장
+                      </button>
                     </div>
                   ) : (
                     <div className="flex justify-between items-center">
-                      <p className="text-sm font-bold text-black/70 truncate">{settings.noticeMessage}</p>
-                      <button onClick={() => setEditingNotice(true)} className="text-xs font-black text-black/30">수정</button>
+                      <p className="text-sm font-bold text-black/70 truncate">
+                        {settings.noticeMessage}
+                      </p>
+                      <button
+                        onClick={() => setEditingNotice(true)}
+                        className="text-xs font-black text-black/30"
+                      >
+                        수정
+                      </button>
                     </div>
                   )}
                 </div>
@@ -2927,14 +3078,18 @@ const SystemView = ({
                 <Lock size={18} className="text-red-500" />
                 <div>
                   <h4 className="font-black text-black">점검 모드 (Maintenance)</h4>
-                  <p className="text-[10px] font-bold text-black/40">활성화 시 모든 유저의 접속이 차단됩니다</p>
+                  <p className="text-[10px] font-bold text-black/40">
+                    활성화 시 모든 유저의 접속이 차단됩니다
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => handleToggle('maintenanceMode')}
                 className={`w-12 h-6 rounded-full transition-colors relative ${settings.maintenanceMode ? 'bg-red-500' : 'bg-gray-300'}`}
               >
-                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.maintenanceMode ? 'left-7' : 'left-1'}`} />
+                <div
+                  className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.maintenanceMode ? 'left-7' : 'left-1'}`}
+                />
               </button>
             </div>
 
@@ -2944,14 +3099,18 @@ const SystemView = ({
                 <UserPlus size={18} className="text-blue-500" />
                 <div>
                   <h4 className="font-black text-black">신규 회원가입 허용</h4>
-                  <p className="text-[10px] font-bold text-black/40">신규 사용자의 가입 가능 여부를 결정합니다</p>
+                  <p className="text-[10px] font-bold text-black/40">
+                    신규 사용자의 가입 가능 여부를 결정합니다
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => handleToggle('signupEnabled')}
                 className={`w-12 h-6 rounded-full transition-colors relative ${settings.signupEnabled ? 'bg-blue-500' : 'bg-gray-300'}`}
               >
-                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.signupEnabled ? 'left-7' : 'left-1'}`} />
+                <div
+                  className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.signupEnabled ? 'left-7' : 'left-1'}`}
+                />
               </button>
             </div>
           </div>
@@ -2959,26 +3118,41 @@ const SystemView = ({
 
         {/* 런타임 로그 섹션 */}
         <GlassCard>
-          <div className="flex items-center justify-between border-b pb-4 mb-6" style={{ borderColor: COLORS.border }}>
+          <div
+            className="flex items-center justify-between border-b pb-4 mb-6"
+            style={{ borderColor: COLORS.border }}
+          >
             <h3 className="text-xl font-black text-black flex items-center gap-2">
               <Database size={20} />
               최신 시스템 로그
             </h3>
-            <button onClick={() => onRefresh()} className="text-[10px] font-black text-black/30 hover:text-black transition-colors uppercase">View All</button>
+            <button
+              onClick={() => onRefresh()}
+              className="text-[10px] font-black text-black/30 hover:text-black transition-colors uppercase"
+            >
+              View All
+            </button>
           </div>
           <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
             {logs.slice(0, 10).map((log, idx) => (
-              <div key={log.id || idx} className={`p-4 rounded-2xl border ${getLogBgColor(log.level)} transition-all hover:scale-[1.01]`}>
+              <div
+                key={log.id || idx}
+                className={`p-4 rounded-2xl border ${getLogBgColor(log.level)} transition-all hover:scale-[1.01]`}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     {getLogIcon(log.level)}
-                    <span className="text-[10px] font-black tracking-widest uppercase text-black/80">{log.level}</span>
+                    <span className="text-[10px] font-black tracking-widest uppercase text-black/80">
+                      {log.level}
+                    </span>
                   </div>
                   <span className="text-[9px] font-bold text-black/30">
                     {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '방금 전'}
                   </span>
                 </div>
-                <p className="text-[11px] font-black text-black/30 uppercase tracking-tighter mb-1">{log.source}</p>
+                <p className="text-[11px] font-black text-black/30 uppercase tracking-tighter mb-1">
+                  {log.source}
+                </p>
                 <p className="text-sm font-bold text-black/80 leading-snug">{log.message}</p>
               </div>
             ))}
@@ -2993,7 +3167,6 @@ const SystemView = ({
     </div>
   );
 };
-
 
 // ── Screen: Add Item Form ─────────────────────────────────────────────
 const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }) => {
@@ -3030,7 +3203,10 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
         type: itemType,
         price: itemPrice,
         discountPrice: discountPrice,
-        imageUrl: itemType === 'AVATAR' ? `dicebear:${dicebearStyle}:${dicebearSeed}` : (itemImageUrl || null),
+        imageUrl:
+          itemType === 'AVATAR'
+            ? `dicebear:${dicebearStyle}:${dicebearSeed}`
+            : itemImageUrl || null,
       });
       alert('아이템이 등록되었습니다.');
       // 폼 초기화
@@ -3079,7 +3255,11 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
               </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full p-4">
-                <img src={parseDicebearUrl(`dicebear:${dicebearStyle}:${dicebearSeed}`, 1, 'AVATAR')} alt="preview" className="w-32 h-32 mb-4" />
+                <img
+                  src={parseDicebearUrl(`dicebear:${dicebearStyle}:${dicebearSeed}`, 1, 'AVATAR')}
+                  alt="preview"
+                  className="w-32 h-32 mb-4"
+                />
                 <button
                   onClick={() => setDicebearSeed(Math.random().toString(36).substring(7))}
                   className="px-4 py-2 bg-[#E8A838]/10 text-[#E8A838] rounded-xl font-bold flex items-center gap-2 mb-4 hover:bg-[#E8A838]/20 transition-colors text-xs"
@@ -3133,7 +3313,9 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
                   <input
                     type="number"
                     value={itemPrice}
-                    onChange={(e) => setItemPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                    onChange={(e) =>
+                      setItemPrice(e.target.value === '' ? '' : Number(e.target.value))
+                    }
                     className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold text-black placeholder:text-black/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="5000"
                     min="0"
@@ -3146,16 +3328,20 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
                   <input
                     type="number"
                     value={discountPrice === null ? '' : discountPrice}
-                    onChange={(e) => setDiscountPrice(e.target.value === '' ? null : Number(e.target.value))}
+                    onChange={(e) =>
+                      setDiscountPrice(e.target.value === '' ? null : Number(e.target.value))
+                    }
                     className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold text-black placeholder:text-black/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="미입력 시 할인 없음"
                     min="0"
                   />
-                  {discountPrice !== null && itemPrice !== '' && discountPrice < Number(itemPrice) && (
-                    <p className="text-xs text-red-500 font-bold mt-1">
-                      -{Math.round((1 - discountPrice / Number(itemPrice)) * 100)}% 할인 적용
-                    </p>
-                  )}
+                  {discountPrice !== null &&
+                    itemPrice !== '' &&
+                    discountPrice < Number(itemPrice) && (
+                      <p className="text-xs text-red-500 font-bold mt-1">
+                        -{Math.round((1 - discountPrice / Number(itemPrice)) * 100)}% 할인 적용
+                      </p>
+                    )}
                 </div>
               </div>
               <div>
@@ -3206,20 +3392,25 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
 };
 
 // ── Screen: Edit Item Form ─────────────────────────────────────────────
-const EditItemView = ({ setActiveTab, editingItem }: { setActiveTab: (tab: AdminTab) => void, editingItem: ItemResponse }) => {
+const EditItemView = ({
+  setActiveTab,
+  editingItem,
+}: { setActiveTab: (tab: AdminTab) => void; editingItem: ItemResponse }) => {
   const [itemName, setItemName] = useState(editingItem.name);
   const [itemDescription, setItemDescription] = useState(editingItem.description);
   const [itemType, setItemType] = useState<ItemType>(editingItem.type);
   const [itemPrice, setItemPrice] = useState<number | ''>(editingItem.price);
-  const [discountPrice, setDiscountPrice] = useState<number | null>(editingItem.discountPrice ?? null);
+  const [discountPrice, setDiscountPrice] = useState<number | null>(
+    editingItem.discountPrice ?? null,
+  );
   const [itemImageUrl, setItemImageUrl] = useState(editingItem.imageUrl || '');
-  
+
   // dicebear 파싱
   const isDicebear = editingItem.imageUrl?.startsWith('dicebear:');
   const dParts = isDicebear ? editingItem.imageUrl?.split(':') || [] : [];
   const [dicebearStyle, setDicebearStyle] = useState(dParts[1] || 'funEmoji');
   const [dicebearSeed, setDicebearSeed] = useState(dParts[2] || '');
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -3244,7 +3435,10 @@ const EditItemView = ({ setActiveTab, editingItem }: { setActiveTab: (tab: Admin
         type: itemType,
         price: itemPrice,
         discountPrice: discountPrice,
-        imageUrl: itemType === 'AVATAR' ? `dicebear:${dicebearStyle}:${dicebearSeed}` : (itemImageUrl || null),
+        imageUrl:
+          itemType === 'AVATAR'
+            ? `dicebear:${dicebearStyle}:${dicebearSeed}`
+            : itemImageUrl || null,
       });
       alert('아이템이 수정되었습니다.');
       setActiveTab('store');
@@ -3285,7 +3479,15 @@ const EditItemView = ({ setActiveTab, editingItem }: { setActiveTab: (tab: Admin
               </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full p-4">
-                <img src={parseDicebearUrl(`dicebear:${dicebearStyle}:${dicebearSeed}`, editingItem.id, 'AVATAR')} alt="preview" className="w-32 h-32 mb-4" />
+                <img
+                  src={parseDicebearUrl(
+                    `dicebear:${dicebearStyle}:${dicebearSeed}`,
+                    editingItem.id,
+                    'AVATAR',
+                  )}
+                  alt="preview"
+                  className="w-32 h-32 mb-4"
+                />
                 <button
                   onClick={() => setDicebearSeed(Math.random().toString(36).substring(7))}
                   className="px-4 py-2 bg-[#E8A838]/10 text-[#E8A838] rounded-xl font-bold flex items-center gap-2 mb-4 hover:bg-[#E8A838]/20 transition-colors text-xs"
@@ -3339,7 +3541,9 @@ const EditItemView = ({ setActiveTab, editingItem }: { setActiveTab: (tab: Admin
                   <input
                     type="number"
                     value={itemPrice}
-                    onChange={(e) => setItemPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                    onChange={(e) =>
+                      setItemPrice(e.target.value === '' ? '' : Number(e.target.value))
+                    }
                     className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold text-black placeholder:text-black/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="5000"
                     min="0"
@@ -3352,16 +3556,20 @@ const EditItemView = ({ setActiveTab, editingItem }: { setActiveTab: (tab: Admin
                   <input
                     type="number"
                     value={discountPrice === null ? '' : discountPrice}
-                    onChange={(e) => setDiscountPrice(e.target.value === '' ? null : Number(e.target.value))}
+                    onChange={(e) =>
+                      setDiscountPrice(e.target.value === '' ? null : Number(e.target.value))
+                    }
                     className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold text-black placeholder:text-black/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="미입력 시 할인 없음"
                     min="0"
                   />
-                  {discountPrice !== null && itemPrice !== '' && discountPrice < Number(itemPrice) && (
-                    <p className="text-xs text-red-500 font-bold mt-1">
-                      -{Math.round((1 - discountPrice / Number(itemPrice)) * 100)}% 할인 적용
-                    </p>
-                  )}
+                  {discountPrice !== null &&
+                    itemPrice !== '' &&
+                    discountPrice < Number(itemPrice) && (
+                      <p className="text-xs text-red-500 font-bold mt-1">
+                        -{Math.round((1 - discountPrice / Number(itemPrice)) * 100)}% 할인 적용
+                      </p>
+                    )}
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4">
@@ -3753,11 +3961,12 @@ const AddTitleView = ({
 // ── Screen: System Logs View ──────────────────────────────────────────
 
 const LogsView = ({ logs, loading }: { logs: any[]; loading: boolean }) => {
-  if (loading) return (
-    <div className="flex justify-center py-20">
-      <RefreshCw size={24} className="animate-spin text-black/20" />
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex justify-center py-20">
+        <RefreshCw size={24} className="animate-spin text-black/20" />
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -3804,13 +4013,24 @@ const LogsView = ({ logs, loading }: { logs: any[]; loading: boolean }) => {
                   <td className="px-8 py-5 text-xs font-bold text-black/60">
                     {log.timestamp ? new Date(log.timestamp).toLocaleString() : '방금 전'}
                   </td>
-                  <td className="px-8 py-5 text-[10px] font-black tracking-widest"
-                      style={{ color: log.level === 'ERROR' ? COLORS.error : log.level === 'WARN' ? COLORS.warning : COLORS.textSecondary }}>
+                  <td
+                    className="px-8 py-5 text-[10px] font-black tracking-widest"
+                    style={{
+                      color:
+                        log.level === 'ERROR'
+                          ? COLORS.error
+                          : log.level === 'WARN'
+                            ? COLORS.warning
+                            : COLORS.textSecondary,
+                    }}
+                  >
                     {log.level || 'INFO'}
                   </td>
                   <td className="px-8 py-5 text-sm font-black text-black">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-black/30 uppercase tracking-tighter mb-0.5">{log.source}</span>
+                      <span className="text-[10px] font-black text-black/30 uppercase tracking-tighter mb-0.5">
+                        {log.source}
+                      </span>
                       <span className="line-clamp-1">{log.message}</span>
                     </div>
                   </td>
@@ -3825,7 +4045,10 @@ const LogsView = ({ logs, loading }: { logs: any[]; loading: boolean }) => {
               ))}
               {(logs || []).length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-20 text-center opacity-30 font-black uppercase tracking-widest text-sm">
+                  <td
+                    colSpan={4}
+                    className="py-20 text-center opacity-30 font-black uppercase tracking-widest text-sm"
+                  >
                     No system logs found
                   </td>
                 </tr>
@@ -3901,7 +4124,7 @@ export function AdminPage() {
     try {
       const [statsData, logsData] = await Promise.all([
         api.get<AdminStatsResponse>('/admin/stats'),
-        api.get<any[]>('/admin/logs')
+        api.get<any[]>('/admin/logs'),
       ]);
       setStats(statsData);
       setLogs(Array.isArray(logsData) ? logsData : []);
@@ -4111,8 +4334,6 @@ export function AdminPage() {
           </div>
 
           <div className="flex items-center gap-6">
-
-
             <div className="flex items-center gap-3 group cursor-pointer pl-2">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-black text-black/80 leading-none">시스템 마스터</p>
@@ -4138,11 +4359,11 @@ export function AdminPage() {
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               {activeTab === 'dashboard' && (
-                <DashboardView 
-                  stats={stats} 
+                <DashboardView
+                  stats={stats}
                   logs={logs}
-                  loading={statsLoading} 
-                  setActiveTab={setActiveTab} 
+                  loading={statsLoading}
+                  setActiveTab={setActiveTab}
                 />
               )}
               {activeTab === 'users' && <UsersView />}
@@ -4161,11 +4382,11 @@ export function AdminPage() {
                 <AddTitleView setActiveTab={setActiveTab} editingTitle={editingTitle} />
               )}
               {activeTab === 'system' && (
-                <SystemView 
-                  stats={stats} 
-                  logs={logs} 
-                  loading={statsLoading} 
-                  onRefresh={fetchStats} 
+                <SystemView
+                  stats={stats}
+                  logs={logs}
+                  loading={statsLoading}
+                  onRefresh={fetchStats}
                 />
               )}
               {activeTab === 'add-item' && <AddItemView setActiveTab={setActiveTab} />}

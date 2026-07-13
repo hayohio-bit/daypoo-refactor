@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import type React from 'react';
+import { useState } from 'react';
 
 interface WaveButtonProps {
   children: React.ReactNode;
@@ -24,7 +25,7 @@ const WaveButton: React.FC<WaveButtonProps> = ({
   type = 'button',
   icon,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -53,7 +54,7 @@ const WaveButton: React.FC<WaveButtonProps> = ({
       bg: 'transparent',
       text: '#1B4332',
       waves: ['rgba(27,67,50,0.05)', 'rgba(27,67,50,0.1)', 'rgba(27,67,50,0.15)'],
-      border: '2px solid rgba(27,67,50,0.2)'
+      border: '2px solid rgba(27,67,50,0.2)',
     },
     ghost: {
       bg: 'transparent',
@@ -64,7 +65,7 @@ const WaveButton: React.FC<WaveButtonProps> = ({
       bg: '#FFFFFF',
       text: '#1B4332',
       waves: ['#F0FDF4', '#DCFCE7', '#BBF7D0'],
-    }
+    },
   };
 
   const currentVariant = colors[variant] || colors.primary;
@@ -93,7 +94,8 @@ const WaveButton: React.FC<WaveButtonProps> = ({
       whileTap={{ scale: 0.96 }}
       className={`relative overflow-hidden font-black tracking-tight flex items-center justify-center gap-2 group transition-all duration-300 ${sizeClasses[size]} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       style={{
-        backgroundColor: variant === 'outline' || variant === 'ghost' ? 'transparent' : currentVariant.bg,
+        backgroundColor:
+          variant === 'outline' || variant === 'ghost' ? 'transparent' : currentVariant.bg,
         color: currentVariant.text,
         border: (currentVariant as any).border || 'none',
       }}
@@ -105,13 +107,13 @@ const WaveButton: React.FC<WaveButtonProps> = ({
               <motion.div
                 key={index}
                 initial={{ y: '100%', rotate: 0 }}
-                animate={{ 
+                animate={{
                   y: isHovered ? `${10 + index * 15}%` : '100%',
                   rotate: isHovered ? 360 : 0,
                 }}
                 transition={{
                   y: { type: 'spring', stiffness: 100, damping: 20, delay: index * 0.05 },
-                  rotate: { duration: 3 + index, repeat: Infinity, ease: 'linear' }
+                  rotate: { duration: 3 + index, repeat: Number.POSITIVE_INFINITY, ease: 'linear' },
                 }}
                 className="absolute left-[-50%] w-[200%] aspect-square"
                 style={{

@@ -40,7 +40,7 @@ export function BlobBackground() {
         overflow: 'hidden',
       }}
     >
-      {BLOBS.map(blob => (
+      {BLOBS.map((blob) => (
         <motion.div
           key={blob.id}
           style={{
@@ -58,7 +58,7 @@ export function BlobBackground() {
           }}
           transition={{
             duration: blob.dur,
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             ease: 'easeInOut',
           }}
         />

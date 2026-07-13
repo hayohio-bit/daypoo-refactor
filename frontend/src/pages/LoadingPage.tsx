@@ -3,7 +3,10 @@ import { Sparkles } from 'lucide-react';
 
 export function LoadingPage() {
   return (
-    <div className="fixed inset-0 w-full h-full flex flex-col items-center justify-center bg-[#f8faf9] overflow-hidden font-sans z-[9999]" style={{ transform: 'translateZ(0)' }}>
+    <div
+      className="fixed inset-0 w-full h-full flex flex-col items-center justify-center bg-[#f8faf9] overflow-hidden font-sans z-[9999]"
+      style={{ transform: 'translateZ(0)' }}
+    >
       <style>{`
         @keyframes morph {
           0% { border-radius: 24%; background-color: #1B4332; transform: rotate(0deg) scale(1); }
@@ -77,9 +80,7 @@ export function LoadingPage() {
             </span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <p className="text-sm font-bold text-[#7a9e8a] tracking-[0.2em]">
-              로딩 중!
-            </p>
+            <p className="text-sm font-bold text-[#7a9e8a] tracking-[0.2em]">로딩 중!</p>
             <div className="flex gap-1">
               {[0, 1, 2].map((i) => (
                 <div

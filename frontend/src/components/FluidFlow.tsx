@@ -110,11 +110,11 @@ export function FluidFlow() {
     const vs = gl.createShader(gl.VERTEX_SHADER)!;
     gl.shaderSource(vs, V_SHADER);
     gl.compileShader(vs);
-    
+
     const fs = gl.createShader(gl.FRAGMENT_SHADER)!;
     gl.shaderSource(fs, F_SHADER);
     gl.compileShader(fs);
-    
+
     const program = gl.createProgram()!;
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
@@ -124,17 +124,17 @@ export function FluidFlow() {
     const posBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    
-    const posLoc = gl.getAttribLocation(program, "position");
+
+    const posLoc = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(posLoc);
     gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-    const resLoc = gl.getUniformLocation(program, "u_resolution");
-    const timeLoc = gl.getUniformLocation(program, "u_time");
-    const mouseLoc = gl.getUniformLocation(program, "u_mouse");
-    const intensityLoc = gl.getUniformLocation(program, "u_intensity");
+    const resLoc = gl.getUniformLocation(program, 'u_resolution');
+    const timeLoc = gl.getUniformLocation(program, 'u_time');
+    const mouseLoc = gl.getUniformLocation(program, 'u_mouse');
+    const intensityLoc = gl.getUniformLocation(program, 'u_intensity');
 
-    let mouse = { x: 0, y: 0, targetX: 0.5, targetY: 0.5 };
+    const mouse = { x: 0, y: 0, targetX: 0.5, targetY: 0.5 };
     let intensity = 0;
     let targetIntensity = 0;
 
@@ -143,7 +143,9 @@ export function FluidFlow() {
       mouse.targetY = window.innerHeight - e.clientY;
       targetIntensity = 1.0;
     };
-    const onMouseLeave = () => { targetIntensity = 0; };
+    const onMouseLeave = () => {
+      targetIntensity = 0;
+    };
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseleave', onMouseLeave);
@@ -156,7 +158,7 @@ export function FluidFlow() {
     window.addEventListener('resize', resize);
     resize();
 
-    let start = performance.now();
+    const start = performance.now();
     const loop = () => {
       const time = (performance.now() - start) * 0.001;
       mouse.x += (mouse.targetX - mouse.x) * 0.1;

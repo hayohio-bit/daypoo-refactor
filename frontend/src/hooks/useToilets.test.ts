@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useToilets } from './useToilets';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToiletProvider } from '../context/ToiletContext';
+import { useToilets } from './useToilets';
 
 // ── apiClient 모킹 ──────────────────────────────────────────────
 vi.mock('../services/apiClient', () => ({
@@ -60,10 +60,10 @@ describe('useToilets', () => {
 
       const { rerender } = renderHook(
         ({ bounds }) => useToilets({ lat: 37.5, lng: 126.9, bounds }),
-        { 
+        {
           initialProps: { bounds: bounds1 },
-          wrapper: ToiletProvider
-        }
+          wrapper: ToiletProvider,
+        },
       );
 
       await flush(); // 초기 debounce(300ms) + API Promise flush
@@ -77,10 +77,9 @@ describe('useToilets', () => {
     });
 
     it('bounds가 null이면 정상적으로 API를 호출하고 에러가 없어야 한다', async () => {
-      const { result } = renderHook(() =>
-        useToilets({ lat: 37.5, lng: 126.9, bounds: null }),
-        { wrapper: ToiletProvider }
-      );
+      const { result } = renderHook(() => useToilets({ lat: 37.5, lng: 126.9, bounds: null }), {
+        wrapper: ToiletProvider,
+      });
 
       await flush();
 
@@ -94,10 +93,10 @@ describe('useToilets', () => {
 
       const { rerender } = renderHook(
         ({ bounds }) => useToilets({ lat: 37.5, lng: 126.9, bounds }),
-        { 
+        {
           initialProps: { bounds: bounds1 },
-          wrapper: ToiletProvider
-        }
+          wrapper: ToiletProvider,
+        },
       );
 
       await flush();
@@ -114,13 +113,10 @@ describe('useToilets', () => {
   // ─────────────────────────────────────────────────────────────
   describe('lat/lng 변경 시 재페치', () => {
     it('lat이 변경되면 API를 다시 호출해야 한다', async () => {
-      const { rerender } = renderHook(
-        ({ lat }) => useToilets({ lat, lng: 126.9 }),
-        { 
-          initialProps: { lat: 37.5 },
-          wrapper: ToiletProvider
-        }
-      );
+      const { rerender } = renderHook(({ lat }) => useToilets({ lat, lng: 126.9 }), {
+        initialProps: { lat: 37.5 },
+        wrapper: ToiletProvider,
+      });
 
       await flush();
       expect(mockApi.get).toHaveBeenCalledTimes(1);
@@ -138,10 +134,9 @@ describe('useToilets', () => {
     it('API 실패 시 error 상태가 설정되어야 한다', async () => {
       mockApi.get.mockRejectedValueOnce(new Error('네트워크 오류'));
 
-      const { result } = renderHook(() =>
-        useToilets({ lat: 37.5, lng: 126.9 }),
-        { wrapper: ToiletProvider }
-      );
+      const { result } = renderHook(() => useToilets({ lat: 37.5, lng: 126.9 }), {
+        wrapper: ToiletProvider,
+      });
 
       await flush();
 
@@ -155,10 +150,9 @@ describe('useToilets', () => {
   // ─────────────────────────────────────────────────────────────
   describe('데이터 변환', () => {
     it('API 응답이 ToiletData 타입으로 정상 변환되어야 한다', async () => {
-      const { result } = renderHook(() =>
-        useToilets({ lat: 37.5, lng: 126.9 }),
-        { wrapper: ToiletProvider }
-      );
+      const { result } = renderHook(() => useToilets({ lat: 37.5, lng: 126.9 }), {
+        wrapper: ToiletProvider,
+      });
 
       await flush();
 
@@ -178,10 +172,9 @@ describe('useToilets', () => {
       const largeData = Array.from({ length: 1500 }, (_, i) => makeMockToilet(i + 1));
       mockApi.get.mockResolvedValueOnce(largeData);
 
-      const { result } = renderHook(() =>
-        useToilets({ lat: 37.5, lng: 126.9 }),
-        { wrapper: ToiletProvider }
-      );
+      const { result } = renderHook(() => useToilets({ lat: 37.5, lng: 126.9 }), {
+        wrapper: ToiletProvider,
+      });
 
       await flush();
 
