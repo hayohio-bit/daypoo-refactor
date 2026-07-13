@@ -63,6 +63,20 @@ describe('[P9] AdminRoute 디버그 console 제거 검증', () => {
 
     expect(source).not.toContain('[AdminRoute] Debug');
     expect(source).not.toContain('console.log(\'[AdminRoute]');
-    expect(source).not.toContain('console.error(\'[AdminRoute]');
+    expect(source).not.toContain("console.error('[AdminRoute]");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────
+// [P2] Suspense fallback 검증
+// ─────────────────────────────────────────────────────────────────
+describe('[P2] Suspense fallback 검증', () => {
+  it('App.tsx 파일 내에 Suspense fallback으로 LoadingPage가 설정되어 있어야 한다', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const filePath = path.resolve(__dirname, 'App.tsx');
+    const source = fs.readFileSync(filePath, 'utf-8');
+
+    expect(source).toContain('Suspense fallback={<LoadingPage />}');
   });
 });

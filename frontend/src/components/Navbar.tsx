@@ -110,7 +110,10 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
 
   return (
     <>
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-full flex justify-center px-4 pointer-events-none">
+      <div 
+        className="fixed left-1/2 -translate-x-1/2 z-[100] w-full flex justify-center px-4 pointer-events-none"
+        style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+      >
         <m.nav
           variants={{
             visible: { y: 0, opacity: 1 },
@@ -262,7 +265,10 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
               className="fixed top-0 right-0 z-[151] w-[280px] h-full flex flex-col md:hidden bg-gradient-to-b from-[#1A2B27] to-[#0F1D19] shadow-[-8px_0_40px_rgba(0,0,0,0.3)]"
             >
               {/* 드로어 헤더 */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4">
+              <div 
+                className="flex items-center justify-between px-6 pb-4"
+                style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+              >
                 <span className="font-['SchoolSafetyNotification'] text-xl text-white font-bold">
                   Day<span className="text-[#E8A838]">.</span>Poo
                 </span>
