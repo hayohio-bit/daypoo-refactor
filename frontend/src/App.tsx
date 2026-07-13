@@ -36,6 +36,7 @@ import { LoadingPage } from './pages/LoadingPage';
 import { TransitionProvider } from './context/TransitionContext';
 import { AuthModal } from './components/AuthModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToiletProvider } from './context/ToiletContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { NotificationSubscriber } from './components/NotificationSubscriber';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -118,51 +119,53 @@ function App() {
       <LazyMotion features={loadFeatures} strict>
         <ErrorBoundary>
           <AuthProvider>
-            <TransitionProvider>
-              <NotificationProvider>
-                <NotificationSubscriber />
-                <LocationConsentBanner />
-                <Suspense fallback={<LoadingPage />}>
-                  <Routes>
-                    <Route path="/" element={<SplashPage />} />
-                    <Route path="/main" element={<MainPage openAuth={openAuth} />} />
-                    <Route path="/login" element={<LoginPage openAuth={openAuth} />} />
-                    <Route path="/map" element={<MapPage openAuth={openAuth} />} />
-                    <Route path="/ranking" element={<RankingPage openAuth={openAuth} />} />
-                    <Route path="/forgot-password" element={<ForgotPage />} />
-                    <Route path="/terms" element={<TermsPage />} />
-                    <Route path="/privacy" element={<PrivacyPage />} />
-                    <Route path="/mypage" element={<MyPage openAuth={openAuth} />} />
-                    <Route path="/support" element={<SupportPage openAuth={openAuth} />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/signup/social" element={<SocialSignupPage />} />
-                    <Route path="/payment/success" element={<PaymentSuccessPage />} />
-                    <Route path="/premium" element={<PremiumPage openAuth={openAuth} />} />
-                    <Route path="/500" element={<ServerErrorPage />} />
-                    <Route
-                      path="/admin"
-                      element={
-                        <AdminRoute>
-                          <AdminPage />
-                        </AdminRoute>
-                      }
-                    />
-                    <Route path="/404" element={<NotFoundPage />} />
-                    <Route path="/loading" element={<LoadingPage />} />
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Routes>
-                </Suspense>
-                <AuthModal
-                  isOpen={authOpen}
-                  onClose={() => setAuthOpen(false)}
-                  defaultMode={authMode}
-                  onSuccess={() => {
-                    if (onAuthSuccess) onAuthSuccess();
-                    setOnAuthSuccess(null);
-                  }}
-                />
-              </NotificationProvider>
-            </TransitionProvider>
+            <ToiletProvider>
+              <TransitionProvider>
+                <NotificationProvider>
+                  <NotificationSubscriber />
+                  <LocationConsentBanner />
+                  <Suspense fallback={<LoadingPage />}>
+                    <Routes>
+                      <Route path="/" element={<SplashPage />} />
+                      <Route path="/main" element={<MainPage openAuth={openAuth} />} />
+                      <Route path="/login" element={<LoginPage openAuth={openAuth} />} />
+                      <Route path="/map" element={<MapPage openAuth={openAuth} />} />
+                      <Route path="/ranking" element={<RankingPage openAuth={openAuth} />} />
+                      <Route path="/forgot-password" element={<ForgotPage />} />
+                      <Route path="/terms" element={<TermsPage />} />
+                      <Route path="/privacy" element={<PrivacyPage />} />
+                      <Route path="/mypage" element={<MyPage openAuth={openAuth} />} />
+                      <Route path="/support" element={<SupportPage openAuth={openAuth} />} />
+                      <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route path="/signup/social" element={<SocialSignupPage />} />
+                      <Route path="/payment/success" element={<PaymentSuccessPage />} />
+                      <Route path="/premium" element={<PremiumPage openAuth={openAuth} />} />
+                      <Route path="/500" element={<ServerErrorPage />} />
+                      <Route
+                        path="/admin"
+                        element={
+                          <AdminRoute>
+                            <AdminPage />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route path="/404" element={<NotFoundPage />} />
+                      <Route path="/loading" element={<LoadingPage />} />
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                  </Suspense>
+                  <AuthModal
+                    isOpen={authOpen}
+                    onClose={() => setAuthOpen(false)}
+                    defaultMode={authMode}
+                    onSuccess={() => {
+                      if (onAuthSuccess) onAuthSuccess();
+                      setOnAuthSuccess(null);
+                    }}
+                  />
+                </NotificationProvider>
+              </TransitionProvider>
+            </ToiletProvider>
           </AuthProvider>
         </ErrorBoundary>
       </LazyMotion>
