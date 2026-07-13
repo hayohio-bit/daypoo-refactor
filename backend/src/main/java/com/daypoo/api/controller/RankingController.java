@@ -45,10 +45,10 @@ public class RankingController {
     return ResponseEntity.ok(rankingService.getRegionRanking(user, regionName));
   }
 
-  /** 건강왕 랭킹 조회 */
+  /** 쾌변왕 랭킹 조회 */
   @Operation(
-      summary = "건강왕(장 컨디션) 랭킹 조회",
-      description = "당일 AI 분석을 통해 가장 높은 장 컨디션 점수를 기록한 건강왕 랭킹 상위권 목록을 조회합니다.")
+      summary = "쾌변왕(장 컨디션) 랭킹 조회",
+      description = "당일 AI 분석을 통해 가장 높은 장 컨디션 점수를 기록한 쾌변왕 랭킹 상위권 목록을 조회합니다.")
   @GetMapping("/health")
   public ResponseEntity<RankingResponse> getHealthRanking(@AuthenticationPrincipal String email) {
     User user =

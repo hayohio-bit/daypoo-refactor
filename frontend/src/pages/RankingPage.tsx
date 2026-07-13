@@ -109,7 +109,7 @@ function ConicGlow({ color, thickness = 1.5, borderRadius = '16px' }: { color: s
 const TAB_CONFIG: { key: TabKey; label: string; desc: string; icon: React.ReactNode }[] = [
   { key: 'total',  label: '전체 랭킹',    desc: '기록 인증 + 장소 방문 점수 합산',          icon: <Trophy size={16} /> },
   { key: 'local',  label: '우리 동네 왕',  desc: '현재 위치 기반 지역 활동 점수',     icon: <MapPin size={16} /> },
-  { key: 'health', label: '건강왕',        desc: 'AI 쾌변 점수 기준',            icon: <Activity size={16} /> },
+  { key: 'health', label: '쾌변왕',        desc: 'AI 쾌변 점수 기준',            icon: <Activity size={16} /> },
 ];
 
 // ── 순위 변화 아이콘 ──────────────────────────────────────────────────

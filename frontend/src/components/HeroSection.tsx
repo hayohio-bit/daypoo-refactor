@@ -156,12 +156,12 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <Zap size={11} className="text-emerald-400" />
                 <span className="text-emerald-300 text-xs font-semibold uppercase tracking-wider">
-                  실시간 건강 엔진 작동 중
+                  실시간 분석 엔진 작동 중
                 </span>
               </div>
 
               <h1 className="text-[2.25rem] sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] text-white tracking-tight">
-                건강은 <br />
+                컨디션은 <br />
                 <span className="text-emerald-400">데이터</span>로 말합니다.
               </h1>
 

@@ -84,12 +84,12 @@ export function HeroOption1({ onCtaClick, openAuth }: HeroProps) {
 
           <h1 className="text-5xl md:text-8xl font-black text-[#1A2B27] leading-[1.1] tracking-tighter">
             당신의 흔적이 <br />
-            <span className="text-emerald-600 italic">건강이 됩니다.</span>
+            <span className="text-emerald-600 italic">기록이 됩니다.</span>
           </h1>
 
           <p className="text-lg md:text-2xl text-slate-600 max-w-2xl mx-auto font-medium leading-relaxed">
             전국 약 5만 건의 화장실 데이터와 지능형 AI 분석으로 <br className="hidden md:block" />
-            당신의 건강한 하루를 완벽하게 서포트합니다.
+            당신의 편안한 하루를 완벽하게 서포트합니다.
           </p>
         </motion.div>
 

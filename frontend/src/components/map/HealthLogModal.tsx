@@ -36,7 +36,7 @@ const BRISTOL_DETAILS = [
   { type: 1, emoji: '🪨', label: '딱딱한 알맹이', desc: '분리된 딱딱한 덩어리', fullDesc: '수분이 극도로 부족한 상태로, 심한 변비를 의미합니다. 장내 체류 시간이 길어져 돌멩이처럼 딱딱한 배변이 발생합니다.', status: '심한 변비', color: '#8d6e63' },
   { type: 2, emoji: '🥖', label: '단단한 소시지형', desc: '덩어리가 뭉친 소시지 모양', fullDesc: '수분이 다소 부족하여 바게트처럼 단단하게 덩어리들이 뭉치 있습니다. 가벼운 변비가 의심되며 수분 섭취가 권장됩니다.', status: '변비 경향', color: '#a1887f' },
   { type: 3, emoji: '🥜', label: '갈라진 소시지형', desc: '표면에 균열이 있는 소시지', fullDesc: '정상 범주에 속하지만 땅콩 껍질처럼 다소 표면에 균열이 있고 단단할 수 있습니다. 규칙적인 생활과 섬유질 섭취가 도움이 됩니다.', status: '정상 (다소 단단)', color: '#bcaaa4' },
-  { type: 4, emoji: '🍌', label: '매끄러운 바나나', desc: '부드럽고 매끄러운 바나나 모양', fullDesc: '가장 이상적인 건강 상태입니다! 뱀처럼 부드럽고 매끈하며 적절한 탄력을 가진 최고의 컨디션입니다.', status: '매우 건강함', color: '#8BC34A' },
+  { type: 4, emoji: '🍌', label: '매끄러운 바나나', desc: '부드럽고 매끄러운 바나나 모양', fullDesc: '가장 이상적인 쾌변 상태입니다! 뱀처럼 부드럽고 매끈하며 적절한 탄력을 가진 최고의 컨디션입니다.', status: '매우 양호', color: '#8BC34A' },
   { type: 5, emoji: '🫘', label: '폭신한 덩어리 모양', desc: '부드러운 덩어리, 경계 뚜렷', fullDesc: '부드러운 알맹이 형태로 경계가 뚜렷합니다. 전반적으로 양호한 상태이며 원활한 소화가 이루어지고 있습니다.', status: '양호 (약간 무름)', color: '#4caf50' },
   { type: 6, emoji: '🍮', label: '흐물흐물한 푸딩형', desc: '경계가 불분명하고 무른 모양', fullDesc: '푸딩처럼 형태가 불분명하고 매우 무른 상태입니다. 설사로 진행되기 직전이므로 자극적인 음식 섭취를 피하고 장 휴식을 권장합니다.', status: '경미한 설사', color: '#ff9800' },
   { type: 7, emoji: '💧', label: '물 같은 액체 상태', desc: '덩어리가 전혀 없는 액체', fullDesc: '심한 설사 상태입니다. 수분 손실이 많으므로 전해질 보충이 시급하며 탈수에 강한 주의가 필요합니다.', status: '심한 설사', color: '#f44336' },
@@ -189,7 +189,7 @@ export function HealthLogModal({
             </div>
             <div className="text-center space-y-3">
               <h2 className="font-black text-3xl text-[#1a2b22] tracking-tight">기록 완료!</h2>
-              <p className="text-sm text-[#7a9e8a] font-medium leading-relaxed">성공적으로 보관되었습니다.<br />변화하는 건강 데이터를 리포트로 확인해보세요.</p>
+              <p className="text-sm text-[#7a9e8a] font-medium leading-relaxed">성공적으로 보관되었습니다.<br />변화하는 컨디션 데이터를 리포트로 확인해보세요.</p>
             </div>
             <div className="w-full space-y-3 pt-6">
               <WaveButtonComponent variant="primary" size="lg" className="w-full shadow-lg" onClick={() => { window.location.href = '/mypage?tab=report'; }} icon={<ChevronRight size={20} />}>기록 보러가기</WaveButtonComponent>
@@ -201,7 +201,7 @@ export function HealthLogModal({
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#eef5f0]">
               <div>
                 {toilet && <p className="text-[10px] font-bold text-[#7a9e8a] uppercase tracking-wider">{toilet.name}</p>}
-                <h2 className="font-black text-xl text-[#1a2b22]">배변 건강 기록</h2>
+                <h2 className="font-black text-xl text-[#1a2b22]">배변 상태 기록</h2>
               </div>
               <button onClick={handleBackdropClick} className="w-10 h-10 rounded-full bg-[#f4faf6] text-[#7a9e8a] flex items-center justify-center hover:bg-[#e8f3ec] transition-colors"><X size={20} /></button>
             </div>
@@ -412,7 +412,7 @@ export function HealthLogModal({
             <m.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white rounded-3xl p-6 shadow-2xl max-w-[320px] w-full text-center" onClick={(e) => e.stopPropagation()}>
               <div className="w-14 h-14 rounded-full bg-[#FFF3E0] flex items-center justify-center mx-auto mb-4"><AlertTriangle size={28} className="text-[#E8A838]" /></div>
               <h3 className="font-black text-lg text-[#1a2b22] mb-2">기록을 중단할까요?</h3>
-              <p className="text-sm text-[#7a9e8a] mb-6">{toilet ? '방문 인증은 유지되며, 건강 기록만 취소됩니다.' : '입력한 내용이 사라집니다.'}</p>
+              <p className="text-sm text-[#7a9e8a] mb-6">{toilet ? '방문 인증은 유지되며, 배변 상태 기록만 취소됩니다.' : '입력한 내용이 사라집니다.'}</p>
               <div className="flex gap-3">
                 <WaveButtonComponent onClick={() => setShowCloseConfirm(false)} variant="outline" size="md" className="flex-1">계속 작성</WaveButtonComponent>
                 <WaveButtonComponent onClick={onClose} variant="error" size="md" className="flex-1">나가기</WaveButtonComponent>

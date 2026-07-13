@@ -6,7 +6,7 @@ import { ToiletData, PoopColor, ConditionTag, FoodTag } from '../../types/toilet
 import { HealthLogModal, HealthLogResult } from './HealthLogModal';
 
 // 방문 인증 결과 타입
-// bristolType / color: 건강 기록 추가 시 채워짐, 건너뛰기 시 null
+// bristolType / color: 상태 기록 추가 시 채워짐, 건너뛰기 시 null
 export interface VisitModalResult {
   toiletId: string;
   bristolType: number | null;
@@ -27,7 +27,7 @@ interface VisitModalProps {
 export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitModalProps) {
   // 방문 인증 완료 여부 (API 미호출 상태, 선택 화면 표시)
   const [visitDone, setVisitDone] = useState(false);
-  // 건강 기록 모달 표시 여부
+  // 상태 기록 모달 표시 여부
   const [showHealthLog, setShowHealthLog] = useState(false);
   const [healthLogStartStep, setHealthLogStartStep] = useState<number | undefined>(undefined);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -114,7 +114,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
     return () => stopCamera();
   }, [stopCamera]);
 
-  // VisitModalResult 생성 (건강 기록 병합 옵션)
+  // VisitModalResult 생성 (상태 기록 병합 옵션)
   const buildResult = (healthData?: HealthLogResult): VisitModalResult => ({
     toiletId: toilet.id,
     bristolType: healthData?.bristolType ?? null,
@@ -149,7 +149,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
     setShowHealthLog(true);
   };
 
-  // 건너뛰기: 건강 기록 없이 방문만 POST (백엔드 필수값 우회를 위해 기본값 전송)
+  // 건너뛰기: 배변 상태 기록 없이 방문만 POST (백엔드 필수값 우회를 위해 기본값 전송)
   const handleSkipHealthLog = async () => {
     setShowCloseConfirm(false);
     try {
@@ -174,7 +174,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
     }
   };
 
-  // 건강 기록 완료: 방문 + 건강 데이터 합쳐서 POST
+  // 상태 기록 완료: 방문 + 상태 데이터 합쳐서 POST
   const handleHealthLogComplete = async (healthResult: HealthLogResult) => {
     try {
       await onComplete(buildResult(healthResult));
@@ -264,14 +264,14 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
               transition={{ duration: 0.2 }}
             >
               {visitDone ? (
-                /* ── 방문 인증 완료: 건강 기록 추가 여부 선택 ── */
+                /* ── 방문 인증 완료: 상태 기록 추가 여부 선택 ── */
                 <div className="flex flex-col items-center justify-center py-6 space-y-6">
                   <div className="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center">
                     <Check size={48} className="text-emerald-500" />
                   </div>
                   <div className="text-center space-y-2">
                     <p className="font-black text-2xl text-[#1a2b22]">방문 인증 완료!</p>
-                    <p className="text-sm text-[#7a9e8a]">배변 건강 기록도 남겨볼까요?</p>
+                    <p className="text-sm text-[#7a9e8a]">배변 상태 기록도 남겨볼까요?</p>
                     <p className="text-xs text-[#b5c9bc]">기록하면 배변 패턴 리포트에 반영됩니다.</p>
                   </div>
                   <div className="w-full space-y-3 pt-2">
@@ -285,7 +285,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
                       className="w-full shadow-lg"
                       icon={<Sparkles size={20} />}
                     >
-                      건강 기록 추가하기
+                      상태 기록 추가하기
                     </WaveButtonComponent>
                     <button
                       onClick={handleSkipHealthLog}
@@ -489,11 +489,11 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
                 <AlertTriangle size={28} className="text-[#E8A838]" />
               </div>
               <h3 className="font-black text-lg text-[#1a2b22] mb-2">
-                {visitDone ? '건강 기록을 건너뛸까요?' : '작성을 중단할까요?'}
+                {visitDone ? '상태 기록을 건너뛸까요?' : '작성을 중단할까요?'}
               </h3>
               <p className="text-sm text-[#7a9e8a] mb-6">
                 {visitDone
-                  ? '건강 기록은 저장되지 않지만, 방문 인증은 완료됩니다.'
+                  ? '상태 기록은 저장되지 않지만, 방문 인증은 완료됩니다.'
                   : '지금까지 입력한 내용이 사라집니다.'}
               </p>
               <div className="flex gap-3">
@@ -519,19 +519,19 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
         )}
       </AnimatePresence>
 
-      {/* 건강 기록 모달 (visitDone 이후에만 마운트) */}
+      {/* 상태 기록 모달 (visitDone 이후에만 마운트) */}
       <AnimatePresence>
         {showHealthLog && (
           <HealthLogModal
             toilet={toilet}
             initialBristolType={null}
             initialColor={null}
-            initialImage={capturedImage} // 촬영된 이미지를 건강 기록 모달로 전달
+            initialImage={capturedImage} // 촬영된 이미지를 상태 기록 모달로 전달
             startStep={healthLogStartStep}
             onClose={() => {
               setShowHealthLog(false);
               setHealthLogStartStep(undefined); // 상태 초기화
-              // 기록이 완료된 상태에서 건강기록 모달을 닫으면 방문인증 모달도 함께 닫음
+              // 기록이 완료된 상태에서 상태기록 모달을 닫으면 방문인증 모달도 함께 닫음
               if (isRecordSubmitted) {
                 onClose();
               }

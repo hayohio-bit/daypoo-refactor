@@ -2067,7 +2067,7 @@ function ReportTab({
                       <Sparkles size={60} />
                     </div>
                     <p className="text-[11px] sm:text-[13px] font-black text-emerald-300 mb-2 sm:mb-3 uppercase tracking-[0.2em] flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> AI Doctor Poo
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> AI Guide Poo
                       Insight
                     </p>
                     <p className="text-base sm:text-xl font-bold leading-relaxed relative z-10 tracking-tight">
@@ -2118,7 +2118,7 @@ function ReportTab({
                     <h3 className="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-[0.2em]">
                       {activeSubTab === 'weekly'
                         ? '7일 정밀 분석 리포트'
-                        : '30일 건강 트렌드 리포트'}
+                        : '30일 컨디션 트렌드 리포트'}
                     </h3>
                     <div className="px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 flex items-center gap-2 shadow-sm">
                       <Crown size={14} className="text-amber-500" />
@@ -2203,7 +2203,7 @@ function ReportTab({
                         emoji: <Activity size={24} className="text-blue-500" />,
                       },
                       {
-                        label: '건강 배변 비율',
+                        label: '쾌변 비율',
                         val: reportData?.healthyRatio != null ? `${reportData.healthyRatio}%` : '-',
                         emoji: <Trophy size={24} className="text-amber-500" />,
                       },
@@ -2640,7 +2640,7 @@ function ReportTab({
                     </p>
                     <p className="text-white/60 text-xs font-bold leading-relaxed">
                       이 분석은 오직 프리미엄 회원에게만 <br />
-                      제공되는 전문적인 건강 가이드입니다.
+                      제공되는 전문적인 쾌변 가이드입니다.
                     </p>
                   </div>
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/5">
@@ -3544,7 +3544,7 @@ export function MyPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
         </AnimatePresence>
       </div>
 
-      {/* 전역 건강 기록 모달 */}
+      {/* 전역 배변 기록 모달 */}
       <AnimatePresence>
         {showHealthLog && (
           <HealthLogModal
