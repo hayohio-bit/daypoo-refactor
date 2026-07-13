@@ -14,7 +14,8 @@ declare global {
 export function MapSection() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  // [P6] marker overlay + handler key 함께 보관 (clearMarkers 시 전역 핸들러 정제 위해)
+  const markersRef = useRef<{ overlay: any; handlerKey: string }[]>([]);
   const navigate = useNavigate();
   
   const [selectedToilet, setSelectedToilet] = useState<ToiletData | null>(null);
@@ -29,8 +30,12 @@ export function MapSection() {
     bounds: mapBounds
   });
 
+  // [P6] clearMarkers: overlay 해제 + 전역 핸들러 정리
   const clearMarkers = useCallback(() => {
-    markersRef.current.forEach(overlay => overlay.setMap(null));
+    markersRef.current.forEach(({ overlay, handlerKey }) => {
+      overlay.setMap(null);
+      delete (window as any)[handlerKey];
+    });
     markersRef.current = [];
   }, []);
 
@@ -96,10 +101,14 @@ export function MapSection() {
         </svg>
       `;
 
+      // [P6] 전역 핸들러 등록 패턴 — setTimeout + getElementById 제거
+      const handlerKey = `__mkClick_${toilet.id}`;
+      (window as any)[handlerKey] = () => setSelectedToilet(toilet);
+
       const overlay = new window.kakao.maps.CustomOverlay({
         position: pos,
         content: `
-          <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;" id="marker-${toilet.id}">
+          <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;" onclick="${handlerKey}()" id="marker-${toilet.id}">
             <div style="
               background:${color};
               color:white;
@@ -124,11 +133,7 @@ export function MapSection() {
       });
 
       overlay.setMap(mapInstance.current);
-      markersRef.current.push(overlay);
-      setTimeout(() => {
-        const el = document.getElementById(`marker-${toilet.id}`);
-        if (el) el.onclick = () => setSelectedToilet(toilet);
-      }, 100);
+      markersRef.current.push({ overlay, handlerKey });
     });
   }, [toilets, clearMarkers]);
 

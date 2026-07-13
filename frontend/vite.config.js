@@ -101,9 +101,30 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['framer-motion', 'lucide-react'],
+          motion: ['framer-motion'],
+          ui: ['lucide-react'],
           chart: ['recharts'],
         },
+      },
+    },
+  },
+  // Vitest 설정 — jsdom 환경, 커버리지
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test-setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: [
+        'src/hooks/useToilets.ts',
+        'src/components/HeroSection.tsx',
+        'src/App.tsx',
+      ],
+      thresholds: {
+        lines: 70,
+        branches: 60,
+        functions: 70,
       },
     },
   },

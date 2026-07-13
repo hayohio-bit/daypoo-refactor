@@ -1,4 +1,4 @@
-import { m, useSpring, useTransform, animate, AnimatePresence } from 'framer-motion';
+import { m, animate, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Activity, MapPin, Sparkles, TrendingUp, Zap, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { TimelineSteps } from './TimelineSteps';
 import { BlobStatsSection } from './BlobStatsSection';
 import { WaveDivider } from './WaveDivider';
-import { useToilets } from '../hooks/useToilets';
+
 
 // Premium Rolling Counter Component
 function RollingCounter({
@@ -74,11 +74,12 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Mobile detection for performance optimization
-  const [isMobile, setIsMobile] = useState(false);
+  // [P5] isMobile lazy initializer — 첫 렌더에서 올바른 값으로 초기화 (깜박임 방지)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
-    check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
@@ -89,41 +90,26 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationName, setLocationName] = useState('위치 확인 중...');
-  const [stats, setStats] = useState({
+
+  // [P4] stats — 실제 업데이트 없는 fake setInterval 제거, 상수로 선언
+  const STATS = {
     todayReports: 2648,
     accuracy: 98.2,
     totalToilets: 72142,
-  });
+  } as const;
 
-  const { toilets, loading: toiletsLoading } = useToilets({
-    lat: userLocation?.lat || 37.5666,
-    lng: userLocation?.lng || 126.9784,
-    radius: 1500,
-  });
+  // [P1] useToilets 호출 제거 — MapSection이 단독으로 호출하므로 이중 호출 방지
 
   useEffect(() => {
-    // We removed the automatic geolocation prompt from here to avoid double-pops
-    // The LocationConsentBanner now handles the first intent.
-
-    // Default location to Seoul while waiting
+    // 기본 위치를 서울로 설정
     setUserLocation({ lat: 37.5666, lng: 126.9784 });
     setLocationName('서울시 중구');
-
-    const interval = setInterval(() => {
-      setStats((prev) => ({
-        ...prev,
-        todayReports: prev.todayReports + (Math.random() > 0.7 ? 1 : 0),
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const [messageIndex, setMessageIndex] = useState(0);
+  // [P1] toilets.length / toiletsLoading 참조 제거 — 하드코딩 메시지로 대체
   const messages = [
-    toiletsLoading
-      ? '데이터 동기화 중...'
-      : `근처에서 가장 청결한 ${toilets.length}개의 화장실 발견`,
+    '근처 최적의 화장실을 AI가 실시간 선별 중',
     'AI가 분석한 오늘의 최적 쾌변 장소 추천',
     '실시간으로 업데이트되는 깨끗한 한 칸 찾기',
     '지금 내 주변 평점 높은 화장실 리스트',
@@ -216,7 +202,7 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-6 rounded-3xl bg-emerald-500/[0.08] border border-emerald-500/10 text-center space-y-2">
                   <div className="text-emerald-400 text-3xl font-black tabular-nums tracking-tighter">
-                    <RollingCounter value={stats.todayReports} delay={0.6} />
+                    <RollingCounter value={STATS.todayReports} delay={0.6} />
                   </div>
                   <div className="text-[10px] text-emerald-300/50 font-black uppercase tracking-widest">
                     오늘의 리포트

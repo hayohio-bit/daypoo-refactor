@@ -44,9 +44,11 @@
     <meta name="twitter:description" content="AI 기반 배변 패턴 분석 & 전국 화장실 실시간 지도" />
     <meta name="twitter:image" content="https://daypoo.8o2.site/icons/og-image.png" />
 
+    <!-- [P3] async 추가: autoload=false이므로 window.kakao.maps.load() 콜백 패턴과 호환됨 -->
     <script
       type="text/javascript"
-      src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=09664cc25ced9ec3fc62e230b833aeba&libraries=services,clusterer&autoload=false"
+      src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7d37ef5b2c2b869c31de1780a48879d4&libraries=services,clusterer&autoload=false"
+      async
     ></script>
   </head>
   <body>
