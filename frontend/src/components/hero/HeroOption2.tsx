@@ -20,7 +20,7 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
   const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
 
-  const words = "건강한 하루, 당신의 흔적에서 시작됩니다.".split(" ");
+  const words = "편안한 하루, 당신의 흔적에서 시작됩니다.".split(" ");
 
   return (
     <section ref={containerRef} className="relative min-h-[120vh] bg-black overflow-hidden select-none">

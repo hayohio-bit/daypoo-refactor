@@ -65,7 +65,7 @@ export function Footer() {
               Day<span className="text-[#E8A838]">.</span>Poo
             </h2>
             <p className="text-xs sm:text-sm font-bold text-white/30 max-w-sm leading-relaxed">
-              당신의 건강한 일상을 위한 <br className="sm:hidden" /> 가장 귀여운 AI 퍼스널 닥터.
+              당신의 편안한 일상을 위한 <br className="sm:hidden" /> 가장 귀여운 AI 퍼스널 메이트.
             </p>
           </div>
 

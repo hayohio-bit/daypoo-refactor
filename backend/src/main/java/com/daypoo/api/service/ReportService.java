@@ -53,7 +53,7 @@ public class ReportService {
 
   private static final String REPORT_CACHE_KEY_PREFIX = "daypoo:reports:v18:";
 
-  /** AI 건강 리포트 생성 및 조회 */
+  /** AI 컨디션 리포트 생성 및 조회 */
   public HealthReportResponse generateReport(User user, ReportType type) {
     boolean isPremium = user.hasPlan(SubscriptionPlan.PREMIUM);
 
@@ -295,7 +295,7 @@ public class ReportService {
     // 7. DB 영구 저장 (Snapshot)
     saveSnapshot(user, type, response);
 
-    // DAILY 리포트 생성 시 건강왕 랭킹 업데이트
+    // DAILY 리포트 생성 시 쾌변왕 랭킹 업데이트
     if (type == ReportType.DAILY) {
       rankingService.updateHealthRank(user, (double) response.healthScore());
     }
@@ -357,7 +357,7 @@ public class ReportService {
         .collect(Collectors.toList());
   }
 
-  /** 건강 점수 트렌드 조회 (PRO/PREMIUM 전용) */
+  /** 컨디션 점수 트렌드 조회 (PRO/PREMIUM 전용) */
   @Transactional(readOnly = true)
   public List<Integer> getHealthTrend(User user) {
     return snapshotRepository.findByUserOrderByCreatedAtDesc(user).stream()

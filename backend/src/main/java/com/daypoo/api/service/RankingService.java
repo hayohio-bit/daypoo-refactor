@@ -145,7 +145,7 @@ public class RankingService {
       }
       log.info("[Ranking] 지역 랭킹 재구축 완료 (Atomically)");
 
-      // 3. 건강왕 (Health) - 임시 키 사용 후 RENAME
+      // 3. 쾌변왕 (Health) - 임시 키 사용 후 RENAME
       String tempHealthKey = HEALTH_RANK_KEY + ":rebuilding";
       LocalDateTime startOfDay = LocalDateTime.now().with(LocalTime.MIN);
       LocalDateTime endOfDay = LocalDateTime.now().with(LocalTime.MAX);
@@ -157,7 +157,7 @@ public class RankingService {
             .add(tempHealthKey, snapshot.getUser().getId().toString(), snapshot.getHealthScore());
       }
       redisTemplate.rename(tempHealthKey, HEALTH_RANK_KEY);
-      log.info("[Ranking] 건강왕 랭킹 재구축 완료 (Atomically)");
+      log.info("[Ranking] 쾌변왕 랭킹 재구축 완료 (Atomically)");
 
     } catch (Exception e) {
       log.error("[Ranking] 랭킹 재구축 중 오류 발생: {}", e.getMessage(), e);

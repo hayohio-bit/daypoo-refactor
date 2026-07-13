@@ -22,7 +22,7 @@ class ReportService:
         self, request: HealthReportRequest
     ) -> HealthReportResponse:
         """
-        누적된 배변 데이터를 바탕으로 AI 건강 리포트 생성 (DAILY/WEEKLY)
+        누적된 배변 데이터를 바탕으로 AI 컨디션 리포트 생성 (DAILY/WEEKLY)
         """
         logger.info(
             f"Generating health report for user {request.userId} ({request.reportType})..."
@@ -86,7 +86,7 @@ class ReportService:
                 """
 
         prompt = f"""
-        당신은 소화기 건강 전문 AI 분석가입니다. 사용자의 최근 배변 기록을 분석하여 전문적인 건강 리포트를 작성해주세요.
+        당신은 소화기 컨디션 전문 AI 분석가입니다. 사용자의 최근 배변 기록을 분석하여 전문적인 컨디션 리포트를 작성해주세요.
 
         [중요: 실천 가능한 한국 식생활 가이드라인]
         - **대한민국 가정이나 마트(이마트, 컬리 등)에서 흔히 접할 수 있는 식재료를 기반으로 메뉴를 제안하세요.**
@@ -103,13 +103,13 @@ class ReportService:
         분석 시 다음 사항을 고려하세요:
         1. 배변 형태(Bristol Scale)의 변화 추이
         2. 식단 태그와 배변 결과 사이의 상관관계
-        3. 전반적인 건강 점수 (0-100점)
+        3. 전반적인 쾌변 점수 (0-100점)
 
         응답은 반드시 유효한 JSON 형태여야 하며, 다음 필드를 포함해야 합니다:
         - reportType: "{request.reportType}"
-        - healthScore: 분석된 건강 점수 (정수)
+        - healthScore: 분석된 컨디션 점수 (정수)
         - summary: 현재 상태에 대한 2~3문장의 요약 (한국어)
-        - solution: 건강 개선을 위한 일반적인 생활 가이드 (한국어)
+        - solution: 컨디션 개선을 위한 일반적인 생활 가이드 (한국어)
         - premiumSolution: [PREMIUM 전용] 정밀 영양 분석 및 상세 식단표 (마크다운 포함 가능, 한국어)
         - insights: 데이터에서 발견된 주요 통계 및 인사이트 리스트 (한국어)
         - analyzedAt: "{datetime.now().isoformat()}"
@@ -121,26 +121,21 @@ class ReportService:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a professional medical health analyst who provides data-driven gastrointestinal health reports.",
-                    },
-                    {"role": "user", "content": prompt},
+                        "content": prompt,
+                    }
                 ],
                 response_format=HealthReportResponse,
             )
-
-            result = response.choices[0].message.parsed
-            logger.info("Health report generation complete.")
-            return result
-
+            return response.choices[0].message.parsed
         except Exception as e:
-            logger.error(f"Error during health report generation: {str(e)}")
+            logger.error(f"Error calling OpenAI API: {e}")
             raise e
 
     async def generate_monthly_report(
         self, request: HealthReportMonthlyRequest
     ) -> HealthReportResponse:
         """
-        4주 요약 데이터를 바탕으로 MONTHLY 건강 리포트 생성
+        4주 요약 데이터를 바탕으로 MONTHLY 컨디션 리포트 생성
         """
         logger.info(f"Generating MONTHLY health report for user {request.userId}...")
 
@@ -148,7 +143,7 @@ class ReportService:
         summaries_text = "\n".join(
             [
                 f"- {s.weekNumber}주차: {s.recordCount}건, Bristol 평균 {s.avgBristolScale}, "
-                f"건강배변 {s.healthyRatio}%, 주요 식단: {s.topDietTags}, 주요 컨디션: {s.topConditionTags}"
+                f"양호배변 {s.healthyRatio}%, 주요 식단: {s.topDietTags}, 주요 컨디션: {s.topConditionTags}"
                 for s in request.weeklySummaries
             ]
         )
@@ -157,9 +152,9 @@ class ReportService:
         if request.isPremium:
             premium_instruction = """
             - [PREMIUM 전용]: 'premiumSolution'의 첫 줄을 반드시 "### 📅 월간 정밀 트렌드 진단"으로 시작하세요. ('정밀', '진단' 키워드가 반드시 포함되어야 합니다.)
-            - **'주차별 상세 분석' 파트는 반드시 마크다운 표(Table) 형식을 활용하세요.** (열: 주차, 변화 추이/상태 요약, 주요 지표(BS/건강%), 식단 피드백)
+            - **'주차별 상세 분석' 파트는 반드시 마크다운 표(Table) 형식을 활용하세요.** (열: 주차, 변화 추이/상태 요약, 주요 지표(BS/양호%), 식단 피드백)
             - **'장기 맞춤 영양 솔루션' 파트 또한 가독성을 위해 마크다운 표(Table)를 활용하여 목표와 실천 방안을 제시하세요.** (열: 목표 분야, 실천 방안, 기대 효과)
-            - 제목(#), 강조(**), 표(|) 등 마크다운의 모든 기능을 풍성하게 활용하여 '전문 건강 검진 결과지' 느낌을 주어야 합니다. 한식(K-Food) 권장 사항도 잊지 마세요.
+            - 제목(#), 강조(**), 표(|) 등 마크다운의 모든 기능을 풍성하게 활용하여 '전문 컨디션 분석 보고서' 느낌을 주어야 합니다. 한식(K-Food) 권장 사항도 잊지 마세요.
             """
         else:
             premium_instruction = """

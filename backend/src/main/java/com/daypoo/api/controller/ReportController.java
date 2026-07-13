@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Report", description = "AI 건강 리포트 및 방문 로그 API")
+@Tag(name = "Report", description = "AI 컨디션 리포트 및 방문 로그 API")
 @RestController
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
@@ -24,10 +24,10 @@ public class ReportController {
   private final ReportService reportService;
   private final UserService userService;
 
-  /** AI 건강 리포트 조회/생성 */
+  /** AI 컨디션 리포트 조회/생성 */
   @Operation(
       summary = "AI 리포트 생성/조회",
-      description = "타입별(DAILY, WEEKLY, MONTHLY) AI 건강 분석 리포트를 생성하거나 조회합니다.")
+      description = "타입별(DAILY, WEEKLY, MONTHLY) AI 장 컨디션 분석 리포트를 생성하거나 조회합니다.")
   @GetMapping("/{type}")
   public ResponseEntity<HealthReportResponse> getReport(
       @AuthenticationPrincipal String email, @PathVariable ReportType type) {
@@ -36,7 +36,7 @@ public class ReportController {
   }
 
   /** 리포트 히스토리 조회 (PRO/PREMIUM 전용) */
-  @Operation(summary = "리포트 히스토리 조회", description = "사용자의 과거 AI 건강 리포트 내역을 조회합니다.")
+  @Operation(summary = "리포트 히스토리 조회", description = "사용자의 과거 AI 컨디션 리포트 내역을 조회합니다.")
   @GetMapping("/history")
   public ResponseEntity<List<HealthReportHistoryResponse>> getReportHistory(
       @AuthenticationPrincipal String email) {
@@ -47,8 +47,8 @@ public class ReportController {
     return ResponseEntity.ok(reportService.getReportHistory(user));
   }
 
-  /** 건강 점수 트렌드 조회 (PRO/PREMIUM 전용) */
-  @Operation(summary = "건강 점수 트렌드 조회", description = "최근 생성된 리포트들의 건강 점수 추이를 조회합니다.")
+  /** 컨디션 점수 트렌드 조회 (PRO/PREMIUM 전용) */
+  @Operation(summary = "컨디션 점수 트렌드 조회", description = "최근 생성된 리포트들의 컨디션 점수 추이를 조회합니다.")
   @GetMapping("/trend")
   public ResponseEntity<List<Integer>> getHealthTrend(@AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);

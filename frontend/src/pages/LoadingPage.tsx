@@ -96,7 +96,7 @@ export function LoadingPage() {
       {/* Bottom Tip */}
       <div className="absolute bottom-12 text-center px-6 opacity-40">
         <p className="text-[11px] text-[#7a9e8a] font-medium tracking-tight">
-          "오늘의 건강은 어제의 기록으로부터 시작됩니다."
+          "오늘의 컨디션은 어제의 기록으로부터 시작됩니다."
         </p>
       </div>
     </div>

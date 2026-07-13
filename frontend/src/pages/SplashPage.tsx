@@ -104,7 +104,7 @@ export function SplashPage() {
                 variants={fadeUp}
                 className="mt-4 text-lg sm:text-xl md:text-2xl text-white/70"
               >
-                당신의 흔적이 건강이 됩니다
+                당신의 흔적이 습관이 됩니다
               </motion.p>
 
               <motion.div
