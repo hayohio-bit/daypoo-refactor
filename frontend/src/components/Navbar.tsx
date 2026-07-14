@@ -12,7 +12,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
@@ -43,6 +43,19 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
   const [showHealthLog, setShowHealthLog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateNavHeight = () => {
+      if (navRef.current) {
+        const rect = navRef.current.getBoundingClientRect();
+        document.documentElement.style.setProperty('--navbar-bottom', `${rect.bottom + 16}px`);
+      }
+    };
+    updateNavHeight();
+    window.addEventListener('resize', updateNavHeight);
+    return () => window.removeEventListener('resize', updateNavHeight);
+  }, []);
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
@@ -111,6 +124,7 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
   return (
     <>
       <div
+        ref={navRef}
         className="fixed left-1/2 -translate-x-1/2 z-[100] w-full flex justify-center px-4 pointer-events-none"
         style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >

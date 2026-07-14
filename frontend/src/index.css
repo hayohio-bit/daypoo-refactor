@@ -21,6 +21,7 @@
 }
 
 :root {
+  --navbar-bottom: 7rem;
   --green-deep: #1b4332;
   --green-mid: #2d6a4f;
   --amber: #e8a838;

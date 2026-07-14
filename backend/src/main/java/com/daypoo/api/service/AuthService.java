@@ -45,6 +45,25 @@ public class AuthService {
   private final ItemRepository itemRepository;
   private final AdminSettingsService adminSettingsService;
 
+  @org.springframework.beans.factory.annotation.Value("${app.admin.emails:admin@admin.com}")
+  private String adminEmailsString;
+
+  private java.util.Set<String> getAdminEmails() {
+    if (adminEmailsString == null || adminEmailsString.trim().isEmpty()) {
+      return java.util.Collections.emptySet();
+    }
+    return java.util.Arrays.stream(adminEmailsString.split(","))
+        .map(String::trim)
+        .collect(java.util.stream.Collectors.toSet());
+  }
+
+  private Role determineRole(String email) {
+    if (email != null && getAdminEmails().contains(email.trim())) {
+      return Role.ROLE_ADMIN;
+    }
+    return Role.ROLE_USER;
+  }
+
   @Transactional
   public TokenResponse socialSignUp(SocialSignUpRequest request) {
     if (!adminSettingsService.isSignupEnabled()) {
@@ -70,12 +89,17 @@ public class AuthService {
       throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
     }
 
+    Role targetRole = determineRole(email);
+    if (Role.ROLE_ADMIN.name().equals(roleClaim)) {
+      targetRole = Role.ROLE_ADMIN;
+    }
+
     User user =
         User.builder()
             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
             .email(email)
             .nickname(request.nickname())
-            .role(Role.valueOf(roleClaim))
+            .role(targetRole)
             .build();
 
     userRepository.save(user);
@@ -190,12 +214,14 @@ public class AuthService {
     checkEmailDuplicate(request.email());
     checkNicknameDuplicate(request.nickname());
 
+    Role targetRole = determineRole(request.email());
+
     User user =
         User.builder()
             .password(passwordEncoder.encode(request.password()))
             .email(request.email())
             .nickname(request.nickname())
-            .role(Role.ROLE_USER)
+            .role(targetRole)
             .build();
 
     userRepository.save(user);
@@ -256,6 +282,15 @@ public class AuthService {
                   log.debug("[Auth] login failed - user not found: email={}", request.email());
                   return new BusinessException(ErrorCode.USER_NOT_FOUND);
                 });
+
+    // 어드민 이메일에 포함되어 있다면 로그인 시점에 강제 승격
+    Role targetRole = determineRole(user.getEmail());
+    if (targetRole == Role.ROLE_ADMIN && user.getRole() != Role.ROLE_ADMIN) {
+      user.updateRole(Role.ROLE_ADMIN);
+      userRepository.save(user);
+      log.info(
+          "User {} promoted to ROLE_ADMIN via admin emails config during login", user.getEmail());
+    }
 
     log.debug("[Auth] BCrypt.matches() 시작: email={}", request.email());
     long bcryptStart = System.currentTimeMillis();
@@ -353,7 +388,10 @@ public class AuthService {
             .findByEmail(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-    String newAccessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
+    Role targetRole = determineRole(user.getEmail());
+    String responseRole =
+        (targetRole == Role.ROLE_ADMIN) ? Role.ROLE_ADMIN.name() : user.getRole().name();
+    String newAccessToken = jwtProvider.createAccessToken(user.getEmail(), responseRole);
 
     return TokenResponse.builder().accessToken(newAccessToken).refreshToken(refreshToken).build();
   }
