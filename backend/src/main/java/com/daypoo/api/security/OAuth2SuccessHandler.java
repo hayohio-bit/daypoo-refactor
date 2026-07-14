@@ -26,6 +26,22 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   @org.springframework.beans.factory.annotation.Value("${app.frontend.url}")
   private String frontendUrl;
 
+  @org.springframework.beans.factory.annotation.Value("${app.admin.emails:admin@admin.com}")
+  private String adminEmailsString;
+
+  private java.util.Set<String> getAdminEmails() {
+    if (adminEmailsString == null || adminEmailsString.trim().isEmpty()) {
+      return java.util.Collections.emptySet();
+    }
+    return java.util.Arrays.stream(adminEmailsString.split(","))
+        .map(String::trim)
+        .collect(java.util.stream.Collectors.toSet());
+  }
+
+  private boolean isAdminEmail(String email) {
+    return email != null && getAdminEmails().contains(email.trim());
+  }
+
   @Override
   public void onAuthenticationSuccess(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -66,7 +82,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     Optional<User> optionalUser = userRepository.findByEmail(email);
     if (optionalUser.isPresent()) {
       User user = optionalUser.get();
-      // 기존 회원: 로그인 처리
+      // 기존 회원이고 어드민 이메일에 해당하는데 ROLE_ADMIN이 아니면 승격
+      if (isAdminEmail(email) && user.getRole() != com.daypoo.api.entity.enums.Role.ROLE_ADMIN) {
+        user.updateRole(com.daypoo.api.entity.enums.Role.ROLE_ADMIN);
+        userRepository.save(user);
+        log.info("Social user {} promoted to ROLE_ADMIN via admin emails config during oauth2 login", email);
+      }
+
       String accessToken = jwtProvider.createAccessToken(email, user.getRole().name());
       String refreshToken = jwtProvider.createRefreshToken(email);
 
@@ -80,7 +102,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
       log.info("Existing OAuth2 User Login Success! Redirecting with authCode: {}", authCode);
     } else {
       // 신규 회원: 닉네임 설정 페이지로 유도
-      String registrationToken = jwtProvider.createRegistrationToken(email, "ROLE_USER");
+      String registrationRole = isAdminEmail(email) ? "ROLE_ADMIN" : "ROLE_USER";
+      String registrationToken = jwtProvider.createRegistrationToken(email, registrationRole);
       targetUrl = frontendUrl + "/signup/social?registration_token=" + registrationToken;
       log.info("New OAuth2 User Detected! Redirecting to nickname setup: {}", targetUrl);
     }
