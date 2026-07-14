@@ -86,7 +86,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
       if (isAdminEmail(email) && user.getRole() != com.daypoo.api.entity.enums.Role.ROLE_ADMIN) {
         user.updateRole(com.daypoo.api.entity.enums.Role.ROLE_ADMIN);
         userRepository.save(user);
-        log.info("Social user {} promoted to ROLE_ADMIN via admin emails config during oauth2 login", email);
+        log.info(
+            "Social user {} promoted to ROLE_ADMIN via admin emails config during oauth2 login",
+            email);
       }
 
       String accessToken = jwtProvider.createAccessToken(email, user.getRole().name());

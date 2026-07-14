@@ -288,7 +288,8 @@ public class AuthService {
     if (targetRole == Role.ROLE_ADMIN && user.getRole() != Role.ROLE_ADMIN) {
       user.updateRole(Role.ROLE_ADMIN);
       userRepository.save(user);
-      log.info("User {} promoted to ROLE_ADMIN via admin emails config during login", user.getEmail());
+      log.info(
+          "User {} promoted to ROLE_ADMIN via admin emails config during login", user.getEmail());
     }
 
     log.debug("[Auth] BCrypt.matches() 시작: email={}", request.email());
@@ -388,7 +389,8 @@ public class AuthService {
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
     Role targetRole = determineRole(user.getEmail());
-    String responseRole = (targetRole == Role.ROLE_ADMIN) ? Role.ROLE_ADMIN.name() : user.getRole().name();
+    String responseRole =
+        (targetRole == Role.ROLE_ADMIN) ? Role.ROLE_ADMIN.name() : user.getRole().name();
     String newAccessToken = jwtProvider.createAccessToken(user.getEmail(), responseRole);
 
     return TokenResponse.builder().accessToken(newAccessToken).refreshToken(refreshToken).build();
