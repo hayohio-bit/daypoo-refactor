@@ -1,7 +1,7 @@
+import { motion } from 'framer-motion';
+import { AlertCircle, Home, RefreshCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Home, RefreshCcw, AlertCircle } from 'lucide-react';
 
 // ── FuzzyText (NotFoundPage와 동일한 컴포넌트) ──────────────────
 interface FuzzyTextProps {
@@ -111,7 +111,17 @@ function FuzzyText({
           const xBase = getXBase(off.width);
           for (let j = 0; j < lineH; j++) {
             const dx = Math.floor(intensity * (Math.random() - 0.5) * fuzzRange);
-            ctx.drawImage(off.canvas, 0, j, off.canvas.width, 1, xBase + dx, yBase + j, off.canvas.width, 1);
+            ctx.drawImage(
+              off.canvas,
+              0,
+              j,
+              off.canvas.width,
+              1,
+              xBase + dx,
+              yBase + j,
+              off.canvas.width,
+              1,
+            );
           }
         });
         raf = requestAnimationFrame(run);
@@ -119,8 +129,12 @@ function FuzzyText({
       run();
 
       if (enableHover) {
-        const onEnter = () => { hovering = true; };
-        const onLeave = () => { hovering = false; };
+        const onEnter = () => {
+          hovering = true;
+        };
+        const onLeave = () => {
+          hovering = false;
+        };
         canvas.addEventListener('mouseenter', onEnter);
         canvas.addEventListener('mouseleave', onLeave);
         return () => {
@@ -136,15 +150,37 @@ function FuzzyText({
       cancelAnimationFrame(raf);
       cleanup?.then?.((fn) => fn?.());
     };
-  }, [text, fontSize, fontWeight, fontFamily, color, lineHeight, align, baseIntensity, hoverIntensity, enableHover, fuzzRange, containerWidth]);
+  }, [
+    text,
+    fontSize,
+    fontWeight,
+    fontFamily,
+    color,
+    lineHeight,
+    align,
+    baseIntensity,
+    hoverIntensity,
+    enableHover,
+    fuzzRange,
+    containerWidth,
+  ]);
 
   return (
     <div
       ref={containerRef}
       className={className}
-      style={{ display: 'inline-block', width: 'fit-content', maxWidth: '100%', position: 'relative', ...style }}
+      style={{
+        display: 'inline-block',
+        width: 'fit-content',
+        maxWidth: '100%',
+        position: 'relative',
+        ...style,
+      }}
     >
-      <canvas ref={canvasRef} style={{ display: 'block', cursor: enableHover ? 'pointer' : 'default' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'block', cursor: enableHover ? 'pointer' : 'default' }}
+      />
     </div>
   );
 }
@@ -166,7 +202,8 @@ export function ServerErrorPage() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 55% 45% at 50% 50%, rgba(232,93,93,0.1) 0%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse 55% 45% at 50% 50%, rgba(232,93,93,0.1) 0%, transparent 70%)',
         }}
       />
 
@@ -190,7 +227,6 @@ export function ServerErrorPage() {
 
       {/* 메인 콘텐츠 */}
       <div className="relative z-10 flex flex-col items-center text-center px-6">
-
         {/* 500 — FuzzyText 글리치 (에러 레드로 설정) */}
         <div style={{ marginBottom: '0px' }}>
           <FuzzyText
@@ -236,7 +272,8 @@ export function ServerErrorPage() {
             marginBottom: '32px',
           }}
         >
-          일시적인 서버 장애로 요청을 처리할 수 없습니다.<br />
+          일시적인 서버 장애로 요청을 처리할 수 없습니다.
+          <br />
           잠시 후 다시 시도해 주시거나 홈으로 돌아가주세요.
         </motion.p>
 

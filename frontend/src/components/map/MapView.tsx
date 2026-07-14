@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   memo,
 } from 'react';
-import { ToiletData } from '../../types/toilet';
+import type { ToiletData } from '../../types/toilet';
 
 declare global {
   interface Window {
@@ -139,7 +139,9 @@ export const MapView = memo(
           if (!window.kakao?.maps) {
             if (retryCount++ >= MAX_SDK_RETRIES) {
               // SDK 로드 실패 (네트워크 오류, iOS PWA 등) — 무한 루프 방지
-              console.error('[MapView] Kakao Maps SDK 로드 타임아웃. 네트워크 연결을 확인해 주세요.');
+              console.error(
+                '[MapView] Kakao Maps SDK 로드 타임아웃. 네트워크 연결을 확인해 주세요.',
+              );
               return;
             }
             setTimeout(initMap, 100);

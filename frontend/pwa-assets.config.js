@@ -1,4 +1,4 @@
-import { defineConfig, minimalPreset } from '@vite-pwa/assets-generator/config'
+import { defineConfig, minimalPreset } from '@vite-pwa/assets-generator/config';
 
 export default defineConfig({
   preset: {
@@ -9,4 +9,4 @@ export default defineConfig({
     },
   },
   images: ['public/icons/icon.svg'],
-})
+});

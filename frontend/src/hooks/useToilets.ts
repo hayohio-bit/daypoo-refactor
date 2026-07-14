@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useToiletContext } from '../context/ToiletContext';
 
 interface UseToiletsOptions {
@@ -72,4 +72,3 @@ export function useToilets({
 
   return { toilets, loading, error, toggleFavorite, markVisited, refetch: triggerFetch };
 }
-

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
-import { MapPin, Brain, Star } from 'lucide-react';
+import { Brain, MapPin, Star } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 interface StatConfig {
@@ -16,7 +16,7 @@ interface StatConfig {
 const STATS: StatConfig[] = [
   {
     target: 72000,
-    format: (v) => v >= 1000 ? `${Math.round(v / 1000)}천+` : `${v}`,
+    format: (v) => (v >= 1000 ? `${Math.round(v / 1000)}천+` : `${v}`),
     label: '전국 화장실 지도',
     desc: '공공데이터 기반\n실시간 위치 정보',
     icon: <MapPin size={22} />,
@@ -24,7 +24,7 @@ const STATS: StatConfig[] = [
   },
   {
     target: 31400,
-    format: (v) => v >= 1000 ? `${((v / 1000) / 10).toFixed(1)}만+` : `${v}`,
+    format: (v) => (v >= 1000 ? `${(v / 1000 / 10).toFixed(1)}만+` : `${v}`),
     label: '누적 분석 데이터',
     desc: 'AI 분석을 위한 거대 데이터셋',
     icon: <Brain size={22} />,
@@ -41,12 +41,7 @@ const STATS: StatConfig[] = [
 ];
 
 // ── 카운트업 Hook ─────────────────────────────────────────────────────
-function useCountUp(
-  target: number,
-  format: (v: number) => string,
-  inView: boolean,
-  delay = 0
-) {
+function useCountUp(target: number, format: (v: number) => string, inView: boolean, delay = 0) {
   const motionVal = useMotionValue(0);
   const spring = useSpring(motionVal, { stiffness: 45, damping: 18 });
   const [display, setDisplay] = useState('0');
@@ -65,10 +60,16 @@ function useCountUp(
 }
 
 // ── 플로팅 글래스 필러 카드 ──────────────────────────────────────────────
-function GlassPillarCard({ 
-  stat, inView, delay, isCenter = false 
-}: { 
-  stat: StatConfig, inView: boolean, delay: number, isCenter?: boolean
+function GlassPillarCard({
+  stat,
+  inView,
+  delay,
+  isCenter = false,
+}: {
+  stat: StatConfig;
+  inView: boolean;
+  delay: number;
+  isCenter?: boolean;
 }) {
   const display = useCountUp(stat.target, stat.format, inView, delay);
 
@@ -82,33 +83,37 @@ function GlassPillarCard({
       style={{ zIndex: isCenter ? 20 : 10 }}
     >
       {/* 카드 본체 (Glassmorphism) */}
-      <div className="relative w-full rounded-[48px] overflow-hidden p-8 md:p-10 flex flex-col items-center text-center transition-all duration-700"
-        style={{ 
-        background: 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+      <div
+        className="relative w-full rounded-[48px] overflow-hidden p-8 md:p-10 flex flex-col items-center text-center transition-all duration-700"
+        style={{
+          background: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           border: '1.5px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: isCenter 
-            ? '0 30px 60px rgba(0,0,0,0.06), inset 0 0 20px rgba(255,255,255,0.2)' 
+          boxShadow: isCenter
+            ? '0 30px 60px rgba(0,0,0,0.06), inset 0 0 20px rgba(255,255,255,0.2)'
             : '0 20px 40px rgba(0,0,0,0.04)',
           height: 'auto',
           minHeight: isCenter ? '380px' : '340px',
         }}
       >
         {/* 내부 글로우 (Hover 시 활성화) */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
           style={{
             background: `radial-gradient(circle at center, ${stat.color}15 0%, transparent 80%)`,
           }}
         />
 
         {/* 아이콘 서클 */}
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mb-8 relative"
-          style={{ 
-            background: '#fff', 
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center mb-8 relative"
+          style={{
+            background: '#fff',
             boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-            border: `1px solid ${stat.color}20`
-          }}>
+            border: `1px solid ${stat.color}20`,
+          }}
+        >
           <div className="absolute inset-0 rounded-full opacity-10 bg-[#1B4332]" />
           <div style={{ color: stat.color }}>{stat.icon}</div>
         </div>
@@ -118,8 +123,10 @@ function GlassPillarCard({
           <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-4 text-[#1B4332]">
             {stat.label}
           </h4>
-          <span className="font-black tracking-[-0.05em] block leading-none text-[#1B4332] mb-4"
-            style={{ fontSize: isCenter ? '64px' : '52px' }}>
+          <span
+            className="font-black tracking-[-0.05em] block leading-none text-[#1B4332] mb-4"
+            style={{ fontSize: isCenter ? '64px' : '52px' }}
+          >
             {display}
           </span>
           <p className="text-sm font-bold text-[#1B4332] leading-relaxed max-w-[180px] whitespace-pre-line">
@@ -132,7 +139,8 @@ function GlassPillarCard({
       </div>
 
       {/* 바닥 그림자 (Shadow reflecting distance) */}
-      <div className="mt-8 transition-all duration-500 group-hover:scale-110 group-hover:opacity-40"
+      <div
+        className="mt-8 transition-all duration-500 group-hover:scale-110 group-hover:opacity-40"
         style={{
           width: '60%',
           height: '10px',
@@ -156,30 +164,44 @@ export function BlobStatsSection() {
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <motion.div
           className="absolute top-1/4 left-1/4 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(82,183,136,0.08) 0%, transparent 70%)', filter: 'blur(40px)' }}
-          animate={inView ? {
-            x: [0, 40, -20, 0],
-            y: [0, -30, 40, 0],
-            scale: [1, 1.05, 0.95, 1],
-          } : {}}
+          style={{
+            background: 'radial-gradient(circle, rgba(82,183,136,0.08) 0%, transparent 70%)',
+            filter: 'blur(40px)',
+          }}
+          animate={
+            inView
+              ? {
+                  x: [0, 40, -20, 0],
+                  y: [0, -30, 40, 0],
+                  scale: [1, 1.05, 0.95, 1],
+                }
+              : {}
+          }
           transition={{
             duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut"
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
           }}
         />
         <motion.div
           className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(232,168,56,0.06) 0%, transparent 70%)', filter: 'blur(40px)' }}
-          animate={inView ? {
-            x: [0, -30, 30, 0],
-            y: [0, 40, -30, 0],
-            scale: [1, 0.95, 1.05, 1],
-          } : {}}
+          style={{
+            background: 'radial-gradient(circle, rgba(232,168,56,0.06) 0%, transparent 70%)',
+            filter: 'blur(40px)',
+          }}
+          animate={
+            inView
+              ? {
+                  x: [0, -30, 30, 0],
+                  y: [0, 40, -30, 0],
+                  scale: [1, 0.95, 1.05, 1],
+                }
+              : {}
+          }
           transition={{
             duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
           }}
         />
       </div>

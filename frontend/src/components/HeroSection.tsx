@@ -1,13 +1,12 @@
-import { m, animate, AnimatePresence } from 'framer-motion';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Activity, MapPin, Sparkles, TrendingUp, Zap, ChevronRight } from 'lucide-react';
+import { AnimatePresence, animate, m } from 'framer-motion';
+import { Activity, ChevronRight, MapPin, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import WaveButton from './WaveButton';
 import { useAuth } from '../context/AuthContext';
-import { TimelineSteps } from './TimelineSteps';
 import { BlobStatsSection } from './BlobStatsSection';
+import { TimelineSteps } from './TimelineSteps';
+import WaveButton from './WaveButton';
 import { WaveDivider } from './WaveDivider';
-
 
 // Premium Rolling Counter Component
 function RollingCounter({
@@ -76,7 +75,7 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
 
   // [P5] isMobile lazy initializer — 첫 렌더에서 올바른 값으로 초기화 (깜박임 방지)
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false,
   );
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -265,7 +264,11 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
                         <m.div
                           className="w-3 h-3 rounded bg-emerald-400"
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                          transition={{
+                            duration: 4,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: 'linear',
+                          }}
                           style={{ willChange: 'transform' }}
                         />
                       </div>
@@ -290,7 +293,7 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
                         transition={{
                           duration: dot.speed,
                           delay: dot.delay,
-                          repeat: Infinity,
+                          repeat: Number.POSITIVE_INFINITY,
                           ease: 'linear',
                         }}
                       />
@@ -303,7 +306,11 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
                         className="absolute text-[8px] font-black uppercase tracking-wider text-emerald-400/40 pointer-events-none z-20"
                         style={{ left: label.x, top: label.y }}
                         animate={{ opacity: [0, 0.8, 0] }}
-                        transition={{ duration: 4, delay: label.delay, repeat: Infinity }}
+                        transition={{
+                          duration: 4,
+                          delay: label.delay,
+                          repeat: Number.POSITIVE_INFINITY,
+                        }}
                       >
                         {label.text}
                       </m.span>
@@ -328,7 +335,7 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
                     {locationName}
                     <m.span
                       animate={{ opacity: [0, 1, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                       className="text-emerald-400 text-[10px]"
                     >
                       CURRENT

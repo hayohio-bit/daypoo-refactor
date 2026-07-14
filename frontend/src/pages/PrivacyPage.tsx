@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function PrivacyPage() {
   const navigate = useNavigate();
@@ -29,10 +29,17 @@ export function PrivacyPage() {
 
           <div className="space-y-6 text-[#1A2B27]/70 leading-relaxed text-sm">
             <section>
-              <h2 className="text-lg font-bold text-[#1A2B27] mb-3">개인정보의 수집 및 이용 목적</h2>
-              <p>DayPoo(이하 "서비스")는 이용자의 개인정보를 다음의 목적을 위해 수집하고 이용합니다.</p>
+              <h2 className="text-lg font-bold text-[#1A2B27] mb-3">
+                개인정보의 수집 및 이용 목적
+              </h2>
+              <p>
+                DayPoo(이하 "서비스")는 이용자의 개인정보를 다음의 목적을 위해 수집하고 이용합니다.
+              </p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>서비스 제공 및 관리: 회원 가입 의사 확인, 본인 식별 및 인증, 회원 자격 유지 관리 등</li>
+                <li>
+                  서비스 제공 및 관리: 회원 가입 의사 확인, 본인 식별 및 인증, 회원 자격 유지 관리
+                  등
+                </li>
                 <li>마케팅 및 광고에의 활용: 신규 서비스 및 이벤트 정보 안내 등 (선택 시)</li>
               </ul>
             </section>
@@ -44,8 +51,14 @@ export function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-[#1A2B27] mb-3">개인정보의 보유 및 이용 기간</h2>
-              <p>이용자의 개인정보는 원칙적으로 개인정보의 수집 및 이용 목적이 달성되면 지체없이 파기합니다. 단, 관계 법령의 규정에 의하여 보존할 필요가 있는 경우 관련 법령에서 정한 일정 기간 동안 보관합니다.</p>
+              <h2 className="text-lg font-bold text-[#1A2B27] mb-3">
+                개인정보의 보유 및 이용 기간
+              </h2>
+              <p>
+                이용자의 개인정보는 원칙적으로 개인정보의 수집 및 이용 목적이 달성되면 지체없이
+                파기합니다. 단, 관계 법령의 규정에 의하여 보존할 필요가 있는 경우 관련 법령에서 정한
+                일정 기간 동안 보관합니다.
+              </p>
             </section>
 
             <div className="pt-10 border-t border-[#d4e8db] text-[10px]">

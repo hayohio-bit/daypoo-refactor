@@ -8,7 +8,7 @@
  * 주의: 무거운 페이지 컴포넌트를 실제로 렌더링하지 않고
  *       named export 존재 여부만 검증하여 테스트 속도를 보장합니다.
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // ─────────────────────────────────────────────────────────────────
 // [P2] 페이지 모듈 named export 검증 (dynamic import 분리 전제 조건)
@@ -62,7 +62,7 @@ describe('[P9] AdminRoute 디버그 console 제거 검증', () => {
     const source = fs.readFileSync(filePath, 'utf-8');
 
     expect(source).not.toContain('[AdminRoute] Debug');
-    expect(source).not.toContain('console.log(\'[AdminRoute]');
+    expect(source).not.toContain("console.log('[AdminRoute]");
     expect(source).not.toContain("console.error('[AdminRoute]");
   });
 });

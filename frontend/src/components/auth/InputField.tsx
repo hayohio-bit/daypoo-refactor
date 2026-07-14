@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
 interface InputFieldProps {
   label: string;
@@ -16,28 +17,41 @@ interface InputFieldProps {
 }
 
 export function InputField({
-  label, type = 'text', value, onChange, placeholder,
-  error, hint, autoComplete, rightEl, maxLength,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  error,
+  hint,
+  autoComplete,
+  rightEl,
+  maxLength,
 }: InputFieldProps) {
   const [focused, setFocused] = useState(false);
   return (
     <div className="flex flex-col gap-1.5 text-left">
-      <label className="text-xs font-bold"
-        style={{ color: 'rgba(26,43,39,0.5)', letterSpacing: '0.06em' }}>
+      <label
+        className="text-xs font-bold"
+        style={{ color: 'rgba(26,43,39,0.5)', letterSpacing: '0.06em' }}
+      >
         {label}
       </label>
-      <div className="relative flex items-center rounded-xl transition-all duration-200"
+      <div
+        className="relative flex items-center rounded-xl transition-all duration-200"
         style={{
           background: focused ? '#fff' : '#f8faf9',
           border: error
             ? '1.5px solid rgba(232,93,93,0.55)'
             : focused
-            ? '1.5px solid rgba(232,168,56,0.6)'
-            : '1.5px solid rgba(26,43,39,0.08)',
+              ? '1.5px solid rgba(232,168,56,0.6)'
+              : '1.5px solid rgba(26,43,39,0.08)',
           boxShadow: focused ? '0 0 0 4px rgba(232,168,56,0.08)' : 'none',
-        }}>
+        }}
+      >
         <input
-          type={type} value={value}
+          type={type}
+          value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -51,13 +65,21 @@ export function InputField({
       </div>
       <AnimatePresence>
         {error && (
-          <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="flex items-center gap-1.5 text-xs font-medium" style={{ color: '#E85D5D' }}>
-            <AlertCircle size={11} />{error}
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-1.5 text-xs font-medium"
+            style={{ color: '#E85D5D' }}
+          >
+            <AlertCircle size={11} />
+            {error}
           </motion.p>
         )}
         {!error && hint && (
-          <p className="text-xs" style={{ color: 'rgba(26,43,39,0.35)' }}>{hint}</p>
+          <p className="text-xs" style={{ color: 'rgba(26,43,39,0.35)' }}>
+            {hint}
+          </p>
         )}
       </AnimatePresence>
     </div>

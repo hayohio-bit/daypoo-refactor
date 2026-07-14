@@ -1,14 +1,14 @@
-import React, { useRef, MouseEvent } from 'react';
 import {
   motion,
+  useMotionTemplate,
+  useMotionValue,
   useScroll,
   useSpring,
   useTransform,
-  useMotionTemplate,
-  useMotionValue,
 } from 'framer-motion';
+import { ArrowRight, Brain, MapPin, Sparkles, Zap } from 'lucide-react';
+import React, { useRef, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Zap, Brain, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Step {

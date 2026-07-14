@@ -1,29 +1,29 @@
-import { m, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, m, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import {
   Bell,
-  User,
-  LogOut,
-  Menu,
-  X,
-  Map,
-  Trophy,
-  HelpCircle,
   Crown,
+  HelpCircle,
   Home,
+  LogOut,
+  Map,
+  Menu,
   Plus,
+  Trophy,
+  User,
+  X,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { AnimatedUnderlink } from './AnimatedUnderlink';
-import WaveButton from './WaveButton';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { NotificationPanel } from './NotificationPanel';
-import { HealthLogModal, HealthLogResult } from './map/HealthLogModal';
-import { api } from '../services/apiClient';
-import { HealthRecordRequest } from '../types/api';
 import { useTransitionContext } from '../context/TransitionContext';
 import { isTouchDevice } from '../hooks/useIsTouchDevice';
+import { api } from '../services/apiClient';
+import type { HealthRecordRequest } from '../types/api';
+import { AnimatedUnderlink } from './AnimatedUnderlink';
+import { NotificationPanel } from './NotificationPanel';
+import WaveButton from './WaveButton';
+import { HealthLogModal, type HealthLogResult } from './map/HealthLogModal';
 
 const NAV_LINKS = [
   { label: '지도', path: '/map', icon: Map, variant: 0 },
@@ -110,7 +110,7 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
 
   return (
     <>
-      <div 
+      <div
         className="fixed left-1/2 -translate-x-1/2 z-[100] w-full flex justify-center px-4 pointer-events-none"
         style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
@@ -265,7 +265,7 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
               className="fixed top-0 right-0 z-[151] w-[280px] h-full flex flex-col md:hidden bg-gradient-to-b from-[#1A2B27] to-[#0F1D19] shadow-[-8px_0_40px_rgba(0,0,0,0.3)]"
             >
               {/* 드로어 헤더 */}
-              <div 
+              <div
                 className="flex items-center justify-between px-6 pb-4"
                 style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
               >
@@ -290,10 +290,11 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                     setDrawerOpen(false);
                     navigate('/main');
                   }}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${isActivePath('/main')
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${
+                    isActivePath('/main')
                       ? 'bg-white/10 text-white'
                       : 'text-white/60 active:bg-white/5 active:text-white/80'
-                    }`}
+                  }`}
                 >
                   <Home size={20} />
                   <span className="text-[15px] font-bold">홈</span>
@@ -312,10 +313,11 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                           navigate(link.path);
                         }
                       }}
-                      className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${isActivePath(link.path)
+                      className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${
+                        isActivePath(link.path)
                           ? 'bg-white/10 text-white'
                           : 'text-white/60 active:bg-white/5 active:text-white/80'
-                        }`}
+                      }`}
                     >
                       <Icon size={20} />
                       <span className="text-[15px] font-bold">{link.label}</span>
@@ -332,10 +334,11 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                       setDrawerOpen(false);
                       navigate('/mypage');
                     }}
-                    className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${isActivePath('/mypage')
+                    className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${
+                      isActivePath('/mypage')
                         ? 'bg-white/10 text-white'
                         : 'text-white/60 active:bg-white/5 active:text-white/80'
-                      }`}
+                    }`}
                   >
                     <User size={20} />
                     <span className="text-[15px] font-bold">마이페이지</span>
@@ -364,10 +367,11 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                     setDrawerOpen(false);
                     navigate('/premium');
                   }}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${isActivePath('/premium')
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${
+                    isActivePath('/premium')
                       ? 'bg-white/10 text-white'
                       : 'text-white/60 active:bg-white/5 active:text-white/80'
-                    }`}
+                  }`}
                 >
                   <Crown size={20} />
                   <span className="text-[15px] font-bold">프리미엄</span>

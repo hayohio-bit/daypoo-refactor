@@ -1,9 +1,9 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight, Clock, Loader2, MapPin, Maximize2, Navigation, Search } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Maximize2, Navigation, Clock, Search, MapPin, ChevronRight, Loader2 } from 'lucide-react';
 import { useToilets } from '../hooks/useToilets';
-import { ToiletData } from '../types/toilet';
+import type { ToiletData } from '../types/toilet';
 
 declare global {
   interface Window {
@@ -17,7 +17,7 @@ export function MapSection() {
   // [P6] marker overlay + handler key 함께 보관 (clearMarkers 시 전역 핸들러 정제 위해)
   const markersRef = useRef<{ overlay: any; handlerKey: string }[]>([]);
   const navigate = useNavigate();
-  
+
   const [selectedToilet, setSelectedToilet] = useState<ToiletData | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5666, lng: 126.9784 });
@@ -27,7 +27,7 @@ export function MapSection() {
     lat: mapCenter.lat,
     lng: mapCenter.lng,
     radius: 1000,
-    bounds: mapBounds
+    bounds: mapBounds,
   });
 
   // [P6] clearMarkers: overlay 해제 + 전역 핸들러 정리
@@ -45,7 +45,7 @@ export function MapSection() {
     window.kakao.maps.load(() => {
       if (!mapRef.current || mapInstance.current) return;
       mapRef.current.innerHTML = '';
-      
+
       const initMap = (lat: number, lng: number) => {
         if (mapInstance.current) return;
         const center = new window.kakao.maps.LatLng(lat, lng);
@@ -71,8 +71,10 @@ export function MapSection() {
           const sw = bounds.getSouthWest();
           const ne = bounds.getNorthEast();
           setMapBounds({
-            swLat: sw.getLat(), swLng: sw.getLng(),
-            neLat: ne.getLat(), neLng: ne.getLng(),
+            swLat: sw.getLat(),
+            swLng: sw.getLng(),
+            neLat: ne.getLat(),
+            neLng: ne.getLng(),
           });
           const centerPos = map.getCenter();
           setMapCenter({ lat: centerPos.getLat(), lng: centerPos.getLng() });
@@ -85,7 +87,9 @@ export function MapSection() {
       initMap(37.5666, 126.9784);
     });
 
-    return () => { mapInstance.current = null; };
+    return () => {
+      mapInstance.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -138,10 +142,13 @@ export function MapSection() {
   }, [toilets, clearMarkers]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-12 pt-4 sm:pt-40 pb-20 sm:pb-56 relative overflow-hidden" style={{ background: '#F8FAF9' }}>
+    <section
+      className="px-4 sm:px-6 md:px-12 pt-4 sm:pt-40 pb-20 sm:pb-56 relative overflow-hidden"
+      style={{ background: '#F8FAF9' }}
+    >
       {/* 배경 장식 원 */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#1B4332]/[0.02] rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-      
+
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -153,14 +160,18 @@ export function MapSection() {
           <div className="flex flex-col items-center gap-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1B4332]/[0.05] border border-[#1B4332]/[0.1] shadow-sm">
               <MapPin size={14} className="text-[#1B4332]" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#1B4332]">Local Explorer</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#1B4332]">
+                Local Explorer
+              </span>
             </div>
             <h2 className="text-xl sm:text-4xl md:text-6xl font-black text-[#1A2B27] tracking-tight leading-[1.1]">
               내 주변 <span className="text-[#1B4332]">화장실 지도</span>
             </h2>
             <p className="text-[13px] sm:text-lg md:text-xl text-[#1A2B27]/50 max-w-2xl mx-auto leading-relaxed">
-              지금 바로 당신 곁의 가장 쾌적한 공간을 확인하세요.<br className="hidden md:block" />
-              <span className="font-bold text-[#1B4332]">실시간 데이터</span>를 기반으로 가장 가까운 대안을 제시합니다.
+              지금 바로 당신 곁의 가장 쾌적한 공간을 확인하세요.
+              <br className="hidden md:block" />
+              <span className="font-bold text-[#1B4332]">실시간 데이터</span>를 기반으로 가장 가까운
+              대안을 제시합니다.
             </p>
           </div>
         </motion.div>
@@ -170,34 +181,41 @@ export function MapSection() {
           <motion.div
             initial={{ opacity: 0, scale: 0.92, filter: 'blur(12px)' }}
             whileInView={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-            viewport={{ once: true, amount: 0.4, margin: "-120px" }}
+            viewport={{ once: true, amount: 0.4, margin: '-120px' }}
             transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="lg:col-span-8 relative group"
-            style={{ 
-              borderRadius: '32px', 
-              overflow: 'hidden', 
+            style={{
+              borderRadius: '32px',
+              overflow: 'hidden',
               border: '1px solid rgba(26,43,39,0.08)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.08)' 
+              boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
             }}
           >
             <div ref={mapRef} className="h-[450px] md:h-[580px] w-full" />
-            
+
             {/* 데이터 로딩 표시 */}
             <AnimatePresence>
               {(loading || !mapLoaded) && (
-                <motion.div 
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center z-20" 
-                  style={{ backgroundColor: 'rgba(248, 250, 249, 0.7)', backdropFilter: 'blur(8px)' }}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex flex-col items-center justify-center z-20"
+                  style={{
+                    backgroundColor: 'rgba(248, 250, 249, 0.7)',
+                    backdropFilter: 'blur(8px)',
+                  }}
                 >
-                  <motion.div 
-                    animate={{ rotate: 360 }} 
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }} 
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
                     className="mb-4"
                   >
                     <Loader2 size={40} className="text-[#1B4332]" />
                   </motion.div>
-                  <p className="text-sm font-bold text-[#1B4332]/60 animate-pulse">지도를 불러오고 있어요</p>
+                  <p className="text-sm font-bold text-[#1B4332]/60 animate-pulse">
+                    지도를 불러오고 있어요
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -207,11 +225,13 @@ export function MapSection() {
               {[
                 { label: '24시간 개방', color: '#1B4332' },
                 { label: '현재 운영 중', color: '#D4922A' },
-                { label: '내 위치', color: '#3B82F6' }
+                { label: '내 위치', color: '#3B82F6' },
               ].map((item, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.1 }}
-                  key={item.label} 
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + i * 0.1 }}
+                  key={item.label}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-black/10 shadow-md text-[10px] font-black"
                   style={{ color: '#1A2B27' }}
                 >
@@ -231,7 +251,8 @@ export function MapSection() {
               onClick={() => navigate('/map')}
               className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-wider transition-all shadow-md bg-[#1B4332] text-white hover:shadow-[#1B4332]/20"
             >
-              전체 지도 모드 <Maximize2 size={14} className="group-hover:rotate-12 transition-transform" />
+              전체 지도 모드{' '}
+              <Maximize2 size={14} className="group-hover:rotate-12 transition-transform" />
             </motion.button>
 
             {/* 상태 바 */}
@@ -251,14 +272,16 @@ export function MapSection() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.9 }}
                     className="p-6 rounded-[24px] shrink-0 relative overflow-hidden"
-                    style={{ 
-                      backgroundColor: '#fff', 
+                    style={{
+                      backgroundColor: '#fff',
                       border: '2px solid #1B4332',
-                      boxShadow: '0 12px 30px rgba(27,67,50,0.12)' 
+                      boxShadow: '0 12px 30px rgba(27,67,50,0.12)',
                     }}
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#1B4332]/[0.03] rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <h4 className="font-black text-xl text-[#1A2B27] mb-3 leading-tight">{selectedToilet.name}</h4>
+                    <h4 className="font-black text-xl text-[#1A2B27] mb-3 leading-tight">
+                      {selectedToilet.name}
+                    </h4>
                     <div className="flex flex-wrap gap-2 mb-5">
                       {selectedToilet.isOpen24h && (
                         <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1B4332]/[0.08] text-[#1B4332] text-[10px] font-black uppercase">
@@ -266,7 +289,8 @@ export function MapSection() {
                         </div>
                       )}
                       <div className="w-full text-[11px] text-[#1A2B27]/40 font-medium leading-relaxed">
-                        {selectedToilet.roadAddress || '상세 주소를 확인하려면 길찾기를 이용해 주세요.'}
+                        {selectedToilet.roadAddress ||
+                          '상세 주소를 확인하려면 길찾기를 이용해 주세요.'}
                       </div>
                     </div>
                     <motion.button
@@ -289,9 +313,10 @@ export function MapSection() {
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
                 <AnimatePresence mode="popLayout">
                   {toilets.length === 0 && !loading ? (
-                    <motion.div 
+                    <motion.div
                       layout
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       className="flex flex-col items-center justify-center h-48 text-center text-[#1A2B27]/30"
                     >
                       <Search size={32} className="mb-2 opacity-20" />
@@ -309,30 +334,56 @@ export function MapSection() {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           setSelectedToilet(toilet);
-                          mapInstance.current?.setCenter(new window.kakao.maps.LatLng(toilet.lat, toilet.lng));
+                          mapInstance.current?.setCenter(
+                            new window.kakao.maps.LatLng(toilet.lat, toilet.lng),
+                          );
                         }}
                         className={`group p-4 rounded-2xl cursor-pointer transition-all border border-transparent ${i >= 3 ? 'hidden md:block' : ''}`}
                         style={{
                           backgroundColor: selectedToilet?.id === toilet.id ? '#1B4332' : 'white',
-                          boxShadow: selectedToilet?.id === toilet.id ? '0 8px 20px rgba(27,67,50,0.15)' : '0 4px 12px rgba(0,0,0,0.03)',
+                          boxShadow:
+                            selectedToilet?.id === toilet.id
+                              ? '0 8px 20px rgba(27,67,50,0.15)'
+                              : '0 4px 12px rgba(0,0,0,0.03)',
                         }}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-lg"
-                              style={{ backgroundColor: selectedToilet?.id === toilet.id ? 'rgba(255,255,255,0.1)' : '#f8faf9' }}>
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: toilet.isOpen24h ? '#1B4332' : '#D4922A', filter: selectedToilet?.id === toilet.id ? 'brightness(2)' : 'none' }} />
+                            <div
+                              className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-lg"
+                              style={{
+                                backgroundColor:
+                                  selectedToilet?.id === toilet.id
+                                    ? 'rgba(255,255,255,0.1)'
+                                    : '#f8faf9',
+                              }}
+                            >
+                              <span
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{
+                                  backgroundColor: toilet.isOpen24h ? '#1B4332' : '#D4922A',
+                                  filter:
+                                    selectedToilet?.id === toilet.id ? 'brightness(2)' : 'none',
+                                }}
+                              />
                             </div>
                             <div className="overflow-hidden">
-                              <h5 className={`font-black text-sm truncate transition-colors ${selectedToilet?.id === toilet.id ? 'text-white' : 'text-[#1A2B27]'}`}>
+                              <h5
+                                className={`font-black text-sm truncate transition-colors ${selectedToilet?.id === toilet.id ? 'text-white' : 'text-[#1A2B27]'}`}
+                              >
                                 {toilet.name}
                               </h5>
-                              <p className={`text-[10px] font-bold truncate transition-colors ${selectedToilet?.id === toilet.id ? 'text-white/60' : 'text-[#1A2B27]/30'}`}>
+                              <p
+                                className={`text-[10px] font-bold truncate transition-colors ${selectedToilet?.id === toilet.id ? 'text-white/60' : 'text-[#1A2B27]/30'}`}
+                              >
                                 {toilet.roadAddress || '상세 주소 확인 불가'}
                               </p>
                             </div>
                           </div>
-                          <ChevronRight size={14} className={`transition-transform group-hover:translate-x-1 ${selectedToilet?.id === toilet.id ? 'text-white/40' : 'text-[#1A2B27]/20'}`} />
+                          <ChevronRight
+                            size={14}
+                            className={`transition-transform group-hover:translate-x-1 ${selectedToilet?.id === toilet.id ? 'text-white/40' : 'text-[#1A2B27]/20'}`}
+                          />
                         </div>
                       </motion.div>
                     ))
@@ -340,9 +391,9 @@ export function MapSection() {
                 </AnimatePresence>
               </div>
 
-              <motion.button 
+              <motion.button
                 whileHover={{ y: -2 }}
-                onClick={() => navigate('/map')} 
+                onClick={() => navigate('/map')}
                 className="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#1B4332] transition-all bg-white border border-[#1B4332]/[0.1] hover:bg-[#1B4332]/[0.02]"
               >
                 + Explore More Toilets
@@ -350,7 +401,6 @@ export function MapSection() {
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

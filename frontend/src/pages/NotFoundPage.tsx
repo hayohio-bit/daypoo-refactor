@@ -1,7 +1,7 @@
+import { motion } from 'framer-motion';
+import { Home, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { MapPin, Home } from 'lucide-react';
 
 // ── FuzzyText (인라인 — 별도 파일로 분리해도 됩니다) ──────────────────
 interface FuzzyTextProps {
@@ -111,7 +111,17 @@ function FuzzyText({
           const xBase = getXBase(off.width);
           for (let j = 0; j < lineH; j++) {
             const dx = Math.floor(intensity * (Math.random() - 0.5) * fuzzRange);
-            ctx.drawImage(off.canvas, 0, j, off.canvas.width, 1, xBase + dx, yBase + j, off.canvas.width, 1);
+            ctx.drawImage(
+              off.canvas,
+              0,
+              j,
+              off.canvas.width,
+              1,
+              xBase + dx,
+              yBase + j,
+              off.canvas.width,
+              1,
+            );
           }
         });
         raf = requestAnimationFrame(run);
@@ -119,8 +129,12 @@ function FuzzyText({
       run();
 
       if (enableHover) {
-        const onEnter = () => { hovering = true; };
-        const onLeave = () => { hovering = false; };
+        const onEnter = () => {
+          hovering = true;
+        };
+        const onLeave = () => {
+          hovering = false;
+        };
         canvas.addEventListener('mouseenter', onEnter);
         canvas.addEventListener('mouseleave', onLeave);
         return () => {
@@ -136,15 +150,37 @@ function FuzzyText({
       cancelAnimationFrame(raf);
       cleanup?.then?.((fn) => fn?.());
     };
-  }, [text, fontSize, fontWeight, fontFamily, color, lineHeight, align, baseIntensity, hoverIntensity, enableHover, fuzzRange, containerWidth]);
+  }, [
+    text,
+    fontSize,
+    fontWeight,
+    fontFamily,
+    color,
+    lineHeight,
+    align,
+    baseIntensity,
+    hoverIntensity,
+    enableHover,
+    fuzzRange,
+    containerWidth,
+  ]);
 
   return (
     <div
       ref={containerRef}
       className={className}
-      style={{ display: 'inline-block', width: 'fit-content', maxWidth: '100%', position: 'relative', ...style }}
+      style={{
+        display: 'inline-block',
+        width: 'fit-content',
+        maxWidth: '100%',
+        position: 'relative',
+        ...style,
+      }}
     >
-      <canvas ref={canvasRef} style={{ display: 'block', cursor: enableHover ? 'pointer' : 'default' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'block', cursor: enableHover ? 'pointer' : 'default' }}
+      />
     </div>
   );
 }
@@ -162,7 +198,8 @@ export function NotFoundPage() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 50% 40% at 50% 50%, rgba(27,67,50,0.6) 0%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse 50% 40% at 50% 50%, rgba(27,67,50,0.6) 0%, transparent 70%)',
         }}
       />
 
@@ -186,7 +223,6 @@ export function NotFoundPage() {
 
       {/* 메인 콘텐츠 */}
       <div className="relative z-10 flex flex-col items-center text-center px-6">
-
         {/* 404 — FuzzyText 글리치 */}
         <div style={{ marginBottom: '0px' }}>
           <FuzzyText
@@ -232,7 +268,8 @@ export function NotFoundPage() {
             marginBottom: '32px',
           }}
         >
-          요청하신 페이지가 존재하지 않거나<br />
+          요청하신 페이지가 존재하지 않거나
+          <br />
           주소가 변경되었을 수 있습니다.
         </motion.p>
 

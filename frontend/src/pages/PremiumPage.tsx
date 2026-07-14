@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { loadTossPayments } from '@tosspayments/payment-sdk';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Check,
-  Sparkles,
-  Zap,
-  Shield,
+  ArrowRight,
+  Award,
   BarChart3,
   Brain,
-  Heart,
-  ArrowRight,
+  Check,
   ChevronLeft,
-  Award,
   Crown,
+  Heart,
+  Shield,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
-import { loadTossPayments } from '@tosspayments/payment-sdk';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
@@ -97,7 +97,7 @@ export function PremiumPage({ openAuth }: { openAuth: (mode: 'login' | 'signup')
 
       const tossPayments = await loadTossPayments(clientKey);
 
-      const amountValue = parseInt(plan.price.replace(/[^0-9]/g, ''));
+      const amountValue = Number.parseInt(plan.price.replace(/[^0-9]/g, ''));
 
       const emailPrefix = user.email ? user.email.split('@')[0] : 'ANON';
       const orderId = `POOPMAP_${Date.now()}_${plan.id}_${emailPrefix}`;
@@ -290,7 +290,7 @@ export function PremiumPage({ openAuth }: { openAuth: (mode: 'login' | 'signup')
                 <div className="flex items-center gap-3">
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
                     className="w-6 h-6 border-4 border-white border-t-transparent rounded-full"
                   />
                   <span className="font-bold">결제 준비 중...</span>

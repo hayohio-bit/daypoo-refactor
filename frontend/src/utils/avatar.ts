@@ -1,5 +1,5 @@
+import { avataaars, bottts, funEmoji, lorelei, pixelArt } from '@dicebear/collection';
 import { createAvatar } from '@dicebear/core';
-import { funEmoji, avataaars, bottts, lorelei, pixelArt } from '@dicebear/collection';
 
 /**
  * 사용 가능한 아바타 스타일
@@ -19,11 +19,11 @@ export const isEmoji = (str: string | null | undefined): boolean => {
  * 아바타 스타일별 설정
  */
 const AVATAR_STYLES = {
-  funEmoji: funEmoji,      // 이모지 조합 (귀여움, 가벼움)
-  avataaars: avataaars,    // 픽사 스타일 (친근함)
-  bottts: bottts,          // 로봇 (독특함)
-  lorelei: lorelei,        // 만화 스타일 (세련됨)
-  pixelArt: pixelArt,      // 픽셀 아트 (레트로)
+  funEmoji: funEmoji, // 이모지 조합 (귀여움, 가벼움)
+  avataaars: avataaars, // 픽사 스타일 (친근함)
+  bottts: bottts, // 로봇 (독특함)
+  lorelei: lorelei, // 만화 스타일 (세련됨)
+  pixelArt: pixelArt, // 픽셀 아트 (레트로)
 };
 
 /**
@@ -51,7 +51,7 @@ const AVATAR_STYLES = {
 export const generateAvatar = (
   seed: string | number,
   style: AvatarStyle = 'funEmoji',
-  size: number = 256
+  size = 256,
 ): string => {
   // 사용자별 고유한 아바타를 위해 seed를 사용합니다.
   const avatar = createAvatar(AVATAR_STYLES[style] as any, {
@@ -72,12 +72,16 @@ export const DEFAULT_AVATAR_URL = '/assets/default-avatar.svg';
 export const useAvatar = (
   seed: string | number,
   style: AvatarStyle = 'funEmoji',
-  size: number = 128
+  size = 128,
 ): string => {
   return generateAvatar(seed, style, size);
 };
 
-export const generateRankingAvatar = (userId: string | number, rank: number, equippedAvatarUrl?: string | null): string => {
+export const generateRankingAvatar = (
+  userId: string | number,
+  rank: number,
+  equippedAvatarUrl?: string | null,
+): string => {
   if (equippedAvatarUrl) {
     return parseDicebearUrl(equippedAvatarUrl, userId, 'AVATAR', 128);
   }
@@ -87,7 +91,10 @@ export const generateRankingAvatar = (userId: string | number, rank: number, equ
 /**
  * 프로필용 아바타 (큰 사이즈, 장착 아바타가 있으면 반영, 없으면 시스템 기본값)
  */
-export const generateProfileAvatar = (userId: string | number, equippedAvatarUrl?: string | null): string => {
+export const generateProfileAvatar = (
+  userId: string | number,
+  equippedAvatarUrl?: string | null,
+): string => {
   if (equippedAvatarUrl) {
     return parseDicebearUrl(equippedAvatarUrl, userId, 'AVATAR', 256);
   }
@@ -97,7 +104,10 @@ export const generateProfileAvatar = (userId: string | number, equippedAvatarUrl
 /**
  * 채팅/댓글용 아바타 (작은 사이즈, 장착 아바타가 있으면 반영, 없으면 시스템 기본값)
  */
-export const generateSmallAvatar = (userId: string | number, equippedAvatarUrl?: string | null): string => {
+export const generateSmallAvatar = (
+  userId: string | number,
+  equippedAvatarUrl?: string | null,
+): string => {
   if (equippedAvatarUrl) {
     return parseDicebearUrl(equippedAvatarUrl, userId, 'AVATAR', 48);
   }
@@ -108,14 +118,10 @@ export const generateSmallAvatar = (userId: string | number, equippedAvatarUrl?:
  * 상점 아이템용 아바타 (아이템 타입별 다른 스타일)
  * - 아이템의 경우 각각 개성이 있어야 하므로 DiceBear 생성을 유지합니다.
  */
-export const generateItemAvatar = (
-  itemId: string | number,
-  itemType: string = 'AVATAR'
-): string => {
-  const style: AvatarStyle = itemType === 'AVATAR' ? 'avataaars' :
-                              itemType === 'EFFECT' ? 'pixelArt' :
-                              'bottts';
-  
+export const generateItemAvatar = (itemId: string | number, itemType = 'AVATAR'): string => {
+  const style: AvatarStyle =
+    itemType === 'AVATAR' ? 'avataaars' : itemType === 'EFFECT' ? 'pixelArt' : 'bottts';
+
   // 아이템은 여전히 DiceBear를 사용하여 고유하게 보이도록 합니다.
   const avatar = createAvatar(AVATAR_STYLES[style] as any, {
     seed: `item-${itemId}`,
@@ -130,8 +136,8 @@ export const generateItemAvatar = (
 export const parseDicebearUrl = (
   imageUrl: string | null | undefined,
   fallbackId: string | number,
-  fallbackType: string = 'AVATAR',
-  size: number = 200
+  fallbackType = 'AVATAR',
+  size = 200,
 ): string => {
   if (imageUrl && imageUrl.startsWith('dicebear:')) {
     const parts = imageUrl.split(':');
@@ -146,7 +152,7 @@ export const parseDicebearUrl = (
       return avatar.toDataUri();
     }
   }
-  
+
   if (imageUrl && imageUrl.trim() !== '') {
     return imageUrl; // URL or Emoji
   }

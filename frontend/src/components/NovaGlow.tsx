@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import type React from 'react';
+import { useEffect, useRef } from 'react';
 
 const VERTEX_SHADER = `
   attribute vec2 position;
@@ -107,7 +108,7 @@ export function NovaGlow({ color, size, className, style }: NovaGlowProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext("webgl", { alpha: true });
+    const gl = canvas.getContext('webgl', { alpha: true });
     if (!gl) return;
 
     function createShader(gl: WebGLRenderingContext, type: number, source: string) {
@@ -130,16 +131,20 @@ export function NovaGlow({ color, size, className, style }: NovaGlowProps) {
 
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+      gl.STATIC_DRAW,
+    );
 
-    const positionLocation = gl.getAttribLocation(program, "position");
+    const positionLocation = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
-    const timeLocation = gl.getUniformLocation(program, "u_time");
-    const mouseLocation = gl.getUniformLocation(program, "u_mouse");
-    const hoverLocation = gl.getUniformLocation(program, "u_hover");
+    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+    const timeLocation = gl.getUniformLocation(program, 'u_time');
+    const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
+    const hoverLocation = gl.getUniformLocation(program, 'u_hover');
 
     let animationId: number;
     const startTime = performance.now();
@@ -163,9 +168,9 @@ export function NovaGlow({ color, size, className, style }: NovaGlowProps) {
       mouseRef.current.hover = 0.0;
     };
 
-    window.addEventListener("resize", resize);
-    window.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
     resize();
 
     function render() {
@@ -187,9 +192,9 @@ export function NovaGlow({ color, size, className, style }: NovaGlowProps) {
     render();
 
     return () => {
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationId);
     };
   }, []);
@@ -198,15 +203,15 @@ export function NovaGlow({ color, size, className, style }: NovaGlowProps) {
     <canvas
       ref={canvasRef}
       style={{
-        position: "absolute",
+        position: 'absolute',
         top: 0,
         left: 0,
-        width: "100%",
-        height: "100%",
+        width: '100%',
+        height: '100%',
         zIndex: 0,
-        pointerEvents: "none",
+        pointerEvents: 'none',
         opacity: 0.5,
-        ...style
+        ...style,
       }}
       className={className}
     />

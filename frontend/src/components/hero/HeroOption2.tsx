@@ -1,8 +1,8 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { Mouse } from 'lucide-react';
 import { useRef } from 'react';
 import { FluidFlow } from '../FluidFlow';
 import { FramerSlideInButton } from '../FramerSlideInButton';
-import { Mouse } from 'lucide-react';
 
 interface HeroProps {
   onCtaClick: () => void;
@@ -13,17 +13,20 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"]
+    offset: ['start start', 'end start'],
   });
 
   const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
 
-  const words = "편안한 하루, 당신의 흔적에서 시작됩니다.".split(" ");
+  const words = '편안한 하루, 당신의 흔적에서 시작됩니다.'.split(' ');
 
   return (
-    <section ref={containerRef} className="relative min-h-[120vh] bg-black overflow-hidden select-none">
+    <section
+      ref={containerRef}
+      className="relative min-h-[120vh] bg-black overflow-hidden select-none"
+    >
       {/* Dynamic Background */}
       <motion.div style={{ scale: bgScale }} className="absolute inset-0 z-0">
         <FluidFlow />
@@ -31,7 +34,7 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
       </motion.div>
 
       {/* Masked Text Content */}
-      <motion.div 
+      <motion.div
         style={{ y: textY, opacity: textOpacity }}
         className="sticky top-0 h-screen flex flex-col items-center justify-center px-6 z-10"
       >
@@ -40,12 +43,12 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
             {words.map((word, i) => (
               <motion.span
                 key={i}
-                initial={{ filter: "blur(20px)", opacity: 0, scale: 1.5 }}
-                animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
-                transition={{ 
-                  duration: 1, 
+                initial={{ filter: 'blur(20px)', opacity: 0, scale: 1.5 }}
+                animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 1,
                   delay: i * 0.15,
-                  ease: [0.19, 1, 0.22, 1] 
+                  ease: [0.19, 1, 0.22, 1],
                 }}
                 className="text-6xl md:text-[140px] font-black text-white tracking-tighter leading-none mix-blend-difference"
               >
@@ -66,7 +69,7 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.5, type: "spring" }}
+            transition={{ delay: 1.5, type: 'spring' }}
             className="flex justify-center gap-6"
           >
             <FramerSlideInButton onClick={onCtaClick} primary className="px-10 py-5 text-lg">
@@ -76,9 +79,9 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
         </div>
 
         {/* Scroll Indicator */}
-        <motion.div 
+        <motion.div
           animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
           className="absolute bottom-10 flex flex-col items-center gap-2 text-white/30"
         >
           <Mouse size={32} strokeWidth={1} />

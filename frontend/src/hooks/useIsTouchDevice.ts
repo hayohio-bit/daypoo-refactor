@@ -10,9 +10,7 @@ export function isTouchDevice(): boolean {
   if (typeof window === 'undefined') return false;
 
   try {
-    _cachedResult =
-      'ontouchstart' in window ||
-      navigator.maxTouchPoints > 0;
+    _cachedResult = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   } catch {
     _cachedResult = false;
   }

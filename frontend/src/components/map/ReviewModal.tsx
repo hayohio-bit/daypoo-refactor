@@ -1,9 +1,9 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2, Send, Star, X } from 'lucide-react';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Send, Loader2 } from 'lucide-react';
+import { type ToiletReviewCreateRequest, createReview } from '../../services/reviewService';
+import { EMOJI_TAG_MAP, type ToiletData } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
-import { ToiletData, EMOJI_TAG_MAP } from '../../types/toilet';
-import { createReview, ToiletReviewCreateRequest } from '../../services/reviewService';
 
 interface ReviewModalProps {
   toilet: ToiletData;
@@ -19,8 +19,8 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
@@ -111,11 +111,15 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
             </div>
             {rating > 0 && (
               <p className="text-center text-sm font-bold" style={{ color: '#E8A838' }}>
-                {rating === 5 ? '최고예요! ⭐' :
-                 rating === 4 ? '좋아요! 😊' :
-                 rating === 3 ? '괜찮아요 👍' :
-                 rating === 2 ? '별로예요 😐' :
-                 '아쉬워요 😢'}
+                {rating === 5
+                  ? '최고예요! ⭐'
+                  : rating === 4
+                    ? '좋아요! 😊'
+                    : rating === 3
+                      ? '괜찮아요 👍'
+                      : rating === 2
+                        ? '별로예요 😐'
+                        : '아쉬워요 😢'}
               </p>
             )}
           </div>
@@ -167,7 +171,9 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
             variant="primary"
             size="lg"
             className="w-full shadow-lg"
-            icon={isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+            icon={
+              isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />
+            }
           >
             {isSubmitting ? '등록 중...' : '후기 등록하기'}
           </WaveButtonComponent>

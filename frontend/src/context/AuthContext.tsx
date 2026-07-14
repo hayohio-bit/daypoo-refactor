@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/apiClient';
-import { UserResponse } from '../types/api';
+import type { UserResponse } from '../types/api';
 
 interface AuthContextType {
   user: UserResponse | null;
@@ -24,18 +24,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return Date.now() > Number(expiresAt);
   }, []);
 
-  const getToken = useCallback((key: string) => {
-    // 로그인 유지 만료 체크
-    if (isTokenExpiredByTime()) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('tokenExpiresAt');
-      sessionStorage.removeItem('accessToken');
-      sessionStorage.removeItem('refreshToken');
-      return null;
-    }
-    return localStorage.getItem(key) || sessionStorage.getItem(key);
-  }, [isTokenExpiredByTime]);
+  const getToken = useCallback(
+    (key: string) => {
+      // 로그인 유지 만료 체크
+      if (isTokenExpiredByTime()) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('tokenExpiresAt');
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
+        return null;
+      }
+      return localStorage.getItem(key) || sessionStorage.getItem(key);
+    },
+    [isTokenExpiredByTime],
+  );
 
   const removeTokens = useCallback(() => {
     localStorage.removeItem('accessToken');
@@ -64,14 +67,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('[AuthContext] ✅ User data received:', {
         email: userData.email,
         nickname: userData.nickname,
-        role: userData.role
+        role: userData.role,
       });
       setUser(userData as UserResponse);
     } catch (err: any) {
       console.error('[AuthContext] ❌ Failed to fetch user:', {
         message: err.message,
         response: err.response?.data,
-        status: err.response?.status
+        status: err.response?.status,
       });
       // 토큰이 유효하지 않으면 로그아웃 처리
       removeTokens();
@@ -90,27 +93,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // SSE 로직은 별도 Subscriber 컴포넌트로 이동함
   }, []);
 
-  const login = useCallback(async (accessToken: string, refreshToken: string, stayLoggedIn = false) => {
-    // 기존 토큰 정리
-    removeTokens();
-    if (stayLoggedIn) {
-      // 로그인 유지: localStorage에 저장 + 3일 만료 시간 설정
-      const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('tokenExpiresAt', String(Date.now() + THREE_DAYS_MS));
-    } else {
-      // 로그인 유지 안 함: sessionStorage (브라우저 닫으면 삭제)
-      sessionStorage.setItem('accessToken', accessToken);
-      sessionStorage.setItem('refreshToken', refreshToken);
-    }
-    await refreshUser();
-  }, [removeTokens, refreshUser]);
+  const login = useCallback(
+    async (accessToken: string, refreshToken: string, stayLoggedIn = false) => {
+      // 기존 토큰 정리
+      removeTokens();
+      if (stayLoggedIn) {
+        // 로그인 유지: localStorage에 저장 + 3일 만료 시간 설정
+        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('tokenExpiresAt', String(Date.now() + THREE_DAYS_MS));
+      } else {
+        // 로그인 유지 안 함: sessionStorage (브라우저 닫으면 삭제)
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('refreshToken', refreshToken);
+      }
+      await refreshUser();
+    },
+    [removeTokens, refreshUser],
+  );
 
   const logout = useCallback(async () => {
     try {
       // 서버 로그아웃 API 호출 (토큰 블랙리스트 처리 등)
-      await api.post('/auth/logout').catch(err => {
+      await api.post('/auth/logout').catch((err) => {
         console.warn('Backend logout failed or not implemented:', err);
       });
     } finally {
@@ -129,15 +135,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [logout]);
 
-  const value = React.useMemo(() => ({
-    user,
-    loading,
-    login,
-    logout,
-    deleteMe,
-    refreshUser,
-    isAuthenticated: !!user,
-  }), [user, loading, login, logout, deleteMe, refreshUser]);
+  const value = React.useMemo(
+    () => ({
+      user,
+      loading,
+      login,
+      logout,
+      deleteMe,
+      refreshUser,
+      isAuthenticated: !!user,
+    }),
+    [user, loading, login, logout, deleteMe, refreshUser],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

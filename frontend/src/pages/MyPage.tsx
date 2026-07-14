@@ -1,52 +1,52 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
-import {
-  generateProfileAvatar,
-  generateItemAvatar,
-  parseDicebearUrl,
-  isEmoji,
-} from '../utils/avatar';
-import { Navbar } from '../components/Navbar';
-import {
-  ShoppingBag,
-  Package,
-  Star,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  MapPin,
-  Settings,
-  ChevronRight,
-  Lock,
-  Check,
-  X,
-  Sparkles,
-  Trophy,
-  Calendar,
-  BarChart3,
-  LogOut,
-  Trash2,
-  Crown,
-  Brain,
-  ArrowRight,
-  Activity,
-  CheckCircle2,
-  Cloud,
-  Waves,
-  Droplets,
-  AlertCircle,
-  Plus,
-} from 'lucide-react';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
-import { api } from '../services/apiClient';
-import { useAuth } from '../context/AuthContext';
+import { AnimatePresence, motion, useInView } from 'framer-motion';
+import {
+  Activity,
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
+  Brain,
+  Calendar,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Cloud,
+  Crown,
+  Droplets,
+  Lock,
+  LogOut,
+  MapPin,
+  Minus,
+  Package,
+  Plus,
+  Settings,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Trophy,
+  Waves,
+  X,
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useLocation, useNavigate } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import { MyPageSkeleton } from '../components/LoadingSkeleton';
+import { Navbar } from '../components/Navbar';
 import WaveButtonComponent from '../components/WaveButton';
-import { UserResponse, HealthRecordRequest } from '../types/api';
-import { HealthLogModal, HealthLogResult } from '../components/map/HealthLogModal';
+import { HealthLogModal, type HealthLogResult } from '../components/map/HealthLogModal';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../services/apiClient';
+import type { HealthRecordRequest, UserResponse } from '../types/api';
+import {
+  generateItemAvatar,
+  generateProfileAvatar,
+  isEmoji,
+  parseDicebearUrl,
+} from '../utils/avatar';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type TabKey = 'home' | 'collection' | 'report' | 'settings';
@@ -550,7 +550,7 @@ function AvatarEffect({ emoji, size = 110 }: { emoji: string; size?: number }) {
           scale: [1, 1.15, 1],
           opacity: [0.6, 1, 0.6],
         }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       />
       {/* 외곽 펄스 링 */}
       <motion.div
@@ -568,7 +568,7 @@ function AvatarEffect({ emoji, size = 110 }: { emoji: string; size?: number }) {
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.6, 0.3],
         }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       />
       {/* 이모지 파티클 */}
       {particles.map((i) => {
@@ -604,7 +604,7 @@ function AvatarEffect({ emoji, size = 110 }: { emoji: string; size?: number }) {
             transition={{
               duration,
               delay,
-              repeat: Infinity,
+              repeat: Number.POSITIVE_INFINITY,
               ease: 'easeInOut',
             }}
           >
@@ -634,7 +634,7 @@ function HeroBanner({
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
           animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
           className="absolute"
           style={{
             top: '-10%',
@@ -1241,65 +1241,75 @@ function HomeTab({
               ))}
             </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${shopTab}-${categoryFilter}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
-            >
-              {items.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
-                    {items
-                      .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
-                      .map((item, idx) => {
-                        const avatarType = item.rawType || 'AVATAR';
-                        const isSelected = preview?.id === item.id;
-                        const isOwned = item.owned;
-                        const color = isOwned ? '#2D6A4F' : '#E8A838';
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${shopTab}-${categoryFilter}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                {items.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+                      {items
+                        .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
+                        .map((item, idx) => {
+                          const avatarType = item.rawType || 'AVATAR';
+                          const isSelected = preview?.id === item.id;
+                          const isOwned = item.owned;
+                          const color = isOwned ? '#2D6A4F' : '#E8A838';
 
-                        return (
-                          <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: idx * 0.03 }}
-                            onClick={() => setPreview(item)}
-                            className={`group cursor-pointer rounded-[24px] border-2 transition-all overflow-hidden ${
-                              isSelected
-                                ? 'border-emerald-500 shadow-2xl shadow-emerald-500/20'
-                                : 'border-gray-100 hover:border-emerald-200 hover:shadow-xl'
-                            } ${
-                              idx === (Math.min(items.length, (currentPage + 1) * itemsPerPage) - (currentPage * itemsPerPage)) - 1 && 
-                              (Math.min(items.length, (currentPage + 1) * itemsPerPage) - (currentPage * itemsPerPage)) % 2 !== 0 
-                                ? 'col-span-2 sm:col-span-1' 
-                                : ''
-                            }`}
-                            style={{ background: '#fff' }}
-                          >
-                            <div className="aspect-square bg-black/[0.02] flex items-center justify-center relative overflow-hidden p-4">
-                              <div
-                                className="w-12 h-12 rounded-full blur-2xl opacity-20 absolute"
-                                style={{ background: color }}
-                              />
-                              {item.imageUrl && (isEmoji(item.imageUrl) || (!item.imageUrl.includes(':') && !item.imageUrl.startsWith('http') && !item.imageUrl.startsWith('/'))) ? (
-                                <span className="text-6xl transition-transform group-hover:scale-110 duration-500 select-none leading-none">
-                                  {item.imageUrl}
-                                </span>
-                              ) : (
-                                <img
-                                  src={parseDicebearUrl(item.imageUrl, item.id, avatarType)}
-                                  alt={item.name}
-                                  className="w-full h-full object-contain transition-transform group-hover:scale-110 duration-500"
+                          return (
+                            <motion.div
+                              key={item.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: idx * 0.03 }}
+                              onClick={() => setPreview(item)}
+                              className={`group cursor-pointer rounded-[24px] border-2 transition-all overflow-hidden ${
+                                isSelected
+                                  ? 'border-emerald-500 shadow-2xl shadow-emerald-500/20'
+                                  : 'border-gray-100 hover:border-emerald-200 hover:shadow-xl'
+                              } ${
+                                idx ===
+                                  Math.min(items.length, (currentPage + 1) * itemsPerPage) -
+                                    currentPage * itemsPerPage -
+                                    1 &&
+                                (Math.min(items.length, (currentPage + 1) * itemsPerPage) -
+                                  currentPage * itemsPerPage) %
+                                  2 !==
+                                  0
+                                  ? 'col-span-2 sm:col-span-1'
+                                  : ''
+                              }`}
+                              style={{ background: '#fff' }}
+                            >
+                              <div className="aspect-square bg-black/[0.02] flex items-center justify-center relative overflow-hidden p-4">
+                                <div
+                                  className="w-12 h-12 rounded-full blur-2xl opacity-20 absolute"
+                                  style={{ background: color }}
                                 />
-                              )}
-                              {isOwned && (
-                                <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg">
-                                  <Check size={14} strokeWidth={3} />
-                                </div>
-                              )}
+                                {item.imageUrl &&
+                                (isEmoji(item.imageUrl) ||
+                                  (!item.imageUrl.includes(':') &&
+                                    !item.imageUrl.startsWith('http') &&
+                                    !item.imageUrl.startsWith('/'))) ? (
+                                  <span className="text-6xl transition-transform group-hover:scale-110 duration-500 select-none leading-none">
+                                    {item.imageUrl}
+                                  </span>
+                                ) : (
+                                  <img
+                                    src={parseDicebearUrl(item.imageUrl, item.id, avatarType)}
+                                    alt={item.name}
+                                    className="w-full h-full object-contain transition-transform group-hover:scale-110 duration-500"
+                                  />
+                                )}
+                                {isOwned && (
+                                  <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg">
+                                    <Check size={14} strokeWidth={3} />
+                                  </div>
+                                )}
                               </div>
                               <div className="p-3 border-t border-gray-100">
                                 <h5 className="font-black text-sm mb-1 text-black truncate">
@@ -1831,7 +1841,9 @@ function CollectionTab({
                 <Sparkles size={20} />
               </div>
               <p className="text-sm font-bold text-emerald-600/60 italic text-center">
-                위 도감에서 칭호를 선택하여<br />상세 내용을 확인하세요!
+                위 도감에서 칭호를 선택하여
+                <br />
+                상세 내용을 확인하세요!
               </p>
             </div>
           )}
@@ -2330,7 +2342,7 @@ function ReportTab({
                           <div className="h-4 w-full bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
                             {Object.entries(reportData?.bristolDistribution || {}).map(
                               ([key, val]: [string, any]) => {
-                                const k = parseInt(key);
+                                const k = Number.parseInt(key);
                                 const total = Object.values(
                                   reportData?.bristolDistribution || {},
                                 ).reduce((a: any, b: any) => a + b, 0) as number;
@@ -2381,7 +2393,7 @@ function ReportTab({
                     animate={{ rotate: [0, -15, 15, -10, 10, -5, 5, 0] }}
                     transition={{
                       duration: 0.8,
-                      repeat: Infinity,
+                      repeat: Number.POSITIVE_INFINITY,
                       repeatDelay: 2,
                       ease: 'easeInOut',
                     }}
@@ -2392,7 +2404,8 @@ function ReportTab({
                     정밀 분석 리포트 잠금
                   </h3>
                   <p className="text-gray-500 font-bold text-xs sm:text-base mb-5 sm:mb-10 leading-relaxed">
-                    {activeSubTab === 'weekly' ? '7일간의' : '30일간의'} 누적 기록을 바탕으로 산출되는 <br />
+                    {activeSubTab === 'weekly' ? '7일간의' : '30일간의'} 누적 기록을 바탕으로
+                    산출되는 <br />
                     <span className="text-emerald-700">장 컨디션 점수</span>와{' '}
                     <span className="text-emerald-700">AI 푸의 맞춤 가이드</span>는<br />
                     <span className="text-[#1B4332] font-black">
@@ -2879,8 +2892,12 @@ function SettingsTab({
                     {item.icon}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs font-bold text-gray-400 mb-0.5 sm:mb-1">{item.label}</p>
-                    <p className="text-sm sm:text-lg font-black text-[#1A2B27] tracking-tight truncate">{item.value}</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-gray-400 mb-0.5 sm:mb-1">
+                      {item.label}
+                    </p>
+                    <p className="text-sm sm:text-lg font-black text-[#1A2B27] tracking-tight truncate">
+                      {item.value}
+                    </p>
                   </div>
                 </div>
                 {item.action && (
@@ -3329,7 +3346,7 @@ export function MyPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
             }}
             transition={{
               duration: 5 + i * 1.2,
-              repeat: Infinity,
+              repeat: Number.POSITIVE_INFINITY,
               ease: 'easeInOut',
               delay: i * 0.8,
             }}
@@ -3370,7 +3387,7 @@ export function MyPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
               <motion.div
                 className="absolute inset-0 opacity-30"
                 animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-                transition={{ duration: 8, repeat: Infinity }}
+                transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
                 style={{
                   background:
                     'radial-gradient(circle at 30% 50%, #95d5b2 0%, transparent 60%), radial-gradient(circle at 70% 50%, #1b4332 0%, transparent 60%)',

@@ -13,13 +13,12 @@ interface PaintCurtainProps {
 }
 
 const LAYERS: Layer[] = [
-  { color: '#E8A838', delay: 0,  wave: 50 }, // 앰버 먼저
+  { color: '#E8A838', delay: 0, wave: 50 }, // 앰버 먼저
   { color: '#1B4332', delay: 90, wave: 40 }, // 딥그린 뒤따라
 ];
 
 const DUR = 650;
-const EASE = (t: number): number =>
-  t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2;
+const EASE = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 function buildPath(progress: number, W: number, H: number, wave: number): string {
   const p = EASE(Math.min(Math.max(progress, 0), 1));
@@ -36,8 +35,8 @@ function buildPath(progress: number, W: number, H: number, wave: number): string
 }
 
 export function PaintCurtain({ isVisible, onComplete, phase }: PaintCurtainProps) {
-  const svgRef  = useRef<SVGSVGElement>(null);
-  const rafRef  = useRef<number>(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     if (phase === 'idle') return;
@@ -51,9 +50,7 @@ export function PaintCurtain({ isVisible, onComplete, phase }: PaintCurtainProps
     // SVG viewBox를 실제 화면 크기로
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-    const paths = LAYERS.map((_, i) =>
-      svg.querySelector<SVGPathElement>(`#paint-path-${i}`)!
-    );
+    const paths = LAYERS.map((_, i) => svg.querySelector<SVGPathElement>(`#paint-path-${i}`)!);
 
     const startTime = performance.now();
     cancelAnimationFrame(rafRef.current);
@@ -62,16 +59,16 @@ export function PaintCurtain({ isVisible, onComplete, phase }: PaintCurtainProps
       const elapsed = now - startTime;
 
       LAYERS.forEach((layer, i) => {
-        const t = phase === 'down'
-          ? (elapsed - layer.delay) / DUR
-          : 1 - (elapsed - ((LAYERS.length - 1 - i) * 90)) / DUR;
+        const t =
+          phase === 'down'
+            ? (elapsed - layer.delay) / DUR
+            : 1 - (elapsed - (LAYERS.length - 1 - i) * 90) / DUR;
 
         paths[i].setAttribute('d', buildPath(t, W, H, layer.wave));
       });
 
-      const lastEnd = phase === 'down'
-        ? LAYERS[LAYERS.length - 1].delay + DUR
-        : (LAYERS.length - 1) * 90 + DUR;
+      const lastEnd =
+        phase === 'down' ? LAYERS[LAYERS.length - 1].delay + DUR : (LAYERS.length - 1) * 90 + DUR;
 
       if (elapsed < lastEnd) {
         rafRef.current = requestAnimationFrame(tick);
@@ -116,8 +113,10 @@ export function PaintCurtain({ isVisible, onComplete, phase }: PaintCurtainProps
       {LAYERS.map((layer, i) => (
         <rect
           key={i}
-          x="0" y="0"
-          width="100%" height="100%"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
           fill={layer.color}
           clipPath={`url(#paint-clip-${i})`}
         />

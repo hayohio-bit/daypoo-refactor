@@ -1,32 +1,32 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import type React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-import { WaveDivider } from '../components/WaveDivider';
-import { api } from '../services/apiClient';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Search,
-  ChevronDown,
-  Plus,
-  MessageSquare,
-  Clock,
+  AlertCircle,
+  ArrowRight,
   CheckCircle,
-  Send,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
-  LifeBuoy,
-  User,
-  FileText,
-  AlertCircle,
-  Hash,
-  ArrowRight,
-  Filter,
+  Clock,
   Edit3,
+  FileText,
+  Filter,
+  Hash,
+  LifeBuoy,
+  MessageSquare,
+  Plus,
+  Search,
+  Send,
+  Sparkles,
   Trash2,
+  User,
 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type React from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Footer } from '../components/Footer';
+import { Navbar } from '../components/Navbar';
+import { WaveDivider } from '../components/WaveDivider';
+import { api } from '../services/apiClient';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type SupportTab = 'faq' | 'inquiry' | 'myinquiry';
@@ -188,7 +188,7 @@ function TrendyFaqItem({
             animate={{ opacity: 1, scale: 1.02 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="absolute -inset-1 bg-gradient-to-r from-[#52B788]/20 via-[#E8A838]/10 to-[#52B788]/20 blur-xl rounded-[32px] z-0"
-            transition={{ duration: 1.5, repeat: Infinity, repeatType: 'reverse' }}
+            transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, repeatType: 'reverse' }}
           />
         )}
       </AnimatePresence>

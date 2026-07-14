@@ -7,25 +7,25 @@ interface SkeletonProps {
   borderRadius?: string | number;
 }
 
-export function LoadingSkeleton({ 
-  className = '', 
-  width = '100%', 
-  height = '14px', 
-  borderRadius = '8px' 
+export function LoadingSkeleton({
+  className = '',
+  width = '100%',
+  height = '14px',
+  borderRadius = '8px',
 }: SkeletonProps) {
   return (
-    <div 
+    <div
       className={`relative overflow-hidden bg-gray-100 ${className}`}
       style={{ width, height, borderRadius }}
     >
       <motion.div
         animate={{
-          x: ['-100%', '100%']
+          x: ['-100%', '100%'],
         }}
         transition={{
-          repeat: Infinity,
+          repeat: Number.POSITIVE_INFINITY,
           duration: 1.5,
-          ease: 'linear'
+          ease: 'linear',
         }}
         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent shadow-lg"
       />
@@ -53,7 +53,7 @@ export function MyPageSkeleton() {
 
       {/* 탭 바 스켈레톤 */}
       <div className="flex gap-4">
-        {[1, 2, 3, 4].map(i => (
+        {[1, 2, 3, 4].map((i) => (
           <LoadingSkeleton key={i} className="flex-1" height={44} borderRadius={16} />
         ))}
       </div>

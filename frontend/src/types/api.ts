@@ -1,4 +1,4 @@
-import { SubscriptionResponse } from './subscription';
+import type { SubscriptionResponse } from './subscription';
 
 /**
  * API 공통 응답 구조

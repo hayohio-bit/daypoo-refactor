@@ -1,18 +1,18 @@
-import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { m, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { LocateFixed } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
+import { MapView, type MapViewHandle } from '../components/map/MapView';
 import { ToiletPopup } from '../components/map/ToiletPopup';
-import { useToilets } from '../hooks/useToilets';
-import { useGeoTracking } from '../hooks/useGeoTracking';
-import { ToiletData } from '../types/toilet';
-import { VisitModal, VisitModalResult } from '../components/map/VisitModal';
-import { CreateRecordRequest } from '../types/api';
-import { api } from '../services/apiClient';
-import { useAuth } from '../context/AuthContext';
-import { MapView, MapViewHandle } from '../components/map/MapView';
 import { ToiletSearchBar } from '../components/map/ToiletSearchBar';
+import { VisitModal, type VisitModalResult } from '../components/map/VisitModal';
+import { useAuth } from '../context/AuthContext';
+import { useGeoTracking } from '../hooks/useGeoTracking';
+import { useToilets } from '../hooks/useToilets';
+import { api } from '../services/apiClient';
+import type { CreateRecordRequest } from '../types/api';
+import type { ToiletData } from '../types/toilet';
 import { calculateDistance } from '../utils/distance';
 
 type FilterMode = 'all' | 'favorite' | 'visited';
@@ -341,7 +341,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       } catch (e: any) {
         const code = e.code || 'UNKNOWN';
         const errorMsg = e.message || (typeof e === 'string' ? e : JSON.stringify(e));
-        
+
         switch (code) {
           case 'R007':
             throw e; // VisitModal에서 카메라 복귀 처리

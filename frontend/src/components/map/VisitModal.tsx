@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
-import { X, Check, AlertTriangle, Camera, Zap, RotateCcw, Loader2, Sparkles } from 'lucide-react';
+import { AnimatePresence, m } from 'framer-motion';
+import { AlertTriangle, Camera, Check, Loader2, RotateCcw, Sparkles, X, Zap } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ConditionTag, FoodTag, PoopColor, ToiletData } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
-import { ToiletData, PoopColor, ConditionTag, FoodTag } from '../../types/toilet';
-import { HealthLogModal, HealthLogResult } from './HealthLogModal';
+import { HealthLogModal, type HealthLogResult } from './HealthLogModal';
 
 // 방문 인증 결과 타입
 // bristolType / color: 상태 기록 추가 시 채워짐, 건너뛰기 시 null
@@ -159,7 +159,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
         color: 'golden', // 황금색
         conditionTags: ['쾌적함'],
         foodTags: ['채소위주'],
-        imageBase64: null
+        imageBase64: null,
       };
       await onComplete(buildResult(defaultResult));
       setIsRecordSubmitted(true);
@@ -272,7 +272,9 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
                   <div className="text-center space-y-2">
                     <p className="font-black text-2xl text-[#1a2b22]">방문 인증 완료!</p>
                     <p className="text-sm text-[#7a9e8a]">배변 상태 기록도 남겨볼까요?</p>
-                    <p className="text-xs text-[#b5c9bc]">기록하면 배변 패턴 리포트에 반영됩니다.</p>
+                    <p className="text-xs text-[#b5c9bc]">
+                      기록하면 배변 패턴 리포트에 반영됩니다.
+                    </p>
                   </div>
                   <div className="w-full space-y-3 pt-2">
                     <WaveButtonComponent
@@ -392,10 +394,8 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
                     </div>
                   ) : (
                     <div className="text-center space-y-4">
-                      <p className="text-[#7a9e8a] text-sm font-bold">
-                        촬영은 선택 사항입니다
-                      </p>
-                      <button 
+                      <p className="text-[#7a9e8a] text-sm font-bold">촬영은 선택 사항입니다</p>
+                      <button
                         onClick={() => {
                           handleComplete();
                           setHealthLogStartStep(1); // 1단계(브리스톨)부터 시작하도록 설정
@@ -438,21 +438,26 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-[2060] flex items-center justify-center p-6"
             >
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowNoPhotoConfirm(false)} />
+              <div
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowNoPhotoConfirm(false)}
+              />
               <div className="relative bg-white rounded-3xl p-6 shadow-2xl max-w-[320px] w-full text-center">
                 <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
                   <Camera size={28} className="text-emerald-500" />
                 </div>
-                <h3 className="font-black text-lg text-[#1a2b22] mb-2">사진 촬영을 하지 않았습니다</h3>
+                <h3 className="font-black text-lg text-[#1a2b22] mb-2">
+                  사진 촬영을 하지 않았습니다
+                </h3>
                 <p className="text-sm text-[#7a9e8a] mb-6">사진 없이 기록만 남기시겠습니까?</p>
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     onClick={() => setShowNoPhotoConfirm(false)}
                     className="flex-1 py-3 bg-[#f4faf6] text-[#7a9e8a] font-bold rounded-2xl hover:bg-[#e8f3ec] transition-colors"
                   >
                     아니오
                   </button>
-                  <button 
+                  <button
                     onClick={handleConfirmNoPhoto}
                     className="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-2xl hover:bg-emerald-600 transition-colors"
                   >

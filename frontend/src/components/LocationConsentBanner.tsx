@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
-import { MapPin, X, ShieldCheck, ChevronRight } from 'lucide-react';
+import { AnimatePresence, m } from 'framer-motion';
+import { ChevronRight, MapPin, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import WaveButton from './WaveButton';
 
 export function LocationConsentBanner() {
@@ -49,7 +49,7 @@ export function LocationConsentBanner() {
   const handleAccept = () => {
     setIsVisible(false);
     localStorage.setItem('location_prompted', 'true');
-    
+
     // 명시적으로 동의한 경우에만 iOS OS 모달을 호출하고 플래그 저장
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -62,7 +62,7 @@ export function LocationConsentBanner() {
         console.warn('Location access denied:', error);
         // 권한 거부 시 거부 상태로 남김 (추후 원할 경우 재요청 가능하도록 로직 확장 가능)
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   };
 
@@ -94,14 +94,16 @@ export function LocationConsentBanner() {
                     <MapPin size={24} className="animate-pulse" />
                   </div>
                   <div>
-                    <h3 className="text-white font-black text-lg tracking-tight">위치 정보 권한 요청</h3>
+                    <h3 className="text-white font-black text-lg tracking-tight">
+                      위치 정보 권한 요청
+                    </h3>
                     <div className="flex items-center gap-1.5 text-emerald-400/60 text-[10px] font-bold uppercase tracking-widest mt-0.5">
                       <ShieldCheck size={10} />
                       <span>Privacy Guaranteed</span>
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={handleDecline}
                   className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
                 >
@@ -110,19 +112,21 @@ export function LocationConsentBanner() {
               </div>
 
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-medium">
-                현위치를 기반으로 가장 가까운 <span className="text-emerald-400 font-bold">안심 화장실</span>을 찾고,<br className="hidden sm:block" /> 
+                현위치를 기반으로 가장 가까운{' '}
+                <span className="text-emerald-400 font-bold">안심 화장실</span>을 찾고,
+                <br className="hidden sm:block" />
                 AI 배변 패턴 리포트를 생성하기 위해 위치 정보가 필요합니다.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-2">
-                <WaveButton 
+                <WaveButton
                   onClick={handleAccept}
-                  variant="primary" 
+                  variant="primary"
                   className="flex-1 py-4 text-sm font-black shadow-lg shadow-emerald-500/20"
                 >
                   동의하고 시작하기
                 </WaveButton>
-                <button 
+                <button
                   onClick={handleDecline}
                   className="px-6 py-4 rounded-2xl bg-white/5 text-slate-400 text-sm font-bold hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2"
                 >
