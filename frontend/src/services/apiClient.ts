@@ -18,7 +18,11 @@ function getToken(key: string): string | null {
     removeTokens();
     return null;
   }
-  return localStorage.getItem(key) || sessionStorage.getItem(key);
+  const token = localStorage.getItem(key) || sessionStorage.getItem(key);
+  if (!token || token === 'null' || token === 'undefined' || token.trim() === '') {
+    return null;
+  }
+  return token;
 }
 
 function getTokenStorage(): Storage {

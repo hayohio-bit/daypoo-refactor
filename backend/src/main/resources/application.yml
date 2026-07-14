@@ -1,6 +1,6 @@
 server:
   port: 8080
-  forward-headers-strategy: native
+  forward-headers-strategy: framework
 
 spring:
   config:
@@ -96,6 +96,9 @@ spring:
           writetimeout: 5000
 
 app:
+  admin:
+    email: ${ADMIN_EMAIL:admin@admin.com}
+    password: ${ADMIN_PASSWORD:admin1234}
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
   cors:

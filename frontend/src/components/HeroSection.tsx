@@ -125,7 +125,10 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
 
   return (
     <>
-      <section className="relative min-h-screen flex items-center justify-center bg-[#111E18] overflow-hidden px-4 sm:px-8 pt-24 pb-16 sm:pt-32 sm:pb-32">
+      <section
+        className="relative min-h-screen flex items-center justify-center bg-[#111E18] overflow-hidden px-4 sm:px-8 pb-16 sm:pb-32"
+        style={{ paddingTop: 'var(--navbar-bottom, 7rem)' }}
+      >
         {/* Deep Ambient Background — mobile uses simple gradient, desktop keeps blur */}
         {isMobile ? (
           <div

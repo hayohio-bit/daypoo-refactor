@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -18,6 +19,12 @@ public class DataInitializer implements CommandLineRunner {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+
+  @Value("${app.admin.email}")
+  private String adminEmail;
+
+  @Value("${app.admin.password}")
+  private String adminPassword;
 
   @Override
   public void run(String... args) {
@@ -32,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
 
   private void initializeAdmin() {
     userRepository
-        .findByEmail("admin@admin.com")
+        .findByEmail(adminEmail)
         .ifPresentOrElse(
             existingAdmin -> {
               if (existingAdmin.getRole() != Role.ROLE_ADMIN) {
@@ -43,9 +50,9 @@ public class DataInitializer implements CommandLineRunner {
             () -> {
               userRepository.save(
                   User.builder()
-                      .password(passwordEncoder.encode("admin1234"))
+                      .password(passwordEncoder.encode(adminPassword))
                       .nickname("관리자")
-                      .email("admin@admin.com")
+                      .email(adminEmail)
                       .role(Role.ROLE_ADMIN)
                       .build());
             });
