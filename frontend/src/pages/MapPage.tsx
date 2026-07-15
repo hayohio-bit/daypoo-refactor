@@ -68,19 +68,6 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     [isAuthenticated, openAuth],
   );
 
-  const handleSearchSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (filteredToilets.length > 0) {
-        const first = filteredToilets[0];
-        handleSelectToilet(first);
-        mapViewRef.current?.panTo(first.lat, first.lng);
-        setSearchQuery(''); // 검색 결과 선택 후 검색창 리셋
-      }
-    },
-    [filteredToilets, handleSelectToilet],
-  );
-
   const handleFavoriteToggle = useCallback(
     async (id: string) => {
       if (!isAuthenticated) {
@@ -408,6 +395,19 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
                 ? t.isVisited
                 : true,
         );
+
+  const handleSearchSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (filteredToilets.length > 0) {
+        const first = filteredToilets[0];
+        handleSelectToilet(first);
+        mapViewRef.current?.panTo(first.lat, first.lng);
+        setSearchQuery(''); // 검색 결과 선택 후 검색창 리셋
+      }
+    },
+    [filteredToilets, handleSelectToilet],
+  );
 
   return (
     <div className="relative h-screen flex flex-col" style={{ background: '#F2F7F4' }}>
