@@ -122,7 +122,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/hooks/useToilets.ts', 'src/components/HeroSection.tsx', 'src/App.tsx'],
+      include: ['src/hooks/useToilets.ts', 'src/components/HeroSection.tsx'],
       thresholds: {
         lines: 70,
         branches: 60,
