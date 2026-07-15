@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -30,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("인증 서비스 테스트")
@@ -146,5 +148,37 @@ class AuthServiceTest {
         .isInstanceOf(BusinessException.class)
         .extracting("errorCode")
         .isEqualTo(ErrorCode.INVALID_PASSWORD);
+  }
+
+  @Test
+  @DisplayName("성공: 어드민 이메일로 로그인 시 ROLE_ADMIN으로 승격 및 토큰 발급")
+  void login_success_promote_to_admin() {
+    // given
+    ReflectionTestUtils.setField(
+        authService, "adminEmailsString", "hayohio@gmail.com,admin@admin.com");
+    User normalUser =
+        User.builder()
+            .email("hayohio@gmail.com")
+            .password("encodedPassword")
+            .nickname("NormalUser")
+            .role(Role.ROLE_USER)
+            .build();
+    LoginRequest adminLoginRequest = new LoginRequest("hayohio@gmail.com", "password123");
+
+    given(userRepository.findByEmail("hayohio@gmail.com")).willReturn(Optional.of(normalUser));
+    given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
+    given(jwtProvider.createAccessToken(eq("hayohio@gmail.com"), eq("ROLE_ADMIN")))
+        .willReturn("access-token-admin");
+    given(jwtProvider.createRefreshToken("hayohio@gmail.com")).willReturn("refresh-token-admin");
+
+    // when
+    TokenResponse response = authService.login(adminLoginRequest);
+
+    // then
+    assertThat(response).isNotNull();
+    assertThat(response.accessToken()).isEqualTo("access-token-admin");
+    assertThat(response.refreshToken()).isEqualTo("refresh-token-admin");
+    assertThat(normalUser.getRole()).isEqualTo(Role.ROLE_ADMIN);
+    verify(userRepository, times(1)).save(normalUser);
   }
 }
