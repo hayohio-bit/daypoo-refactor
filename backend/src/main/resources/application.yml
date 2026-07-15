@@ -143,11 +143,10 @@ management:
     enabled: true
 
 springdoc:
-  swagger-ui:
-    url: /api/openapi.yaml
-    path: /api/docs
   api-docs:
-    enabled: true # 스웨거 UI 구동을 위해 활성화 필요
+    path: /api/v3/api-docs
+  swagger-ui:
+    path: /api/docs
 
 ---
 # Simulation Profile

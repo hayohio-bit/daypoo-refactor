@@ -70,7 +70,8 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/openapi.yaml",
                         "/api/docs/**",
-                        "/api/openapi.yaml")
+                        "/api/swagger-ui/**",
+                        "/api/v3/api-docs/**")
                     .permitAll()
                     .requestMatchers("/api/v1/notifications/subscribe")
                     .permitAll()
