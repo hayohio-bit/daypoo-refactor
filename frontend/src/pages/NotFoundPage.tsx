@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Home, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Navbar } from '../components/Navbar';
 
 // ── FuzzyText (인라인 — 별도 파일로 분리해도 됩니다) ──────────────────
 interface FuzzyTextProps {
@@ -186,7 +187,7 @@ function FuzzyText({
 }
 
 // ── 404 Page ──────────────────────────────────────────────────────────
-export function NotFoundPage() {
+export function NotFoundPage({ openAuth }: { openAuth?: (mode: 'login' | 'signup') => void }) {
   const navigate = useNavigate();
 
   return (
@@ -194,6 +195,8 @@ export function NotFoundPage() {
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       style={{ background: '#0d1a14' }}
     >
+      <Navbar openAuth={openAuth || (() => {})} />
+
       {/* 배경 글로우 */}
       <div
         className="absolute inset-0 pointer-events-none"

@@ -74,6 +74,25 @@ function LoginPage({
   return <MainPage openAuth={openAuth} />;
 }
 
+function SignupPage({
+  openAuth,
+}: {
+  openAuth: (mode: 'login' | 'signup', callback?: () => void) => void;
+}) {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/main', { replace: true });
+    } else {
+      openAuth('signup');
+    }
+  }, [isAuthenticated, navigate, openAuth]);
+
+  return <MainPage openAuth={openAuth} />;
+}
+
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
@@ -138,6 +157,7 @@ function App() {
                       <Route path="/" element={<SplashPage />} />
                       <Route path="/main" element={<MainPage openAuth={openAuth} />} />
                       <Route path="/login" element={<LoginPage openAuth={openAuth} />} />
+                      <Route path="/signup" element={<SignupPage openAuth={openAuth} />} />
                       <Route path="/map" element={<MapPage openAuth={openAuth} />} />
                       <Route path="/ranking" element={<RankingPage openAuth={openAuth} />} />
                       <Route path="/forgot-password" element={<ForgotPage />} />
@@ -158,14 +178,22 @@ function App() {
                           </AdminRoute>
                         }
                       />
-                      <Route path="/404" element={<NotFoundPage />} />
+                      <Route path="/404" element={<NotFoundPage openAuth={openAuth} />} />
                       <Route path="/loading" element={<LoadingPage />} />
-                      <Route path="*" element={<NotFoundPage />} />
+                      <Route path="*" element={<NotFoundPage openAuth={openAuth} />} />
                     </Routes>
                   </Suspense>
                   <AuthModal
                     isOpen={authOpen}
-                    onClose={() => setAuthOpen(false)}
+                    onClose={() => {
+                      setAuthOpen(false);
+                      if (
+                        window.location.pathname === '/login' ||
+                        window.location.pathname === '/signup'
+                      ) {
+                        window.history.replaceState({}, document.title, '/main');
+                      }
+                    }}
                     defaultMode={authMode}
                     onSuccess={() => {
                       if (onAuthSuccess) onAuthSuccess();

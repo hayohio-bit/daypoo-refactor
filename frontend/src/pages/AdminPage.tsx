@@ -293,6 +293,21 @@ const DashboardView = ({
   const totalUsersCount = stats?.totalUsers || 0;
   const [liveUsers, setLiveUsers] = useState(342);
   const [chartRange, setChartRange] = useState<'7D' | '30D'>('7D');
+  const [boosting, setBoosting] = useState(false);
+
+  const handleEngineBoost = async () => {
+    if (boosting) return;
+    setBoosting(true);
+    try {
+      await api.post('/admin/rebuild-rankings');
+      alert('🚀 엔진 가속 및 캐시 최적화가 완료되었습니다!');
+    } catch (error: any) {
+      console.error('엔진 가속 실패:', error);
+      alert('엔진 가속 실행 중 오류가 발생했습니다.');
+    } finally {
+      setBoosting(false);
+    }
+  };
 
   useEffect(() => {
     // 실제 총 유저수에 기반하여 접속자 수 시뮬레이션
@@ -759,10 +774,11 @@ const DashboardView = ({
               <h4 className="text-lg font-black mb-1 text-black">시스템 최적화</h4>
               <p className="text-xs font-bold text-black mb-6">리소스 사용량 82% 임계치 접근</p>
               <button
-                onClick={() => setActiveTab('system')}
-                className="w-full py-3 bg-[#1B4332] text-white rounded-xl text-[11px] font-black transition-all hover:bg-[#E8A838] shadow-lg shadow-green-900/20"
+                onClick={handleEngineBoost}
+                disabled={boosting}
+                className="w-full py-3 bg-[#1B4332] text-white rounded-xl text-[11px] font-black transition-all hover:bg-[#E8A838] shadow-lg shadow-green-900/20 disabled:opacity-50"
               >
-                엔진 가속 실행
+                {boosting ? '가속 실행 중...' : '엔진 가속 실행'}
               </button>
             </div>
             <Zap className="absolute -right-8 -bottom-8 w-32 h-32 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none" />
@@ -1397,6 +1413,7 @@ const UsersView = () => {
 const RecentToiletsPanel = () => {
   const [recentToilets, setRecentToilets] = useState<AdminToiletListResponse[]>([]);
   const [loadingRecent, setLoadingRecent] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     const fetchRecentToilets = async () => {
@@ -1404,9 +1421,12 @@ const RecentToiletsPanel = () => {
         const response = await api.get<PageResponse<AdminToiletListResponse>>(
           '/admin/toilets?page=0&size=5&sort=id,desc',
         );
-        setRecentToilets(response.content);
+        setRecentToilets(response?.content || []);
+        setTotalCount(response?.totalElements || 0);
       } catch (error) {
         console.error('최근 화장실 목록 조회 실패:', error);
+        setRecentToilets([]);
+        setTotalCount(0);
       } finally {
         setLoadingRecent(false);
       }
@@ -1432,7 +1452,7 @@ const RecentToiletsPanel = () => {
         <div className="flex items-center justify-between mb-6">
           <h4 className="text-xl font-black text-black">최근 등록 화장실</h4>
           <span className="text-[10px] font-black uppercase tracking-widest text-[#1B4332]/50">
-            {recentToilets.length}건
+            총 {totalCount.toLocaleString()}개 중 5개
           </span>
         </div>
         {loadingRecent ? (
@@ -1583,24 +1603,39 @@ const ToiletsView = () => {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const { kakao } = window as any;
-    if (!kakao) return;
+    let retryCount = 0;
+    const MAX_SDK_RETRIES = 100; // 최대 10초 대기
 
-    kakao.maps.load(() => {
-      const options = {
-        center: new kakao.maps.LatLng(mapCenter.lat, mapCenter.lng),
-        level: mapScale,
-      };
-      const map = new kakao.maps.Map(mapContainerRef.current, options);
-      mapRef.current = map;
+    const initMap = () => {
+      const { kakao } = window as any;
+      if (!kakao?.maps) {
+        if (retryCount++ >= MAX_SDK_RETRIES) {
+          console.error('[ToiletsView] Kakao Maps SDK 로드 타임아웃.');
+          return;
+        }
+        setTimeout(initMap, 100);
+        return;
+      }
 
-      // 지도 이동 시 센터 업데이트 (useToilets 훅 트리거)
-      kakao.maps.event.addListener(map, 'idle', () => {
-        const center = map.getCenter();
-        setMapCenter({ lat: center.getLat(), lng: center.getLng() });
-        setMapScale(map.getLevel());
+      kakao.maps.load(() => {
+        if (!mapContainerRef.current) return;
+        const options = {
+          center: new kakao.maps.LatLng(mapCenter.lat, mapCenter.lng),
+          level: mapScale,
+        };
+        const map = new kakao.maps.Map(mapContainerRef.current, options);
+        mapRef.current = map;
+
+        // 지도 이동 시 센터 업데이트 (useToilets 훅 트리거)
+        kakao.maps.event.addListener(map, 'idle', () => {
+          const center = map.getCenter();
+          setMapCenter({ lat: center.getLat(), lng: center.getLng() });
+          setMapScale(map.getLevel());
+        });
       });
-    });
+    };
+
+    initMap();
   }, []);
 
   // 2. 언마운트 시 폴링 정리
@@ -2652,7 +2687,7 @@ const StoreView = ({
             <WaveButtonComponent
               onClick={handleDeleteAllItems}
               disabled={loading || items.length === 0}
-              variant="secondary"
+              variant="error"
               size="sm"
               className="shadow-md"
               icon={<Trash2 size={14} />}
@@ -2850,11 +2885,13 @@ const SystemView = ({
   logs,
   loading,
   onRefresh,
+  setActiveTab,
 }: {
   stats: AdminStatsResponse | null;
   logs: SystemLog[];
   loading: boolean;
   onRefresh: () => void;
+  setActiveTab: (tab: AdminTab) => void;
 }) => {
   const [settings, setSettings] = useState<SystemSettings>({
     noticeEnabled: true,
@@ -2944,6 +2981,7 @@ const SystemView = ({
         </div>
         <button
           onClick={onRefresh}
+          aria-label="시스템 관제 새로고침"
           className="p-3 rounded-xl bg-white border border-gray-300 text-[#1B4332] hover:bg-black/5 transition-colors"
         >
           <RefreshCw size={18} />
@@ -2980,19 +3018,26 @@ const SystemView = ({
           </div>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-purple-500/10">
-              <MessageSquare size={24} className="text-purple-500" />
+        <div
+          onClick={() => setActiveTab('cs')}
+          className="cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <GlassCard>
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-purple-500/10">
+                <MessageSquare size={24} className="text-purple-500" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">
+                  미답변 문의
+                </p>
+                <p className="text-3xl font-black text-purple-500">
+                  {stats?.pendingInquiries || 0}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-bold text-black/40 uppercase tracking-wider mb-1">
-                미답변 문의
-              </p>
-              <p className="text-3xl font-black text-purple-500">{stats?.pendingInquiries || 0}</p>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
+        </div>
 
         <GlassCard>
           <div className="flex items-center gap-4">
@@ -3039,7 +3084,9 @@ const SystemView = ({
                 </button>
               </div>
               {settings.noticeEnabled && (
-                <div className="mt-4 p-3 bg-white border rounded-xl border-dashed">
+                <div
+                  className={`mt-4 p-3 border rounded-xl border-dashed transition-all ${editingNotice ? 'bg-yellow-50/50 border-yellow-200' : 'bg-white'}`}
+                >
                   {editingNotice ? (
                     <div className="flex gap-2">
                       <input
@@ -3127,7 +3174,7 @@ const SystemView = ({
               최신 시스템 로그
             </h3>
             <button
-              onClick={() => onRefresh()}
+              onClick={() => setActiveTab('logs')}
               className="text-[10px] font-black text-black/30 hover:text-black transition-colors uppercase"
             >
               View All
@@ -3179,21 +3226,25 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
   const [dicebearStyle, setDicebearStyle] = useState('funEmoji');
   const [dicebearSeed, setDicebearSeed] = useState('golden-crown');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async () => {
-    // 유효성 검사
-    if (!itemName.trim()) {
-      alert('아이템 명칭을 입력해주세요.');
-      return;
-    }
-    if (!itemDescription.trim()) {
-      alert('아이템 설명을 입력해주세요.');
-      return;
-    }
+    const newErrors: Record<string, string> = {};
+    if (!itemName.trim()) newErrors.itemName = '아이템 명칭을 입력해주세요.';
+    if (!itemDescription.trim()) newErrors.itemDescription = '아이템 설명을 입력해주세요.';
     if (itemPrice === '' || itemPrice < 0) {
-      alert('가격은 0 이상이어야 합니다.');
+      newErrors.itemPrice = '가격을 0 이상으로 입력해주세요.';
+    }
+    if (itemType === 'EFFECT' && !itemImageUrl.trim()) {
+      newErrors.itemImageUrl = '이펙트 이모지를 입력해주세요.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      alert('필수 입력 항목을 확인해주세요.');
       return;
     }
+    setErrors({});
 
     setIsSubmitting(true);
     try {
@@ -3231,6 +3282,7 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
       <div className="flex items-center gap-4 mb-4">
         <button
           onClick={() => setActiveTab('store')}
+          aria-label="상점 목록으로 돌아가기"
           className="p-2 rounded-xl hover:bg-black/5 transition-colors"
         >
           <ChevronLeft size={24} />
@@ -3247,11 +3299,25 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
                 <input
                   type="text"
                   value={itemImageUrl}
-                  onChange={(e) => setItemImageUrl(e.target.value)}
-                  className="w-full bg-white border border-black/10 px-4 py-2 rounded-xl text-center text-2xl placeholder:text-black/40"
+                  onChange={(e) => {
+                    setItemImageUrl(e.target.value);
+                    if (e.target.value.trim()) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.itemImageUrl;
+                        return next;
+                      });
+                    }
+                  }}
+                  required
+                  aria-required="true"
+                  className={`w-full bg-white border px-4 py-2 rounded-xl text-center text-2xl placeholder:text-black/40 focus:ring-4 ring-[#1B4332]/10 outline-none transition-all ${errors.itemImageUrl ? 'border-red-500 ring-red-500/10' : 'border-black/10'}`}
                   placeholder="🔥"
                   maxLength={2}
                 />
+                {errors.itemImageUrl && (
+                  <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.itemImageUrl}</p>
+                )}
               </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full p-4">
@@ -3300,10 +3366,24 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
                 <input
                   type="text"
                   value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold focus:ring-4 ring-[#1B4332]/10 outline-none transition-all text-black placeholder:text-black/40"
+                  onChange={(e) => {
+                    setItemName(e.target.value);
+                    if (e.target.value.trim()) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.itemName;
+                        return next;
+                      });
+                    }
+                  }}
+                  required
+                  aria-required="true"
+                  className={`w-full bg-black/[0.02] border px-5 py-4 rounded-2xl text-sm font-bold focus:ring-4 ring-[#1B4332]/10 outline-none transition-all text-black placeholder:text-black/40 ${errors.itemName ? 'border-red-500 ring-red-500/10' : 'border-black/5'}`}
                   placeholder="예: 황금 변기 칭호"
                 />
+                {errors.itemName && (
+                  <p className="text-red-500 text-xs mt-1 font-bold">{errors.itemName}</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -3313,13 +3393,26 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
                   <input
                     type="number"
                     value={itemPrice}
-                    onChange={(e) =>
-                      setItemPrice(e.target.value === '' ? '' : Number(e.target.value))
-                    }
-                    className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold text-black placeholder:text-black/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? '' : Number(e.target.value);
+                      setItemPrice(val);
+                      if (val !== '' && val >= 0) {
+                        setErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.itemPrice;
+                          return next;
+                        });
+                      }
+                    }}
+                    required
+                    aria-required="true"
+                    className={`w-full bg-black/[0.02] border px-5 py-4 rounded-2xl text-sm font-bold text-black placeholder:text-black/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:ring-4 ring-[#1B4332]/10 outline-none transition-all ${errors.itemPrice ? 'border-red-500 ring-red-500/10' : 'border-black/5'}`}
                     placeholder="5000"
                     min="0"
                   />
+                  {errors.itemPrice && (
+                    <p className="text-red-500 text-xs mt-1 font-bold">{errors.itemPrice}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-black/40 mb-2 block">
@@ -3363,10 +3456,24 @@ const AddItemView = ({ setActiveTab }: { setActiveTab: (tab: AdminTab) => void }
                 </label>
                 <textarea
                   value={itemDescription}
-                  onChange={(e) => setItemDescription(e.target.value)}
-                  className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold h-32 resize-none text-black placeholder:text-black/40"
+                  onChange={(e) => {
+                    setItemDescription(e.target.value);
+                    if (e.target.value.trim()) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.itemDescription;
+                        return next;
+                      });
+                    }
+                  }}
+                  required
+                  aria-required="true"
+                  className={`w-full bg-black/[0.02] border px-5 py-4 rounded-2xl text-sm font-bold h-32 resize-none text-black placeholder:text-black/40 focus:ring-4 ring-[#1B4332]/10 outline-none transition-all ${errors.itemDescription ? 'border-red-500 ring-red-500/10' : 'border-black/5'}`}
                   placeholder="아이템에 대한 상세 설명을 입력하세요..."
                 />
+                {errors.itemDescription && (
+                  <p className="text-red-500 text-xs mt-1 font-bold">{errors.itemDescription}</p>
+                )}
               </div>
               <div className="pt-4 flex gap-4">
                 <button
@@ -3816,12 +3923,20 @@ const AddTitleView = ({
   );
   const [threshold, setThreshold] = useState<number>(editingTitle?.achievementThreshold || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async () => {
-    if (!name.trim() || !description.trim()) {
-      alert('명칭과 설명을 모두 입력해주세요.');
+    const newErrors: Record<string, string> = {};
+    if (!name.trim()) newErrors.name = '칭호 명칭을 입력해주세요.';
+    if (!description.trim()) newErrors.description = '칭호 설명을 입력해주세요.';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      alert('필수 입력 항목을 확인해주세요.');
       return;
     }
+    setErrors({});
+
     setIsSubmitting(true);
     try {
       const payload = {
@@ -3851,7 +3966,11 @@ const AddTitleView = ({
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => setActiveTab('titles')} className="p-2 rounded-xl hover:bg-black/5">
+        <button
+          onClick={() => setActiveTab('titles')}
+          aria-label="칭호 목록으로 돌아가기"
+          className="p-2 rounded-xl hover:bg-black/5"
+        >
           <ChevronLeft size={24} />
         </button>
         <h3 className="text-2xl font-black text-black">
@@ -3870,10 +3989,24 @@ const AddTitleView = ({
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold focus:ring-4 ring-[#1B4332]/10 outline-none transition-all text-black placeholder:text-black/40"
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (e.target.value.trim()) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.name;
+                        return next;
+                      });
+                    }
+                  }}
+                  required
+                  aria-required="true"
+                  className={`w-full bg-black/[0.02] border px-5 py-4 rounded-2xl text-sm font-bold focus:ring-4 ring-[#1B4332]/10 outline-none transition-all text-black placeholder:text-black/40 ${errors.name ? 'border-red-500 ring-red-500/10' : 'border-black/5'}`}
                   placeholder="예: 전설의 쾌변가"
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1 font-bold">{errors.name}</p>
+                )}
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-black/40 mb-2 block tracking-widest">
@@ -3895,10 +4028,24 @@ const AddTitleView = ({
               </label>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-black/[0.02] border border-black/5 px-5 py-4 rounded-2xl text-sm font-bold h-32 resize-none outline-none focus:ring-4 ring-[#1B4332]/10 transition-all text-black placeholder:text-black/40"
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  if (e.target.value.trim()) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.description;
+                      return next;
+                    });
+                  }
+                }}
+                required
+                aria-required="true"
+                className={`w-full bg-black/[0.02] border px-5 py-4 rounded-2xl text-sm font-bold h-32 resize-none outline-none focus:ring-4 ring-[#1B4332]/10 transition-all text-black placeholder:text-black/40 ${errors.description ? 'border-red-500 ring-red-500/10' : 'border-black/5'}`}
                 placeholder="획득 시 표시될 설명을 입력하세요..."
               />
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1 font-bold">{errors.description}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -4212,6 +4359,7 @@ export function AdminPage() {
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
             className="p-2 rounded-xl hover:bg-black/5 transition-colors text-[#1B4332]"
           >
             {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -4387,6 +4535,7 @@ export function AdminPage() {
                   logs={logs}
                   loading={statsLoading}
                   onRefresh={fetchStats}
+                  setActiveTab={setActiveTab}
                 />
               )}
               {activeTab === 'add-item' && <AddItemView setActiveTab={setActiveTab} />}

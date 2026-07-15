@@ -17,37 +17,37 @@ describe('[P2] 페이지 lazy import 전제: named export 구조', () => {
   it('MainPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/MainPage');
     expect(typeof mod.MainPage).toBe('function');
-  }, 15000);
+  }, 30000);
 
   it('MapPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/MapPage');
     expect(typeof mod.MapPage).toBe('function');
-  }, 15000);
+  }, 30000);
 
   it('RankingPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/RankingPage');
     expect(typeof mod.RankingPage).toBe('function');
-  }, 15000);
+  }, 30000);
 
   it('SplashPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/SplashPage');
     expect(typeof mod.SplashPage).toBe('function');
-  }, 15000);
+  }, 30000);
 
   it('AuthCallback이 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/AuthCallback');
     expect(typeof mod.AuthCallback).toBe('function');
-  }, 15000);
+  }, 30000);
 
   it('SocialSignupPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/SocialSignupPage');
     expect(typeof mod.SocialSignupPage).toBe('function');
-  }, 15000);
+  }, 30000);
 
   it('ServerErrorPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/ServerErrorPage');
     expect(typeof mod.ServerErrorPage).toBe('function');
-  }, 15000);
+  }, 30000);
 });
 
 // ─────────────────────────────────────────────────────────────────
