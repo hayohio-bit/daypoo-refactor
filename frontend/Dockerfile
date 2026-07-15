@@ -6,6 +6,7 @@ WORKDIR /app
 # Vite 빌드타임 환경변수 선언
 ARG VITE_TOSS_CLIENT_KEY
 ARG VITE_KAKAO_MAP_KEY
+ARG VITE_KAKAO_MAP_API_KEY
 
 # package.json, package-lock.json 복사 (npm ci 캐시 최적화)
 COPY package*.json ./
@@ -22,6 +23,7 @@ COPY . .
 # Vite 빌드 (ARG → ENV 매핑으로 import.meta.env에 주입)
 ENV VITE_TOSS_CLIENT_KEY=$VITE_TOSS_CLIENT_KEY
 ENV VITE_KAKAO_MAP_KEY=$VITE_KAKAO_MAP_KEY
+ENV VITE_KAKAO_MAP_API_KEY=$VITE_KAKAO_MAP_API_KEY
 RUN npm run build
 
 # Production stage
