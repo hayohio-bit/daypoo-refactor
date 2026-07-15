@@ -97,9 +97,9 @@ spring:
 
 app:
   admin:
-    email: ${ADMIN_EMAIL:admin@admin.com}
-    password: ${ADMIN_PASSWORD:admin1234}
-    emails: ${ADMIN_EMAILS:admin@admin.com}
+    email: ${ADMIN_EMAIL:admin@daypoo.com}
+    password: ${ADMIN_PASSWORD:p00dle****}
+    emails: ${ADMIN_EMAILS:hayohio@gmail.com}
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
   cors:
@@ -144,8 +144,8 @@ management:
 
 springdoc:
   swagger-ui:
-    url: /openapi.yaml
-    path: /docs
+    url: /api/openapi.yaml
+    path: /api/docs
   api-docs:
     enabled: true # 스웨거 UI 구동을 위해 활성화 필요
 

@@ -34,6 +34,7 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
     // 관리자 관련 API나 스웨거 등은 점검 모드에서도 허용
     String path = request.getRequestURI();
     if (path.startsWith("/api/v1/admin")
+        || path.startsWith("/api/docs")
         || path.contains("swagger")
         || path.contains("api-docs")
         || path.contains("openapi.yaml")) {
