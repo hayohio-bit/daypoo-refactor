@@ -138,16 +138,24 @@ function MiniMap({
 
   return (
     <div
-      ref={miniMapRef}
+      className="relative w-full h-[180px] rounded-2xl overflow-hidden border-[2px] border-emerald-800/40 bg-[#0c1e18] flex flex-col items-center justify-center text-center px-4"
       style={{
-        width: '100%',
-        height: '180px',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        border: '2px solid rgba(82,183,136,0.3)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(82,183,136,0.1)',
       }}
-    />
+    >
+      <div ref={miniMapRef} className="absolute inset-0 w-full h-full" />
+      {mapError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0c1e18]/90 z-10">
+          <p className="text-sm font-bold text-[#E85D5D] mb-1">🗺️ 지도를 불러올 수 없습니다</p>
+          <p className="text-xs text-emerald-400/50">아래 목록을 확인하여 이동하세요.</p>
+        </div>
+      )}
+      {!userPos && !mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0c1e18]/90 z-10">
+          <p className="text-xs text-emerald-400/80 animate-pulse">📍 내 위치를 수신하는 중...</p>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -33,20 +33,25 @@ export interface MapViewHandle {
 }
 
 // ── 카카오맵 마커 생성 헬퍼 ─────────────────────────────────────────
-function createToiletMarker(kakao: any, toilet: ToiletData) {
+function createToiletMarker(
+  kakao: any,
+  toilet: ToiletData,
+  onSelectToilet: (toilet: ToiletData) => void,
+) {
   const emoji = toilet.isVisited ? '💩' : '🚻';
   const markerBg = toilet.isVisited ? '#1B4332' : '#8a9a8a';
 
-  // H8: JSON.stringify 대신 ID만 전달하여 XSS 방지
-  const content = `
-    <div onclick="window.setSelectedToiletByIdGlobal('${toilet.id}')" style="
-      position:relative;
-      display:flex;flex-direction:column;align-items:center;
-      cursor:pointer;
-      width:36px; height:44px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    ">
+  const contentEl = document.createElement('div');
+  contentEl.style.position = 'relative';
+  contentEl.style.display = 'flex';
+  contentEl.style.flexDirection = 'column';
+  contentEl.style.alignItems = 'center';
+  contentEl.style.cursor = 'pointer';
+  contentEl.style.width = '36px';
+  contentEl.style.height = '44px';
+  contentEl.style.webkitFontSmoothing = 'antialiased';
+
+  contentEl.innerHTML = `
       <div style="
         width:36px;height:36px;border-radius:50%;
         background:${markerBg};
@@ -64,7 +69,13 @@ function createToiletMarker(kakao: any, toilet: ToiletData) {
         margin-top:-1px;
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
       "></div>
-    </div>`;
+  `;
+
+  contentEl.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelectToilet(toilet);
+  });
 
   const marker = new kakao.maps.Marker({
     position: new kakao.maps.LatLng(toilet.lat, toilet.lng),
@@ -76,7 +87,7 @@ function createToiletMarker(kakao: any, toilet: ToiletData) {
   });
 
   const overlay = new kakao.maps.CustomOverlay({
-    content,
+    content: contentEl,
     position: marker.getPosition(),
     yAnchor: 1.15,
     zIndex: toilet.isVisited ? 5 : 3,
@@ -294,7 +305,7 @@ export const MapView = memo(
           }
 
           // 새 마커 생성 (추가 또는 갱신된 경우)
-          const { marker, overlay } = createToiletMarker(window.kakao, toilet);
+          const { marker, overlay } = createToiletMarker(window.kakao, toilet, onSelectToilet);
           if (currentLevel < 5) overlay.setMap(mapRef.current);
           markersRef.current.set(toilet.id, { marker, overlay });
           newMarkers.push(marker);
