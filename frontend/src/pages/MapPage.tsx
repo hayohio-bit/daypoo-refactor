@@ -8,6 +8,7 @@ import { ToiletPopup } from '../components/map/ToiletPopup';
 import { ToiletSearchBar } from '../components/map/ToiletSearchBar';
 import { VisitModal, type VisitModalResult } from '../components/map/VisitModal';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import { useGeoTracking } from '../hooks/useGeoTracking';
 import { useToilets } from '../hooks/useToilets';
 import { api } from '../services/apiClient';
@@ -42,6 +43,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   }, [visitCounts]);
 
   const { refreshUser, isAuthenticated } = useAuth();
+  const { showToast } = useNotification();
 
   // ── 비즈니스 로직 ──────────────────────────────────────────
 
@@ -59,13 +61,13 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   const handleFilterChange = useCallback(
     (newFilter: FilterMode) => {
       if (newFilter !== 'all' && !isAuthenticated) {
-        alert('로그인이 필요한 기능입니다.');
+        showToast('로그인이 필요합니다', '해당 필터링은 로그인 이후 사용 가능합니다.', 'warn');
         openAuth('login');
         return;
       }
       setFilter(newFilter);
     },
-    [isAuthenticated, openAuth],
+    [isAuthenticated, openAuth, showToast],
   );
 
   const handleFavoriteToggle = useCallback(

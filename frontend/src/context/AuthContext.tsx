@@ -52,36 +52,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     const token = getToken('accessToken');
 
-    console.log('[AuthContext] refreshUser called. Has token:', !!token);
-
     if (!token) {
-      console.log('[AuthContext] No token found. Setting user to null.');
       setUser(null);
       setLoading(false);
       return;
     }
 
     try {
-      console.log('[AuthContext] Fetching user info from /auth/me...');
       const userData = await api.get<any>('/auth/me');
-      console.log('[AuthContext] ✅ User data received:', {
-        email: userData.email,
-        nickname: userData.nickname,
-        role: userData.role,
-      });
       setUser(userData as UserResponse);
     } catch (err: any) {
-      console.error('[AuthContext] ❌ Failed to fetch user:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-      });
-      // 토큰이 유효하지 않으면 로그아웃 처리
+      console.error('[AuthContext] Failed to fetch user info');
       removeTokens();
       setUser(null);
     } finally {
       setLoading(false);
-      console.log('[AuthContext] Loading complete. User:', !!user);
     }
   }, []);
 

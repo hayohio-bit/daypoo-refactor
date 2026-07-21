@@ -1,39 +1,70 @@
 package com.daypoo.api.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.daypoo.api.dto.AdminRoleUpdateRequest;
+import com.daypoo.api.dto.AdminUserDetailResponse;
 import com.daypoo.api.dto.AdminUserListResponse;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.entity.enums.SubscriptionPlan;
 import com.daypoo.api.service.AdminManagementService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+/**
+ * AdminUserController Standalone MockMvc 테스트.
+ * DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다.
+ */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("관리자 유저 컨트롤러 단위 테스트")
+@DisplayName("관리자 유저 컨트롤러 MockMvc 테스트")
 class AdminUserControllerTest {
 
-  @InjectMocks private AdminUserController adminUserController;
+  private MockMvc mockMvc;
+  // JavaTimeModule 등록으로 LocalDateTime 직렬화 지원
+  private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
   @Mock private AdminManagementService adminManagementService;
 
+  @InjectMocks private AdminUserController adminUserController;
+
+  @BeforeEach
+  void setUp() {
+    // Page 직렬화를 위해 JavaTimeModule이 포함된 커스텀 MappingJackson2HttpMessageConverter 사용
+    MappingJackson2HttpMessageConverter converter =
+        new MappingJackson2HttpMessageConverter(objectMapper);
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(adminUserController)
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+            .setMessageConverters(converter)
+            .build();
+  }
+
   @Test
-  @DisplayName("성공: 유저 목록 조회 위임 확인")
-  void getUsers_success() {
+  @DisplayName("성공: 유저 목록 조회 API")
+  void getUsers_success() throws Exception {
     // given
     AdminUserListResponse userResponse =
         AdminUserListResponse.builder()
@@ -48,21 +79,73 @@ class AdminUserControllerTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    Pageable pageable = PageRequest.of(0, 20);
     given(adminManagementService.getUsers(any(), any(), any(), any(Pageable.class)))
-        .willReturn(new PageImpl<>(Collections.singletonList(userResponse)));
+        .willReturn(new PageImpl<>(new ArrayList<>(Collections.singletonList(userResponse)), PageRequest.of(0, 20), 1));
 
-    // when
-    ResponseEntity<Page<AdminUserListResponse>> response =
-        adminUserController.getUsers("test", Role.ROLE_USER, SubscriptionPlan.BASIC, pageable);
+    // when & then
+    mockMvc
+        .perform(
+            get("/api/v1/admin/users")
+                .param("search", "test")
+                .param("role", "ROLE_USER")
+                .param("plan", "BASIC")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].email").value("test@example.com"))
+        .andExpect(jsonPath("$.content[0].nickname").value("PoopKing"));
+  }
 
-    // then
-    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-    Page<AdminUserListResponse> body = response.getBody();
-    assertThat(body).isNotNull();
-    assertThat(body.getContent()).hasSize(1);
-    assertThat(body.getContent().get(0).email()).isEqualTo("test@example.com");
-    verify(adminManagementService, times(1))
-        .getUsers(eq("test"), eq(Role.ROLE_USER), eq(SubscriptionPlan.BASIC), eq(pageable));
+  @Test
+  @DisplayName("성공: 유저 상세 정보 조회 API")
+  void getUserDetail_success() throws Exception {
+    // given
+    AdminUserDetailResponse detailResponse =
+        AdminUserDetailResponse.builder()
+            .id(1L)
+            .email("test@example.com")
+            .nickname("PoopKing")
+            .role(Role.ROLE_USER)
+            .plan(SubscriptionPlan.BASIC)
+            .level(1)
+            .points(100L)
+            .createdAt(LocalDateTime.now())
+            .build();
+
+    given(adminManagementService.getUserDetail(1L)).willReturn(detailResponse);
+
+    // when & then
+    mockMvc
+        .perform(get("/api/v1/admin/users/{id}", 1L).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.email").value("test@example.com"))
+        .andExpect(jsonPath("$.nickname").value("PoopKing"));
+  }
+
+  @Test
+  @DisplayName("성공: 유저 권한 변경 API")
+  void updateUserRole_success() throws Exception {
+    // given
+    AdminRoleUpdateRequest request = new AdminRoleUpdateRequest(Role.ROLE_ADMIN);
+    doNothing().when(adminManagementService).updateUserRole(eq(1L), eq(Role.ROLE_ADMIN), any());
+
+    // when & then
+    mockMvc
+        .perform(
+            patch("/api/v1/admin/users/{id}/role", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("성공: 유저 영구 삭제 API")
+  void deleteUser_success() throws Exception {
+    // given
+    doNothing().when(adminManagementService).deleteUser(eq(1L), any());
+
+    // when & then
+    mockMvc
+        .perform(delete("/api/v1/admin/users/{id}", 1L).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 }
