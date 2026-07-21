@@ -5,6 +5,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
   Settings,
   Sparkles,
   Trophy,
