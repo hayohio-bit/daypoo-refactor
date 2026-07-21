@@ -34,10 +34,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-/**
- * AdminUserController Standalone MockMvc 테스트.
- * DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다.
- */
+/** AdminUserController Standalone MockMvc 테스트. DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다. */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("관리자 유저 컨트롤러 MockMvc 테스트")
 class AdminUserControllerTest {
@@ -80,7 +77,11 @@ class AdminUserControllerTest {
             .build();
 
     given(adminManagementService.getUsers(any(), any(), any(), any(Pageable.class)))
-        .willReturn(new PageImpl<>(new ArrayList<>(Collections.singletonList(userResponse)), PageRequest.of(0, 20), 1));
+        .willReturn(
+            new PageImpl<>(
+                new ArrayList<>(Collections.singletonList(userResponse)),
+                PageRequest.of(0, 20),
+                1));
 
     // when & then
     mockMvc

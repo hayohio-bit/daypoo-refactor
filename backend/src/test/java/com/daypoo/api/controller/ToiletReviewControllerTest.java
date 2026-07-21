@@ -29,10 +29,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-/**
- * ToiletReviewController Standalone MockMvc 테스트.
- * DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다.
- */
+/** ToiletReviewController Standalone MockMvc 테스트. DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다. */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("화장실 리뷰 컨트롤러 MockMvc 테스트")
 class ToiletReviewControllerTest {
@@ -105,7 +102,8 @@ class ToiletReviewControllerTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    given(toiletReviewService.getRecentReviews(10L)).willReturn(Collections.singletonList(response));
+    given(toiletReviewService.getRecentReviews(10L))
+        .willReturn(Collections.singletonList(response));
 
     // when & then
     mockMvc

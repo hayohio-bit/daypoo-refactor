@@ -31,10 +31,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-/**
- * AuthController Standalone MockMvc 테스트.
- * DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다.
- */
+/** AuthController Standalone MockMvc 테스트. DB, Redis 등 외부 인프라 없이 컨트롤러 레이어만 단독 검증합니다. */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("인증 컨트롤러 MockMvc 테스트")
 class AuthControllerTest {
