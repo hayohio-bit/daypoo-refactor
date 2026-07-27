@@ -451,9 +451,7 @@ export const HomeTab = ({
                   {preview.owned
                     ? `${preview.type} 장착 가능`
                     : `구매에 ${(
-                        preview.discountPrice ??
-                        preview.price ??
-                        0
+                        preview.discountPrice ?? preview.price ?? 0
                       ).toLocaleString()}P가 차감됩니다.`}
                 </p>
               </div>

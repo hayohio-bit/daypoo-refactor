@@ -145,7 +145,10 @@ export function RankingSkeleton() {
       {/* 랭킹 리스트 스켈레톤 */}
       <div className="space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-gray-100">
+          <div
+            key={i}
+            className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-gray-100"
+          >
             <LoadingSkeleton width={24} height={20} />
             <LoadingSkeleton width={44} height={44} borderRadius="50%" />
             <div className="flex-1 space-y-2">
@@ -159,4 +162,3 @@ export function RankingSkeleton() {
     </div>
   );
 }
-

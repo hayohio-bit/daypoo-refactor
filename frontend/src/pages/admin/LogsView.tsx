@@ -67,8 +67,8 @@ export const LogsView = ({ logs, loading }: LogsViewProps) => {
                         log.level === 'ERROR'
                           ? COLORS.error
                           : log.level === 'WARN'
-                          ? COLORS.warning
-                          : COLORS.textSecondary,
+                            ? COLORS.warning
+                            : COLORS.textSecondary,
                     }}
                   >
                     {log.level || 'INFO'}
@@ -84,7 +84,9 @@ export const LogsView = ({ logs, loading }: LogsViewProps) => {
                   <td className="px-8 py-5 text-right flex justify-end">
                     <span
                       className={`px-2 py-0.5 rounded-md text-[9px] font-black ${
-                        log.level === 'ERROR' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                        log.level === 'ERROR'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-green-100 text-green-700'
                       }`}
                     >
                       {log.level === 'ERROR' ? 'FAIL' : 'OK'}

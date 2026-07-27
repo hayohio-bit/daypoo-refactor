@@ -112,9 +112,7 @@ export function DepthDeckCarousel({
                 damping: 32,
                 mass: 0.9,
               }}
-              whileHover={
-                s.isCenter ? { scale: 1.04, y: -6 } : { scale: s.scale * 1.04, y: -3 }
-              }
+              whileHover={s.isCenter ? { scale: 1.04, y: -6 } : { scale: s.scale * 1.04, y: -3 }}
               drag={s.isCenter ? 'x' : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
@@ -139,8 +137,8 @@ export function DepthDeckCarousel({
                   border: card.selected
                     ? '2px solid rgba(232,168,56,0.6)'
                     : s.isCenter
-                    ? '1.5px solid rgba(26,43,39,0.12)'
-                    : '1px solid rgba(26,43,39,0.07)',
+                      ? '1.5px solid rgba(26,43,39,0.12)'
+                      : '1px solid rgba(26,43,39,0.07)',
                   boxShadow: s.isCenter
                     ? '0 20px 48px rgba(26,43,39,0.12), 0 4px 16px rgba(26,43,39,0.06)'
                     : '0 8px 24px rgba(26,43,39,0.06)',

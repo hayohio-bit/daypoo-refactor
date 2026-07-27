@@ -1,24 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Activity,
-  Database,
-  Navigation,
-  Plus,
-  RefreshCw,
-  Sparkles,
-  Star,
-  X,
-} from 'lucide-react';
+import { Activity, Database, Navigation, Plus, RefreshCw, Sparkles, Star, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { GlassCard } from '../../components/common/GlassCard';
 import { useToilets } from '../../hooks/useToilets';
 import { api } from '../../services/apiClient';
-import type {
-  AdminToiletListResponse,
-  PageResponse,
-  SyncStatusResponse,
-} from '../../types/admin';
+import type { AdminToiletListResponse, PageResponse, SyncStatusResponse } from '../../types/admin';
 import type { ToiletData } from '../../types/toilet';
 import { COLORS } from './adminCommons';
 
@@ -504,7 +491,9 @@ export const ToiletsView = () => {
                                   {review.nickname || '익명'}
                                 </span>
                                 {review.emojiTags && (
-                                  <span className="text-[10px] text-black/30">{review.emojiTags}</span>
+                                  <span className="text-[10px] text-black/30">
+                                    {review.emojiTags}
+                                  </span>
                                 )}
                               </div>
                             </div>

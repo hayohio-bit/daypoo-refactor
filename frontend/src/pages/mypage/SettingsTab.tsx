@@ -1,14 +1,5 @@
 import { AnimatePresence, motion, useInView } from 'framer-motion';
-import {
-  Activity,
-  Calendar,
-  Crown,
-  Lock,
-  LogOut,
-  Package,
-  Trash2,
-  Trophy,
-} from 'lucide-react';
+import { Activity, Calendar, Crown, Lock, LogOut, Package, Trash2, Trophy } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/apiClient';
@@ -328,8 +319,8 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
                             {subscriptionInfo.status === 'ACTIVE'
                               ? '활성'
                               : subscriptionInfo.status === 'CANCELLED'
-                              ? '해지됨'
-                              : '만료'}
+                                ? '해지됨'
+                                : '만료'}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
@@ -394,7 +385,9 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
                 <>
                   <div
                     className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto ${
-                      modalType === 'withdraw' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'
+                      modalType === 'withdraw'
+                        ? 'bg-red-50 text-red-500'
+                        : 'bg-emerald-50 text-emerald-600'
                     }`}
                   >
                     {modalType === 'nickname' ? (
@@ -409,15 +402,15 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
                     {modalType === 'nickname'
                       ? '새로운 닉네임'
                       : modalType === 'password'
-                      ? '비밀번호 재설정'
-                      : '계정 삭제'}
+                        ? '비밀번호 재설정'
+                        : '계정 삭제'}
                   </h3>
                   <p className="text-xs font-medium text-gray-400 mb-8 leading-relaxed text-center">
                     {modalType === 'nickname'
                       ? '부르고 싶은 멋진 닉네임을 입력해주세요.'
                       : modalType === 'password'
-                      ? '보안을 위해 강력한 비밀번호를 설정하세요.'
-                      : '탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.'}
+                        ? '보안을 위해 강력한 비밀번호를 설정하세요.'
+                        : '탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.'}
                   </p>
 
                   {modalType !== 'withdraw' && (
@@ -442,8 +435,8 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
                         modalType === 'nickname'
                           ? handleNicknameChange
                           : modalType === 'password'
-                          ? handlePasswordChange
-                          : handleWithdraw
+                            ? handlePasswordChange
+                            : handleWithdraw
                       }
                       disabled={isSubmitting}
                       className={`flex-1 py-4 text-white font-black rounded-[20px] shadow-xl disabled:opacity-50 transition-colors ${

@@ -17,11 +17,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/apiClient';
-import type {
-  AdminStatsResponse,
-  AdminTitleResponse,
-  ItemResponse,
-} from '../types/admin';
+import type { AdminStatsResponse, AdminTitleResponse, ItemResponse } from '../types/admin';
 
 // ── 분할된 서브 뷰 임포트 ───────────────────────────────────────────────
 import { COLORS, type AdminTab } from './admin/adminCommons';
@@ -276,7 +272,9 @@ export function AdminPage() {
               {activeTab === 'dashboard' ? (
                 <LayoutDashboard size={20} style={{ color: COLORS.primary }} />
               ) : activeTab === 'users' ? (
-                <span className="text-[#1B4332] font-black text-sm flex items-center justify-center w-5 h-5">U</span>
+                <span className="text-[#1B4332] font-black text-sm flex items-center justify-center w-5 h-5">
+                  U
+                </span>
               ) : activeTab === 'toilets' ? (
                 <MapPin size={20} style={{ color: COLORS.primary }} />
               ) : activeTab === 'cs' ? (
@@ -294,24 +292,24 @@ export function AdminPage() {
                 {activeTab === 'dashboard'
                   ? '관리자 대시보드'
                   : activeTab === 'users'
-                  ? '유저 제어 센터'
-                  : activeTab === 'toilets'
-                  ? '맵 엔진 관제'
-                  : activeTab === 'cs'
-                  ? '고객 통합 지원'
-                  : activeTab === 'store'
-                  ? '프리미엄 샵 관리'
-                  : activeTab === 'titles'
-                  ? '칭호 시스템 엔진'
-                  : activeTab === 'add-title'
-                  ? '신규 칭호 마스터 클래스'
-                  : activeTab === 'add-item'
-                  ? '신규 아이템 카탈로그'
-                  : activeTab === 'edit-item'
-                  ? '아이템 데이터 마스터 수정'
-                  : activeTab === 'logs'
-                  ? '시스템 런타임 로그'
-                  : '시스템 인프라 설정'}
+                    ? '유저 제어 센터'
+                    : activeTab === 'toilets'
+                      ? '맵 엔진 관제'
+                      : activeTab === 'cs'
+                        ? '고객 통합 지원'
+                        : activeTab === 'store'
+                          ? '프리미엄 샵 관리'
+                          : activeTab === 'titles'
+                            ? '칭호 시스템 엔진'
+                            : activeTab === 'add-title'
+                              ? '신규 칭호 마스터 클래스'
+                              : activeTab === 'add-item'
+                                ? '신규 아이템 카탈로그'
+                                : activeTab === 'edit-item'
+                                  ? '아이템 데이터 마스터 수정'
+                                  : activeTab === 'logs'
+                                    ? '시스템 런타임 로그'
+                                    : '시스템 인프라 설정'}
               </h2>
               <div className="flex items-center gap-2 text-[10px] text-black/40 font-bold">
                 <Calendar size={12} /> {currentTime.toLocaleDateString()}

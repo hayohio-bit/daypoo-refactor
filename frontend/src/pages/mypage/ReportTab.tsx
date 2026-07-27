@@ -202,10 +202,10 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                         {!hasData
                           ? '분석 데이터 없음'
                           : reportData?.healthScore > 80
-                          ? '아주 좋음'
-                          : reportData?.healthScore > 60
-                          ? '좋음'
-                          : '보통'}
+                            ? '아주 좋음'
+                            : reportData?.healthScore > 60
+                              ? '좋음'
+                              : '보통'}
                         <Sparkles size={22} className="text-amber-400" />
                       </p>
                     </div>
@@ -224,7 +224,8 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                       <Sparkles size={60} />
                     </div>
                     <p className="text-[11px] sm:text-[13px] font-black text-emerald-300 mb-2 sm:mb-3 uppercase tracking-[0.2em] flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> AI Guide Poo Insight
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> AI Guide Poo
+                      Insight
                     </p>
                     <p className="text-base sm:text-xl font-bold leading-relaxed relative z-10 tracking-tight">
                       "
@@ -534,7 +535,8 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                     정밀 분석 리포트 잠금
                   </h3>
                   <p className="text-gray-500 font-bold text-xs sm:text-base mb-5 sm:mb-10 leading-relaxed">
-                    {activeSubTab === 'weekly' ? '7일간의' : '30일간의'} 누적 기록을 바탕으로 산출되는 <br />
+                    {activeSubTab === 'weekly' ? '7일간의' : '30일간의'} 누적 기록을 바탕으로
+                    산출되는 <br />
                     <span className="text-emerald-700">장 컨디션 점수</span>와{' '}
                     <span className="text-emerald-700">AI 푸의 맞춤 가이드</span>는<br />
                     <span className="text-[#1B4332] font-black">
@@ -548,7 +550,8 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                     onClick={() => navigate('/premium')}
                     className="w-full py-3.5 sm:py-6 bg-[#1B4332] text-white font-black rounded-[18px] sm:rounded-[28px] shadow-xl shadow-emerald-900/30 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-lg"
                   >
-                    {activeSubTab === 'weekly' ? 'PRO' : 'PREMIUM'} 멤버십 가입하고 확인하기 <ArrowRight size={18} />
+                    {activeSubTab === 'weekly' ? 'PRO' : 'PREMIUM'} 멤버십 가입하고 확인하기{' '}
+                    <ArrowRight size={18} />
                   </motion.button>
                 </motion.div>
               </div>
@@ -680,7 +683,8 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                         className="text-sm leading-relaxed mb-3"
                         style={{ color: 'rgba(26,43,39,0.7)' }}
                       >
-                        성격이 급하신가요? 배변 데이터가 조금 불규칙해요. 다음 주는 조금 더 여유를 가져보세요.
+                        성격이 급하신가요? 배변 데이터가 조금 불규칙해요. 다음 주는 조금 더 여유를
+                        가져보세요.
                       </p>
                     </div>
                   </>

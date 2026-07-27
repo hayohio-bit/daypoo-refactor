@@ -17,18 +17,10 @@ import { KnockoutWobble } from '../components/common/KnockoutWobble';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/apiClient';
 import type { UserResponse } from '../types/api';
-import {
-  generateProfileAvatar,
-  isEmoji,
-  parseDicebearUrl,
-} from '../utils/avatar';
+import { generateProfileAvatar, isEmoji, parseDicebearUrl } from '../utils/avatar';
 
 // ── 분할된 서브 탭 임포트 ───────────────────────────────────────────────
-import {
-  AvatarEffect,
-  type AvatarItem,
-  type TabKey,
-} from './mypage/myPageCommons';
+import { AvatarEffect, type AvatarItem, type TabKey } from './mypage/myPageCommons';
 import { HomeTab } from './mypage/HomeTab';
 import { CollectionTab } from './mypage/CollectionTab';
 import { ReportTab } from './mypage/ReportTab';
@@ -398,8 +390,8 @@ export function MyPage() {
     user?.subscription?.plan === 'PREMIUM'
       ? 'PREMIUM'
       : user?.subscription?.plan === 'PRO'
-      ? 'PRO'
-      : 'FREE';
+        ? 'PRO'
+        : 'FREE';
 
   // 상점 데이터 호출 API
   const fetchShopData = useCallback(async () => {
@@ -488,8 +480,7 @@ export function MyPage() {
 
   // 소셜 로그인 회원의 닉네임 설정 권장 여부
   const needsNicknameSetup =
-    user?.nickname &&
-    (user.nickname.startsWith('user_') || user.nickname.startsWith('kakaouser_'));
+    user?.nickname && (user.nickname.startsWith('user_') || user.nickname.startsWith('kakaouser_'));
 
   return (
     <div
@@ -507,9 +498,7 @@ export function MyPage() {
       <TabBar active={tab} onChange={setTab} />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {needsNicknameSetup && (
-          <NicknameSetupBanner onSettingsClick={() => setTab('settings')} />
-        )}
+        {needsNicknameSetup && <NicknameSetupBanner onSettingsClick={() => setTab('settings')} />}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -544,9 +533,7 @@ export function MyPage() {
                 fetchShopData={fetchShopData}
               />
             )}
-            {tab === 'report' && (
-              <ReportTab isPro={isPro} membershipName={membershipName} />
-            )}
+            {tab === 'report' && <ReportTab isPro={isPro} membershipName={membershipName} />}
             {tab === 'settings' && (
               <SettingsTab
                 user={user}

@@ -1,12 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ChevronLeft,
-  ChevronRight,
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  X,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageSquare, Plus, RefreshCw, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { GlassCard } from '../../components/common/GlassCard';
@@ -158,11 +151,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
             size="sm"
             className="shadow-lg animate-none"
             icon={
-              generatingData ? (
-                <RefreshCw size={14} className="animate-spin" />
-              ) : (
-                <Plus size={14} />
-              )
+              generatingData ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />
             }
           >
             {generatingData ? '데이터 생성 중...' : '테스트 데이터 30개 생성'}

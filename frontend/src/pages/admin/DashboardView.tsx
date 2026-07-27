@@ -79,11 +79,7 @@ const StatWidget = ({
               isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
             }`}
           >
-            {isUp ? (
-              <TrendingUp size={12} />
-            ) : (
-              <TrendingUp size={12} className="rotate-180" />
-            )}
+            {isUp ? <TrendingUp size={12} /> : <TrendingUp size={12} className="rotate-180" />}
             {trend}
           </div>
         </div>
@@ -458,7 +454,11 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                       />
                     </filter>
                   </defs>
-                  <CartesianGrid strokeDasharray="12 12" vertical={false} stroke="rgba(0,0,0,0.02)" />
+                  <CartesianGrid
+                    strokeDasharray="12 12"
+                    vertical={false}
+                    stroke="rgba(0,0,0,0.02)"
+                  />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
@@ -588,7 +588,10 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                     className="flex items-center justify-between p-3.5 rounded-[20px] bg-black/[0.03] border border-transparent hover:border-black/5 hover:bg-white transition-all shadow-sm group/item"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-3.5 h-3.5 rounded-full shadow-lg" style={{ background: item.color }} />
+                      <div
+                        className="w-3.5 h-3.5 rounded-full shadow-lg"
+                        style={{ background: item.color }}
+                      />
                       <div className="flex flex-col">
                         <span className="text-[13px] font-black text-black/80">{item.name}</span>
                         <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">
@@ -598,7 +601,10 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                     </div>
                     <div className="text-right">
                       <div className="text-[14px] font-black text-black">
-                        {totalUsersCount > 0 ? ((item.value / totalUsersCount) * 100).toFixed(1) : 0}%
+                        {totalUsersCount > 0
+                          ? ((item.value / totalUsersCount) * 100).toFixed(1)
+                          : 0}
+                        %
                       </div>
                       <div className="text-[9px] font-bold text-black/20">
                         {item.value.toLocaleString()} Users
@@ -666,8 +672,8 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                       log.level === 'ERROR'
                         ? COLORS.error
                         : log.level === 'WARN'
-                        ? COLORS.warning
-                        : COLORS.primary,
+                          ? COLORS.warning
+                          : COLORS.primary,
                   }}
                 >
                   {log.level === 'ERROR' ? <AlertTriangle size={18} /> : <Activity size={18} />}
@@ -734,7 +740,10 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                 미해결 티켓: {stats?.pendingInquiries || 0}건
               </p>
             </div>
-            <ChevronRight size={20} className="ml-auto text-black/10 group-hover:text-black/30 transition-all" />
+            <ChevronRight
+              size={20}
+              className="ml-auto text-black/10 group-hover:text-black/30 transition-all"
+            />
           </div>
         </div>
       </div>

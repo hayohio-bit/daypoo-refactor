@@ -1,13 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-  Search,
-  Settings,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, Search, Settings, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { api } from '../../services/apiClient';

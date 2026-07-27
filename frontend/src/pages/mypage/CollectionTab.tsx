@@ -143,7 +143,7 @@ export const CollectionTab = ({
         className="bg-white rounded-[40px] border border-gray-100 p-8 flex flex-col items-center justify-center min-h-[380px] shadow-sm relative overflow-hidden"
       >
         <div className="absolute -right-20 -top-20 w-60 h-60 bg-[#1B4332]/5 rounded-full blur-3xl pointer-events-none" />
-        
+
         {filteredItems.length > 0 ? (
           <DepthDeckCarousel cards={deckCards} onSelect={handleSelect} />
         ) : (
@@ -226,10 +226,10 @@ export const CollectionTab = ({
                 {saving
                   ? '적용 중...'
                   : preview
-                  ? preview.isEquipped
-                    ? '장착 해제'
-                    : '장착하기'
-                  : '장착 해제'}
+                    ? preview.isEquipped
+                      ? '장착 해제'
+                      : '장착하기'
+                    : '장착 해제'}
               </button>
               {preview && (
                 <button

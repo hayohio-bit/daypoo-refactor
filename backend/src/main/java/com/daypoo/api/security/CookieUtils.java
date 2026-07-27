@@ -11,8 +11,7 @@ import java.util.Base64;
 import java.util.Optional;
 
 /**
- * OAuth2 인증 플로우에서 사용하는 쿠키 유틸리티.
- * Java 직렬화를 사용하되 Spring의 deprecated SerializationUtils 대신 직접 구현.
+ * OAuth2 인증 플로우에서 사용하는 쿠키 유틸리티. Java 직렬화를 사용하되 Spring의 deprecated SerializationUtils 대신 직접 구현.
  * OAuth2AuthorizationRequest가 Serializable 인터페이스를 구현하므로 Java 직렬화 사용.
  */
 public class CookieUtils {
@@ -54,9 +53,7 @@ public class CookieUtils {
     }
   }
 
-  /**
-   * 객체를 Java 직렬화 후 Base64 URL-safe 인코딩하여 쿠키 저장용 문자열로 변환.
-   */
+  /** 객체를 Java 직렬화 후 Base64 URL-safe 인코딩하여 쿠키 저장용 문자열로 변환. */
   public static String serialize(Object object) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -69,9 +66,7 @@ public class CookieUtils {
     }
   }
 
-  /**
-   * Base64 URL-safe 디코딩 후 Java 역직렬화.
-   */
+  /** Base64 URL-safe 디코딩 후 Java 역직렬화. */
   @SuppressWarnings("unchecked")
   public static <T> T deserialize(Cookie cookie, Class<T> cls) {
     try {

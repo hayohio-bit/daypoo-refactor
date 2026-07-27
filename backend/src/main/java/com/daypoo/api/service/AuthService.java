@@ -64,9 +64,7 @@ public class AuthService {
     return Role.ROLE_USER;
   }
 
-  /**
-   * Refresh token을 Redis에 저장. refresh-token-validity-in-seconds 값을 TTL로 사용.
-   */
+  /** Refresh token을 Redis에 저장. refresh-token-validity-in-seconds 값을 TTL로 사용. */
   private void storeRefreshToken(String email, String refreshToken) {
     long remainingTime = jwtProvider.getRemainingTime(refreshToken);
     if (remainingTime > 0) {

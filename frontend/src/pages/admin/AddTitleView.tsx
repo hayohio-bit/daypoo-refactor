@@ -103,7 +103,9 @@ export const AddTitleView = ({ setActiveTab, editingTitle }: AddTitleViewProps) 
                   }`}
                   placeholder="예: 전설의 쾌변가"
                 />
-                {errors.name && <p className="text-red-500 text-xs mt-1 font-bold">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1 font-bold">{errors.name}</p>
+                )}
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-black/40 mb-2 block tracking-widest">
@@ -187,8 +189,8 @@ export const AddTitleView = ({ setActiveTab, editingTitle }: AddTitleViewProps) 
                 {isSubmitting
                   ? '데이터 처리 엔진 작동 중...'
                   : editingTitle
-                  ? '수정 완료'
-                  : '시스템 등록'}
+                    ? '수정 완료'
+                    : '시스템 등록'}
               </button>
               <button
                 onClick={() => setActiveTab('titles')}

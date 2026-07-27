@@ -39,13 +39,7 @@ export interface SystemViewProps {
   setActiveTab: (tab: AdminTab) => void;
 }
 
-export const SystemView = ({
-  stats,
-  logs,
-  loading,
-  onRefresh,
-  setActiveTab,
-}: SystemViewProps) => {
+export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: SystemViewProps) => {
   const [settings, setSettings] = useState<SystemSettings>({
     noticeEnabled: true,
     noticeMessage: '🎉 Day.Poo 서비스가 정식 오픈했습니다!',
