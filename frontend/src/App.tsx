@@ -113,6 +113,20 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function NavigationHelper({ authOpen }: { authOpen: boolean }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // 모달이 닫혔는데 현재 URL이 /login이나 /signup인 경우 /main으로 이동
+    if (!authOpen && (location.pathname === '/login' || location.pathname === '/signup')) {
+      navigate('/main', { replace: true });
+    }
+  }, [authOpen, location.pathname, navigate]);
+
+  return null;
+}
+
 function App() {
   const [onAuthSuccess, setOnAuthSuccess] = useState<(() => void) | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -127,12 +141,9 @@ function App() {
       alert(
         '소셜 로그인 처리 중 문제가 발생했습니다. (설정/비밀키 누락 등)\n서버 관리자에게 문의하세요.',
       );
-      window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('login') === 'open') {
       setAuthMode('login');
       setAuthOpen(true);
-      // 열고 난 후 URL 파라미터 정리
-      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
@@ -150,6 +161,7 @@ function App() {
             <ToiletProvider>
               <TransitionProvider>
                 <NotificationProvider>
+                  <NavigationHelper authOpen={authOpen} />
                   <NotificationSubscriber />
                   <LocationConsentBanner />
                   <Suspense fallback={<LoadingPage />}>
@@ -185,15 +197,7 @@ function App() {
                   </Suspense>
                   <AuthModal
                     isOpen={authOpen}
-                    onClose={() => {
-                      setAuthOpen(false);
-                      if (
-                        window.location.pathname === '/login' ||
-                        window.location.pathname === '/signup'
-                      ) {
-                        window.history.replaceState({}, document.title, '/main');
-                      }
-                    }}
+                    onClose={() => setAuthOpen(false)}
                     defaultMode={authMode}
                     onSuccess={() => {
                       if (onAuthSuccess) onAuthSuccess();
