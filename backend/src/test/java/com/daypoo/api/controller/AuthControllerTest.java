@@ -138,7 +138,8 @@ class AuthControllerTest {
     // given
     // SignUpRequest 실제 생성자 순서: (password, email, nickname)
     SignUpRequest request = new SignUpRequest("password123!", "test@example.com", "PoopKing");
-    doNothing().when(authService).signUp(any(SignUpRequest.class));
+    TokenResponse tokenResponse = new TokenResponse("mockAccessToken", "mockRefreshToken");
+    given(authService.signUp(any(SignUpRequest.class))).willReturn(tokenResponse);
 
     // when & then
     mockMvc

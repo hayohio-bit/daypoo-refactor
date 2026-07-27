@@ -40,7 +40,10 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
   @Override
   public OAuth2AuthorizationRequest removeAuthorizationRequest(
       HttpServletRequest request, HttpServletResponse response) {
-    return this.loadAuthorizationRequest(request);
+    OAuth2AuthorizationRequest authorizationRequest = this.loadAuthorizationRequest(request);
+    // 쿠키를 실제로 삭제하여 stale 쿠키로 인한 state 불일치 방지
+    removeAuthorizationRequestCookies(request, response);
+    return authorizationRequest;
   }
 
   public void removeAuthorizationRequestCookies(

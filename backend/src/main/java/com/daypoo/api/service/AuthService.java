@@ -64,6 +64,18 @@ public class AuthService {
     return Role.ROLE_USER;
   }
 
+  /**
+   * Refresh token을 Redis에 저장. refresh-token-validity-in-seconds 값을 TTL로 사용.
+   */
+  private void storeRefreshToken(String email, String refreshToken) {
+    long remainingTime = jwtProvider.getRemainingTime(refreshToken);
+    if (remainingTime > 0) {
+      redisTemplate
+          .opsForValue()
+          .set("refresh_token:" + email, refreshToken, remainingTime, TimeUnit.MILLISECONDS);
+    }
+  }
+
   @Transactional
   public TokenResponse socialSignUp(SocialSignUpRequest request) {
     if (!adminSettingsService.isSignupEnabled()) {
@@ -108,6 +120,9 @@ public class AuthService {
 
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
+
+    // Refresh token을 Redis에 저장하여 서버측 검증 지원
+    storeRefreshToken(user.getEmail(), refreshToken);
 
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -184,7 +199,7 @@ public class AuthService {
         equippedAvatarUrl);
   }
 
-  @Transactional
+  // Redis-only 작업이므로 @Transactional 불필요 (DB 커넥션 점유 방지)
   public TokenResponse exchangeCode(String code) {
     String redisKey = "auth_code:" + code;
     String value = redisTemplate.opsForValue().get(redisKey);
@@ -197,7 +212,8 @@ public class AuthService {
     // 일회용이므로 즉시 삭제
     redisTemplate.delete(redisKey);
 
-    String[] tokens = value.split(":");
+    // OAuth2SuccessHandler에서 "|||" 구분자로 저장한 값을 파싱
+    String[] tokens = value.split("\\|\\|\\|", 2);
     if (tokens.length != 2) {
       throw new BusinessException(ErrorCode.INVALID_TOKEN);
     }
@@ -207,7 +223,7 @@ public class AuthService {
   }
 
   @Transactional
-  public void signUp(SignUpRequest request) {
+  public TokenResponse signUp(SignUpRequest request) {
     if (!adminSettingsService.isSignupEnabled()) {
       throw new BusinessException(ErrorCode.SIGNUP_DISABLED);
     }
@@ -227,6 +243,13 @@ public class AuthService {
     userRepository.save(user);
     assignDefaultAvatar(user);
     systemLogService.info("Auth", "New user registered: " + request.email());
+
+    // 회원가입 성공 시 바로 토큰 발급 (별도 login 호출 불필요 → BCrypt 1회로 성능 개선)
+    String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
+    String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
+    storeRefreshToken(user.getEmail(), refreshToken);
+
+    return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
   private void assignDefaultAvatar(User user) {
@@ -316,6 +339,9 @@ public class AuthService {
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
+    // Refresh token을 Redis에 저장하여 서버측 검증 지원
+    storeRefreshToken(user.getEmail(), refreshToken);
+
     systemLogService.info("Auth", "User login: " + user.getEmail());
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -383,6 +409,13 @@ public class AuthService {
     Claims claims = jwtProvider.getClaims(refreshToken);
     String email = claims.getSubject();
 
+    // Redis에 저장된 refresh token과 비교 검증 (탈취된 토큰 차단)
+    String storedToken = redisTemplate.opsForValue().get("refresh_token:" + email);
+    if (storedToken == null || !storedToken.equals(refreshToken)) {
+      log.warn("Refresh token mismatch or not found for email: {}", email);
+      throw new BusinessException(ErrorCode.INVALID_TOKEN);
+    }
+
     User user =
         userRepository
             .findByEmail(email)
@@ -406,6 +439,8 @@ public class AuthService {
             .set("blacklist:" + accessToken, "logout", remainingTime, TimeUnit.MILLISECONDS);
       }
     }
+    // 로그아웃 시 refresh token도 Redis에서 삭제
+    redisTemplate.delete("refresh_token:" + email);
     systemLogService.info("Auth", "User logout: " + email);
     log.info("User {} logged out and token blacklisted", email);
   }

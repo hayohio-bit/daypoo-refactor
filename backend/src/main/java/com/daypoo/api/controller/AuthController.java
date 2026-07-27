@@ -75,14 +75,14 @@ public class AuthController {
     return ResponseEntity.ok("사용 가능한 닉네임입니다.");
   }
 
-  @Operation(summary = "회원가입", description = "아이디, 비밀번호, 닉네임을 입력받아 신규 회원을 등록합니다.")
-  @ApiResponse(responseCode = "200", description = "회원가입 성공")
+  @Operation(summary = "회원가입", description = "아이디, 비밀번호, 닉네임을 입력받아 신규 회원을 등록하고 JWT 토큰을 발급합니다.")
+  @ApiResponse(responseCode = "200", description = "회원가입 성공 및 토큰 발급")
   @ApiResponse(responseCode = "400", description = "잘못된 입력값 또는 중복된 아이디/닉네임")
   @RateLimit(maxAttempts = 200, windowSeconds = 600)
   @PostMapping("/signup")
-  public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest request) {
-    authService.signUp(request);
-    return ResponseEntity.ok("회원가입이 완료되었습니다.");
+  public ResponseEntity<TokenResponse> signUp(@Valid @RequestBody SignUpRequest request) {
+    TokenResponse response = authService.signUp(request);
+    return ResponseEntity.ok(response);
   }
 
   @Operation(summary = "로그인", description = "아이디와 비밀번호를 검증하여 JWT 토큰을 발급합니다.")

@@ -214,6 +214,12 @@ class ApiClient {
         if (data.refreshToken) {
           storage.setItem('refreshToken', data.refreshToken);
         }
+        // tokenExpiresAt 갱신: 로그인 유지 사용 시 기존 만료 시간 연장
+        const existingExpiresAt = localStorage.getItem('tokenExpiresAt');
+        if (existingExpiresAt) {
+          const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+          localStorage.setItem('tokenExpiresAt', String(Date.now() + THREE_DAYS_MS));
+        }
         return true;
       }
       return false;
@@ -223,16 +229,16 @@ class ApiClient {
     }
   }
 
-  // F2: 지수 백오프 재시도 래퍼
+  // F2: 지수 백오프 재시도 래퍼 (5xx 과부하 방지를 위해 재시도 1회로 제한)
   private async requestWithRetry<T>(
     method: string,
     endpoint: string,
     body?: any,
-    maxRetries = 3,
+    maxRetries = 1,
     retryDelay = 1000,
   ): Promise<T> {
-    // 재시도하지 않아야 하는 엔드포인트
-    const noRetryEndpoints = ['/auth/login', '/auth/signup', '/auth/refresh'];
+    // 재시도하지 않아야 하는 엔드포인트 (인증 관련은 모두 제외)
+    const noRetryEndpoints = ['/auth/'];
     const shouldSkipRetry = noRetryEndpoints.some((path) => endpoint.includes(path));
 
     if (shouldSkipRetry) {

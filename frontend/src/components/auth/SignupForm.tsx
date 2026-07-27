@@ -243,8 +243,8 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
 
     setLoading(true);
     try {
-      await api.post('/auth/signup', { email, password, nickname });
-      const res: any = await api.post('/auth/login', { email, password });
+      // signup API가 직접 토큰을 반환하므로 별도 login 호출 불필요
+      const res: any = await api.post('/auth/signup', { email, password, nickname });
       if (res && res.accessToken) {
         authLogin(res.accessToken, res.refreshToken || '');
         onSuccess?.();

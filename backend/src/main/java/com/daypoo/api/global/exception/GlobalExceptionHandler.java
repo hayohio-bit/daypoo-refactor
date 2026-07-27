@@ -53,6 +53,15 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(response, ErrorCode.INTERNAL_SERVER_ERROR.getStatus());
   }
 
+  /** OAuth2 인증 실패 예외 처리 */
+  @ExceptionHandler(org.springframework.security.oauth2.core.OAuth2AuthenticationException.class)
+  protected ResponseEntity<ErrorResponse> handleOAuth2AuthenticationException(
+      org.springframework.security.oauth2.core.OAuth2AuthenticationException e) {
+    log.error("OAuth2AuthenticationException: {}", e.getMessage());
+    ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_TOKEN);
+    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
+
   /** DB 제약 조건 위반 예외 처리 */
   @ExceptionHandler(DataIntegrityViolationException.class)
   protected ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException e) {

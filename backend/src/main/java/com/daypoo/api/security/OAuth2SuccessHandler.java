@@ -97,7 +97,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
       // 보안 개선: JWT를 직접 노출하지 않고 일회용 코드로 교환
       String authCode = java.util.UUID.randomUUID().toString();
       String redisKey = "auth_code:" + authCode;
-      String redisValue = accessToken + ":" + refreshToken;
+      // JWT에 포함되지 않는 구분자를 사용하여 토큰 분할 파싱 오류 방지
+      String redisValue = accessToken + "|||" + refreshToken;
       redisTemplate.opsForValue().set(redisKey, redisValue, java.time.Duration.ofMinutes(1));
 
       targetUrl = frontendUrl + "/auth/callback?code=" + authCode;
