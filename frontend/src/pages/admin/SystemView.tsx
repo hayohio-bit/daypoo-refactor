@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import type { AdminStatsResponse } from '../../types/admin';
-import { COLORS, type AdminTab } from './adminCommons';
+import { type AdminTab, COLORS } from './adminCommons';
 
 export interface SystemSettings {
   noticeEnabled: boolean;

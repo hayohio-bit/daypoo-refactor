@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useToiletContext } from '../context/ToiletContext';
 
 interface UseToiletsOptions {
@@ -27,18 +27,6 @@ export function useToilets({
 }: UseToiletsOptions) {
   const { toilets, loading, error, fetchToilets, toggleFavorite, markVisited } = useToiletContext();
 
-  const visitedIdsRef = useRef(visitedIds);
-  const favoriteIdsRef = useRef(favoriteIds);
-
-  useEffect(() => {
-    visitedIdsRef.current = visitedIds;
-  }, [visitedIds]);
-
-  useEffect(() => {
-    favoriteIdsRef.current = favoriteIds;
-  }, [favoriteIds]);
-
-  // boundsKey: JSON.stringify 대신 안정적 문자열로 변환 (ESLint 훅 rules 준수)
   const boundsKey = bounds
     ? `${bounds.swLat},${bounds.swLng},${bounds.neLat},${bounds.neLng}`
     : 'null';
@@ -50,25 +38,17 @@ export function useToilets({
       radius,
       bounds,
       level,
-      visitedIds: visitedIdsRef.current,
-      favoriteIds: favoriteIdsRef.current,
+      visitedIds,
+      favoriteIds,
     });
-  }, [lat, lng, radius, boundsKey, level, fetchToilets]);
+  }, [lat, lng, radius, boundsKey, level, visitedIds, favoriteIds, fetchToilets]);
 
-  // 디바운스 적용 (300ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       triggerFetch();
     }, 300);
     return () => clearTimeout(timer);
   }, [triggerFetch]);
-
-  // favoriteIds 또는 visitedIds가 나중에 비동기로 로드되어 변경되는 경우 재호출
-  useEffect(() => {
-    if (favoriteIds || visitedIds) {
-      triggerFetch();
-    }
-  }, [favoriteIds, visitedIds, triggerFetch]);
 
   return { toilets, loading, error, toggleFavorite, markVisited, refetch: triggerFetch };
 }

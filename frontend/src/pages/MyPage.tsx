@@ -19,12 +19,12 @@ import { api } from '../services/apiClient';
 import type { UserResponse } from '../types/api';
 import { generateProfileAvatar, isEmoji, parseDicebearUrl } from '../utils/avatar';
 
-// ── 분할된 서브 탭 임포트 ───────────────────────────────────────────────
-import { AvatarEffect, type AvatarItem, type TabKey } from './mypage/myPageCommons';
-import { HomeTab } from './mypage/HomeTab';
 import { CollectionTab } from './mypage/CollectionTab';
+import { HomeTab } from './mypage/HomeTab';
 import { ReportTab } from './mypage/ReportTab';
 import { SettingsTab } from './mypage/SettingsTab';
+// ── 분할된 서브 탭 임포트 ───────────────────────────────────────────────
+import { AvatarEffect, type AvatarItem, type TabKey } from './mypage/myPageCommons';
 
 // ── 애니메이션 프리셋 ──────────────────────────────────────────────────
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };

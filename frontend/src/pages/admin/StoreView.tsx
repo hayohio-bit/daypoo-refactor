@@ -18,7 +18,7 @@ import type {
   PageResponse,
 } from '../../types/admin';
 import { type AvatarStyle, parseDicebearUrl } from '../../utils/avatar';
-import { COLORS, type AdminTab } from './adminCommons';
+import { type AdminTab, COLORS } from './adminCommons';
 
 export interface StoreViewProps {
   setActiveTab: (tab: AdminTab) => void;

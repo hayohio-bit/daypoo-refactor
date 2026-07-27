@@ -160,7 +160,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       hasReceivedRealPos.current = true;
       mapViewRef.current?.panTo(position.lat, position.lng);
     }
-  }, [position]);
+  }, [position?.lat, position?.lng]);
 
   // ── 방문 횟수 데이터 가져오기 ──────────────────────────────
   useEffect(() => {
@@ -285,7 +285,15 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       };
       findAndOpenNearest();
     }
-  }, [openNearest, pos, hasTriedOpenNearest, visitedIds, favoriteIds, handleSelectToilet]);
+  }, [
+    openNearest,
+    pos.lat,
+    pos.lng,
+    hasTriedOpenNearest,
+    visitedIds,
+    favoriteIds,
+    handleSelectToilet,
+  ]);
 
   const handleVisitRequest = useCallback(async () => {
     if (!isAuthenticated) {
@@ -319,7 +327,15 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
 
     setTargetForVisit(selectedToilet);
     handleSelectToilet(null);
-  }, [selectedToilet, openAuth, pos, handleSelectToilet, isAuthenticated, refreshUser]);
+  }, [
+    selectedToilet,
+    openAuth,
+    pos.lat,
+    pos.lng,
+    handleSelectToilet,
+    isAuthenticated,
+    refreshUser,
+  ]);
 
   const handleVisitComplete = useCallback(
     async (result: VisitModalResult) => {
@@ -375,7 +391,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
         }
       }
     },
-    [markVisited, pos, refreshUser],
+    [markVisited, pos.lat, pos.lng, refreshUser],
   );
 
   // visitCount 병합

@@ -1,11 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { DepthDeckCarousel, type DeckCard } from '../../components/common/DepthDeckCarousel';
+import { type DeckCard, DepthDeckCarousel } from '../../components/common/DepthDeckCarousel';
 import { api } from '../../services/apiClient';
 import type { UserResponse } from '../../types/api';
 import { isEmoji, parseDicebearUrl } from '../../utils/avatar';
-import { type AvatarItem, AvatarEffect } from './myPageCommons';
+import { AvatarEffect, type AvatarItem } from './myPageCommons';
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const fadeUp = (delay = 0) => ({

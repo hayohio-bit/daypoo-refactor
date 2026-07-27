@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Settings, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '../../components/common/GlassCard';
+import { AdminCard } from '../../components/admin/AdminCard';
 import { api } from '../../services/apiClient';
 import type {
   AdminUserDetailResponse,
@@ -214,91 +214,84 @@ export const UsersView = () => {
         </div>
       ) : (
         <>
-          <GlassCard className="p-0 border-none bg-transparent shadow-none">
-            <div
-              className="overflow-x-auto rounded-[28px] border bg-white/50 backdrop-blur-xl"
-              style={{ borderColor: COLORS.border }}
-            >
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-black/[0.02] border-b" style={{ borderColor: COLORS.border }}>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                      사용자 정보
-                    </th>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                      가입일
-                    </th>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                      구독 정보
-                    </th>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                      레벨
-                    </th>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                      포인트
-                    </th>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                      기록 수
-                    </th>
-                    <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40 text-right">
-                      관리
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr
-                      key={u.id}
-                      className="border-b transition-colors hover:bg-black/[0.01]"
-                      style={{ borderColor: COLORS.border }}
-                    >
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-black/[0.05] flex items-center justify-center font-black text-black/60 text-xs">
-                            {u.id}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-black text-sm text-[#1B4332]">
-                                {u.nickname}
-                              </span>
-                              <span
-                                className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
-                                  u.role === 'ROLE_ADMIN'
-                                    ? 'bg-red-100 text-red-600'
-                                    : 'bg-black/5 text-black/40'
-                                }`}
-                              >
-                                {getRoleBadge(u.role)}
-                              </span>
-                            </div>
-                            <p className="text-xs text-black/30 font-bold">{u.email}</p>
-                          </div>
+          <AdminCard className="p-0 border-none bg-transparent shadow-none" bodyClassName="p-0">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-black/[0.02] border-b" style={{ borderColor: COLORS.border }}>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
+                    사용자 정보
+                  </th>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
+                    가입일
+                  </th>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
+                    구독 정보
+                  </th>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
+                    레벨
+                  </th>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
+                    포인트
+                  </th>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
+                    기록 수
+                  </th>
+                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40 text-right">
+                    관리
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr
+                    key={u.id}
+                    className="border-b transition-colors hover:bg-black/[0.01]"
+                    style={{ borderColor: COLORS.border }}
+                  >
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-2xl bg-black/[0.05] flex items-center justify-center font-black text-black/60 text-xs">
+                          {u.id}
                         </div>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-black/60">
-                        {formatDate(u.createdAt)}
-                      </td>
-                      <td className="px-8 py-5">{getPlanBadge(u.plan)}</td>
-                      <td className="px-8 py-5 font-black text-[#2D6A4F]">Lv.{u.level}</td>
-                      <td className="px-8 py-5 font-black text-[#E8A838]">
-                        {u.points.toLocaleString()} P
-                      </td>
-                      <td className="px-8 py-5 font-bold text-black/60">{u.recordCount}건</td>
-                      <td className="px-8 py-5 text-right">
-                        <button
-                          onClick={() => handleOpenUserDetail(u)}
-                          className="p-2 rounded-xl hover:bg-black/5 text-black/20 hover:text-black/60 transition-colors"
-                        >
-                          <Settings size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </GlassCard>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-black text-sm text-[#1B4332]">{u.nickname}</span>
+                            <span
+                              className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                                u.role === 'ROLE_ADMIN'
+                                  ? 'bg-red-100 text-red-600'
+                                  : 'bg-black/5 text-black/40'
+                              }`}
+                            >
+                              {getRoleBadge(u.role)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-black/30 font-bold">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5 text-sm font-bold text-black/60">
+                      {formatDate(u.createdAt)}
+                    </td>
+                    <td className="px-8 py-5">{getPlanBadge(u.plan)}</td>
+                    <td className="px-8 py-5 font-black text-[#2D6A4F]">Lv.{u.level}</td>
+                    <td className="px-8 py-5 font-black text-[#E8A838]">
+                      {u.points.toLocaleString()} P
+                    </td>
+                    <td className="px-8 py-5 font-bold text-black/60">{u.recordCount}건</td>
+                    <td className="px-8 py-5 text-right">
+                      <button
+                        onClick={() => handleOpenUserDetail(u)}
+                        className="p-2 rounded-xl hover:bg-black/5 text-black/20 hover:text-black/60 transition-colors"
+                      >
+                        <Settings size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </AdminCard>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-6">

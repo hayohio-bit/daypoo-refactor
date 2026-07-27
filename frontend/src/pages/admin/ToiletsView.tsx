@@ -2,11 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, Database, Navigation, Plus, RefreshCw, Sparkles, Star, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
-import { GlassCard } from '../../components/common/GlassCard';
+import type { ToiletData } from '../../types/toilet';
+import type { ToiletReviewSummaryResponse } from '../../services/reviewService';
+import { AdminCard } from '../../components/admin/AdminCard';
 import { useToilets } from '../../hooks/useToilets';
 import { api } from '../../services/apiClient';
 import type { AdminToiletListResponse, PageResponse, SyncStatusResponse } from '../../types/admin';
-import type { ToiletData } from '../../types/toilet';
 import { COLORS } from './adminCommons';
 
 // ── Recent Toilets Panel Component ────────────────────────────────────
@@ -49,13 +50,15 @@ const RecentToiletsPanel = () => {
 
   return (
     <div className="space-y-6">
-      <GlassCard className="h-full">
-        <div className="flex items-center justify-between mb-6">
-          <h4 className="text-xl font-black text-black">최근 등록 화장실</h4>
+      <AdminCard
+        className="h-full"
+        title="최근 등록 화장실"
+        headerRight={
           <span className="text-[10px] font-black uppercase tracking-widest text-[#1B4332]/50">
             총 {totalCount.toLocaleString()}개 중 5개
           </span>
-        </div>
+        }
+      >
         {loadingRecent ? (
           <div className="flex items-center justify-center py-10">
             <RefreshCw size={24} className="animate-spin text-[#1B4332]" />
@@ -96,7 +99,7 @@ const RecentToiletsPanel = () => {
             ))}
           </div>
         )}
-      </GlassCard>
+      </AdminCard>
     </div>
   );
 };
@@ -359,7 +362,7 @@ export const ToiletsView = () => {
             </div>
 
             <div className="absolute bottom-6 left-6 right-6 z-10">
-              <GlassCard className="bg-white/95 py-4 px-6">
+              <div className="bg-white/95 py-4 px-6 rounded-[32px] shadow-xl border border-black/5">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-4">
                     <div className="p-2.5 rounded-2xl bg-green-50 text-green-600">
@@ -383,7 +386,7 @@ export const ToiletsView = () => {
                     </span>
                   </div>
                 </div>
-              </GlassCard>
+              </div>
             </div>
           </div>
 
@@ -394,7 +397,7 @@ export const ToiletsView = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
               >
-                <GlassCard className="border-2 border-[#E8A838]/30">
+                <AdminCard className="border-2 border-[#E8A838]/30">
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex gap-4">
                       <div className="w-16 h-16 rounded-[24px] bg-[#1B4332]/5 flex items-center justify-center text-3xl">
@@ -506,7 +509,7 @@ export const ToiletsView = () => {
                       </p>
                     )}
                   </div>
-                </GlassCard>
+                </AdminCard>
               </motion.div>
             )}
           </AnimatePresence>

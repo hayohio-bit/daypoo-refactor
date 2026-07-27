@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Footer } from '../components/Footer';
 import { Navbar } from '../components/Navbar';
 import { WaveDivider } from '../components/WaveDivider';
+import { BaseModal } from '../components/common/BaseModal';
 import { useRankings } from '../hooks/useRankings';
 import {
   DEFAULT_AVATAR_URL,
@@ -189,144 +190,132 @@ function ItemPopup({
   };
 
   return (
-    <>
+    <BaseModal onClose={onClose} zIndex={300} backdropClassName="bg-[#0A1A14]/60 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-[300] bg-[#0A1A14]/60 backdrop-blur-md"
-      />
+        initial={{ opacity: 0, scale: 0.9, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 15 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+        className="w-full max-w-[380px] bg-white rounded-[44px] overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.25)] border border-white relative pointer-events-auto"
+      >
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#1B4332]/5 to-transparent pointer-events-none" />
+        <div className="absolute top-8 right-10 w-24 h-24 bg-emerald-100/30 blur-3xl rounded-full" />
 
-      <div className="fixed inset-0 flex items-center justify-center z-[301] pointer-events-none p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 15 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          className="w-full max-w-[380px] bg-white rounded-[44px] overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.25)] border border-white relative pointer-events-auto"
-        >
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#1B4332]/5 to-transparent pointer-events-none" />
-          <div className="absolute top-8 right-10 w-24 h-24 bg-emerald-100/30 blur-3xl rounded-full" />
+        <div className="p-8 pt-10 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all bg-gray-50 text-gray-400 hover:text-gray-900 hover:bg-gray-100"
+          >
+            <X size={20} />
+          </button>
 
-          <div className="p-8 pt-10 relative">
-            <button
-              onClick={onClose}
-              className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all bg-gray-50 text-gray-400 hover:text-gray-900 hover:bg-gray-100"
+          <div className="flex flex-col items-center mb-8">
+            <div
+              className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-4 shadow-xl relative"
+              style={{ background: '#fff', border: `3.5px solid ${user.titleColor}20` }}
             >
-              <X size={20} />
-            </button>
-
-            <div className="flex flex-col items-center mb-8">
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-4 shadow-xl relative"
-                style={{ background: '#fff', border: `3.5px solid ${user.titleColor}20` }}
-              >
-                {user.effectEmoji && <RankAvatarEffect emoji={user.effectEmoji} size={96} />}
-                <ConicGlow color={user.titleColor} thickness={4} borderRadius="50%" />
-                <div className="absolute inset-[4px] rounded-full bg-white flex items-center justify-center z-10 overflow-hidden">
-                  {isEmoji(user.avatarUrl) ? (
-                    <span className="text-5xl select-none leading-none">{user.avatarUrl}</span>
-                  ) : (
-                    <img
-                      src={user.avatarUrl || DEFAULT_AVATAR_URL}
-                      alt={user.nick}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                {user.rank <= 3 && (
-                  <div className="absolute -top-6 -right-2 text-amber-500 transform rotate-12 drop-shadow-lg">
-                    <Crown size={28} />
-                  </div>
+              {user.effectEmoji && <RankAvatarEffect emoji={user.effectEmoji} size={96} />}
+              <ConicGlow color={user.titleColor} thickness={4} borderRadius="50%" />
+              <div className="absolute inset-[4px] rounded-full bg-white flex items-center justify-center z-10 overflow-hidden">
+                {isEmoji(user.avatarUrl) ? (
+                  <span className="text-5xl select-none leading-none">{user.avatarUrl}</span>
+                ) : (
+                  <img
+                    src={user.avatarUrl || DEFAULT_AVATAR_URL}
+                    alt={user.nick}
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </div>
-
-              <div className="text-center">
-                <motion.span
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2"
-                  style={{ background: user.titleBg, color: user.titleColor }}
-                >
-                  {user.title}
-                </motion.span>
-                <h3 className="text-2xl font-black text-[#1A2B27] leading-tight mb-1">
-                  {user.nick}
-                </h3>
-                <div className="flex items-center justify-center gap-1.5 text-emerald-600">
-                  <span className="text-sm font-black whitespace-nowrap">
-                    {user.score.toLocaleString()}
-                    {user.scoreLabel}
-                  </span>
-                  <div className="w-1 h-1 rounded-full bg-gray-200" />
-                  <span className="text-[10px] text-gray-400 font-bold">전체 {user.rank}위</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50/50 rounded-[32px] p-6 border border-gray-100/50 mb-8">
-              <div className="flex items-center justify-between mb-4 px-1">
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Star size={12} className="text-amber-400 fill-amber-400" /> 착용 중인 아이템
-                </span>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  {user.items.length}개
-                </span>
-              </div>
-
-              {user.items.length === 0 ? (
-                <div className="py-8 flex flex-col items-center gap-2 opacity-40">
-                  <ShoppingBag size={24} strokeWidth={1} />
-                  <p className="text-sm font-medium">착용 중인 아이템이 없습니다</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3 max-h-[180px] overflow-y-auto pr-1 custom-scrollbar">
-                  {user.items.map((item, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-100">
-                        {isEmoji(item.icon) ? (
-                          <span className="text-3xl select-none leading-none">{item.icon}</span>
-                        ) : (
-                          <img
-                            src={parseDicebearUrl(item.icon, item.name, item.type)}
-                            alt={item.name}
-                            className="w-full h-full object-contain p-1"
-                          />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black text-[#1A2B27] truncate">{item.name}</p>
-                        <p className="text-[10px] font-bold text-gray-400">{item.type}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+              {user.rank <= 3 && (
+                <div className="absolute -top-6 -right-2 text-amber-500 transform rotate-12 drop-shadow-lg">
+                  <Crown size={28} />
                 </div>
               )}
             </div>
 
-            <WaveButtonComponent
-              onClick={goToShop}
-              variant="accent"
-              size="lg"
-              className="w-full shadow-2xl"
-              icon={<ShoppingBag size={20} />}
-            >
-              상점 가서 이 아이템 보기
-            </WaveButtonComponent>
-            <p className="text-center text-[10px] text-gray-300 font-bold mt-4 tracking-tight">
-              나만의 스타일로 랭킹 페이지를 꾸며보세요!
-            </p>
+            <div className="text-center">
+              <motion.span
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2"
+                style={{ background: user.titleBg, color: user.titleColor }}
+              >
+                {user.title}
+              </motion.span>
+              <h3 className="text-2xl font-black text-[#1A2B27] leading-tight mb-1">{user.nick}</h3>
+              <div className="flex items-center justify-center gap-1.5 text-emerald-600">
+                <span className="text-sm font-black whitespace-nowrap">
+                  {user.score.toLocaleString()}
+                  {user.scoreLabel}
+                </span>
+                <div className="w-1 h-1 rounded-full bg-gray-200" />
+                <span className="text-[10px] text-gray-400 font-bold">전체 {user.rank}위</span>
+              </div>
+            </div>
           </div>
-        </motion.div>
-      </div>
-    </>
+
+          <div className="bg-gray-50/50 rounded-[32px] p-6 border border-gray-100/50 mb-8">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <span className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                <Star size={12} className="text-amber-400 fill-amber-400" /> 착용 중인 아이템
+              </span>
+              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                {user.items.length}개
+              </span>
+            </div>
+
+            {user.items.length === 0 ? (
+              <div className="py-8 flex flex-col items-center gap-2 opacity-40">
+                <ShoppingBag size={24} strokeWidth={1} />
+                <p className="text-sm font-medium">착용 중인 아이템이 없습니다</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 max-h-[180px] overflow-y-auto pr-1 custom-scrollbar">
+                {user.items.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-100">
+                      {isEmoji(item.icon) ? (
+                        <span className="text-3xl select-none leading-none">{item.icon}</span>
+                      ) : (
+                        <img
+                          src={parseDicebearUrl(item.icon, item.name, item.type)}
+                          alt={item.name}
+                          className="w-full h-full object-contain p-1"
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-[#1A2B27] truncate">{item.name}</p>
+                      <p className="text-[10px] font-bold text-gray-400">{item.type}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <WaveButtonComponent
+            onClick={goToShop}
+            variant="accent"
+            size="lg"
+            className="w-full shadow-2xl"
+            icon={<ShoppingBag size={20} />}
+          >
+            상점 가서 이 아이템 보기
+          </WaveButtonComponent>
+          <p className="text-center text-[10px] text-gray-300 font-bold mt-4 tracking-tight">
+            나만의 스타일로 랭킹 페이지를 꾸며보세요!
+          </p>
+        </div>
+      </motion.div>
+    </BaseModal>
   );
 }
 

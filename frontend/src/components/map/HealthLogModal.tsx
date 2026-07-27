@@ -21,6 +21,7 @@ import {
   type ToiletData,
 } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
+import { BaseModal } from '../common/BaseModal';
 
 export interface HealthLogResult {
   bristolType: number | null;
@@ -239,15 +240,7 @@ export function HealthLogModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[2100] flex items-center justify-center p-4">
-      <m.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={handleBackdropClick}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      />
-
+    <BaseModal onClose={handleBackdropClick} zIndex={2100}>
       <m.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -815,6 +808,6 @@ export function HealthLogModal({
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #eef5f0; border-radius: 10px; }
       `}</style>
-    </div>
+    </BaseModal>
   );
 }

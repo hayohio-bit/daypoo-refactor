@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { api } from '../../services/apiClient';
 import type { AchievementType, AdminTitleResponse, PageResponse } from '../../types/admin';
-import { COLORS, type AdminTab } from './adminCommons';
+import { type AdminTab, COLORS } from './adminCommons';
 
 export const ACHIEVEMENT_LABELS: Record<AchievementType, string> = {
   TOTAL_RECORDS: '총 기록 횟수',

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { CountUp } from '../../components/common/CountUp';
-import { DepthDeckCarousel, type DeckCard } from '../../components/common/DepthDeckCarousel';
+import { type DeckCard, DepthDeckCarousel } from '../../components/common/DepthDeckCarousel';
 import { api } from '../../services/apiClient';
 import type { UserResponse } from '../../types/api';
 import { generateItemAvatar, isEmoji, parseDicebearUrl } from '../../utils/avatar';

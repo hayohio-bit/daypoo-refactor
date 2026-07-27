@@ -34,7 +34,7 @@ export interface MapViewHandle {
 
 // ── 카카오맵 마커 생성 헬퍼 ─────────────────────────────────────────
 function createToiletMarker(
-  kakao: any,
+  kakao: typeof window.kakao,
   toilet: ToiletData,
   onSelectToilet: (toilet: ToiletData) => void,
 ) {
@@ -101,10 +101,12 @@ export const MapView = memo(
   forwardRef<MapViewHandle, MapViewProps>(
     ({ toilets, pos, onSelectToilet, onBoundsChange, onLevelChange }, ref) => {
       const mapContainerRef = useRef<HTMLDivElement>(null);
-      const mapRef = useRef<any>(null);
-      const clustererRef = useRef<any>(null);
-      const markersRef = useRef<Map<string, { marker: any; overlay: any }>>(new Map());
-      const myOverlayRef = useRef<any>(null);
+      const mapRef = useRef<kakao.maps.Map | null>(null);
+      const clustererRef = useRef<kakao.maps.MarkerClusterer | null>(null);
+      const markersRef = useRef<
+        Map<string, { marker: kakao.maps.Marker; overlay: kakao.maps.CustomOverlay }>
+      >(new Map());
+      const myOverlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
 
       useImperativeHandle(ref, () => ({
         panTo: (lat: number, lng: number) => {
@@ -249,7 +251,7 @@ export const MapView = memo(
         if (!mapRef.current || !pos || !myOverlayRef.current) return;
         const center = new window.kakao.maps.LatLng(pos.lat, pos.lng);
         myOverlayRef.current.setPosition(center);
-      }, [pos]);
+      }, [pos?.lat, pos?.lng]);
 
       useEffect(() => {
         if (!mapRef.current || !clustererRef.current) return;
@@ -264,7 +266,7 @@ export const MapView = memo(
         const currentToiletsIds = new Set(toilets.map((t) => t.id));
 
         // 제거할 마커 식별
-        const toRemoveMarkers: any[] = [];
+        const toRemoveMarkers: kakao.maps.Marker[] = [];
         markersRef.current.forEach((item, id) => {
           if (!currentToiletsIds.has(id)) {
             item.overlay.setMap(null);
@@ -278,7 +280,7 @@ export const MapView = memo(
         }
 
         // 추가 또는 갱신할 마커 식별
-        const newMarkers: any[] = [];
+        const newMarkers: kakao.maps.Marker[] = [];
         const currentLevel = mapRef.current.getLevel();
 
         toilets.forEach((toilet) => {

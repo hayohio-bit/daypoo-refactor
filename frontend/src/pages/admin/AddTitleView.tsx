@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { api } from '../../services/apiClient';
 import type { AchievementType, AdminTitleResponse } from '../../types/admin';
-import type { AdminTab } from './adminCommons';
 import { ACHIEVEMENT_LABELS } from './TitleManagementView';
+import type { AdminTab } from './adminCommons';
 
 export interface AddTitleViewProps {
   setActiveTab: (tab: AdminTab) => void;

@@ -25,7 +25,9 @@ import type React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { Navbar } from '../components/Navbar';
+import WaveButtonComponent from '../components/WaveButton';
 import { WaveDivider } from '../components/WaveDivider';
+import { BaseModal } from '../components/common/BaseModal';
 import { api } from '../services/apiClient';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
@@ -499,14 +501,7 @@ function ModernHistory() {
       {/* Edit Modal */}
       <AnimatePresence>
         {editingInquiry && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setEditingInquiry(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
+          <BaseModal onClose={() => setEditingInquiry(null)} zIndex={100}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -531,7 +526,7 @@ function ModernHistory() {
                 />
               </div>
             </motion.div>
-          </div>
+          </BaseModal>
         )}
       </AnimatePresence>
     </>

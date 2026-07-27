@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Loader2, Star, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -8,6 +8,7 @@ import {
   getReviews,
 } from '../../services/reviewService';
 import { EMOJI_TAG_MAP, type ToiletData } from '../../types/toilet';
+import { BaseModal } from '../common/BaseModal';
 
 interface ReviewListModalProps {
   toilet: ToiletData;
@@ -69,15 +70,7 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      />
-
+    <BaseModal onClose={onClose} zIndex={2000}>
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -247,6 +240,6 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
           </div>
         )}
       </motion.div>
-    </div>
+    </BaseModal>
   );
 }

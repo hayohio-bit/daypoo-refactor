@@ -3,6 +3,7 @@ import { AlertTriangle, Camera, Check, Loader2, RotateCcw, Sparkles, X, Zap } fr
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ConditionTag, FoodTag, PoopColor, ToiletData } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
+import { BaseModal } from '../common/BaseModal';
 import { HealthLogModal, type HealthLogResult } from './HealthLogModal';
 
 // 방문 인증 결과 타입
@@ -200,16 +201,8 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
   };
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+    <BaseModal onClose={handleBackdropClick} zIndex={2000}>
       <canvas ref={canvasRef} className="hidden" />
-
-      <m.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={handleBackdropClick}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      />
 
       <m.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -550,6 +543,6 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #eef5f0; border-radius: 10px; }
       `}</style>
-    </div>
+    </BaseModal>
   );
 }
