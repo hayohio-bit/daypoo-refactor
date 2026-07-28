@@ -139,10 +139,10 @@ public class PublicDataSyncService {
 
     TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
-    for (int batchStart = startPage; batchStart <= endPage; batchStart += batchPages) {
-      int batchEnd = Math.min(batchStart + batchPages - 1, endPage);
+    try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      for (int batchStart = startPage; batchStart <= endPage; batchStart += batchPages) {
+        int batchEnd = Math.min(batchStart + batchPages - 1, endPage);
 
-      try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
         Semaphore semaphore = new Semaphore(MAX_CONCURRENT_REQUESTS);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
@@ -168,15 +168,15 @@ public class PublicDataSyncService {
         }
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-      }
 
-      log.info(
-          "📈 Batch {}-{} done. Total: {}, Inserted: {}, Updated: {}",
-          batchStart,
-          batchEnd,
-          totalCount.get(),
-          totalInserted.get(),
-          totalUpdated.get());
+        log.info(
+            "📈 Batch {}-{} done. Total: {}, Inserted: {}, Updated: {}",
+            batchStart,
+            batchEnd,
+            totalCount.get(),
+            totalInserted.get(),
+            totalUpdated.get());
+      }
     }
 
     log.info(
@@ -274,16 +274,19 @@ public class PublicDataSyncService {
     // upsert 전에 기존 데이터 상세 조회하여 실제 변경 여부 확인
     List<String> mngNos =
         toiletsToSave.stream().map(Toilet::getMngNo).collect(java.util.stream.Collectors.toList());
-    String inClause =
-        mngNos.stream()
-            .map(m -> "'" + m.replace("'", "''") + "'")
-            .collect(java.util.stream.Collectors.joining(","));
+    String placeholders =
+        mngNos.stream().map(m -> "?").collect(java.util.stream.Collectors.joining(","));
 
     Map<String, ExistingToiletInfo> existingMap =
         jdbcTemplate.query(
             "SELECT mng_no, name, address, ST_AsText(location) as location_wkt, open_hours, is_24h, is_unisex FROM toilets WHERE mng_no IN ("
-                + inClause
+                + placeholders
                 + ")",
+            ps -> {
+              for (int i = 0; i < mngNos.size(); i++) {
+                ps.setString(i + 1, mngNos.get(i));
+              }
+            },
             (rs) -> {
               Map<String, ExistingToiletInfo> map = new HashMap<>();
               while (rs.next()) {
@@ -373,7 +376,11 @@ public class PublicDataSyncService {
 
       // 위치 데이터가 유효하지 않으면 DB NOT NULL 제약조건 위반을 방지하기 위해 스킵
       if (!geometryUtil.isValidKoreaCoordinates(lon, lat)) {
-        log.warn("유효하지 않은 좌표 범위로 인해 Toilet 데이터를 건너뜁니다. 관리번호(MNG_NO): {}, 위도(Lat): {}, 경도(Lon): {}", mngNo, lat, lon);
+        log.warn(
+            "유효하지 않은 좌표 범위로 인해 Toilet 데이터를 건너뜁니다. 관리번호(MNG_NO): {}, 위도(Lat): {}, 경도(Lon): {}",
+            mngNo,
+            lat,
+            lon);
         continue;
       }
       Point location = geometryUtil.createPoint(lon, lat);

@@ -16,7 +16,7 @@ public interface ToiletRepository extends JpaRepository<Toilet, Long> {
 
   @Query(
       value =
-          "SELECT t.id as id, t.name as name, t.address as address, t.open_hours as open_hours, t.is_24h as is_24h, "
+          "SELECT t.id as id, t.name as name, t.address as address, t.open_hours as \"openHours\", t.is_24h as \"is24h\", "
               + "ST_X(t.location) as longitude, ST_Y(t.location) as latitude, "
               + "ST_DistanceSphere(t.location, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)) as distance "
               + "FROM toilets t "
@@ -39,12 +39,6 @@ public interface ToiletRepository extends JpaRepository<Toilet, Long> {
       @Param("toiletId") Long toiletId,
       @Param("latitude") double latitude,
       @Param("longitude") double longitude);
-
-  @Query("SELECT t.mngNo FROM Toilet t WHERE t.mngNo IN :mngNos")
-  List<String> findAllMngNoIn(@Param("mngNos") List<String> mngNos);
-
-  @Query("SELECT t.mngNo FROM Toilet t")
-  List<String> findAllMngNos();
 
   boolean existsByMngNo(String mngNo);
 
