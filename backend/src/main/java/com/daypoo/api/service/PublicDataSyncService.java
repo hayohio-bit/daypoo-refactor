@@ -361,8 +361,9 @@ public class PublicDataSyncService {
   }
 
   private List<Toilet> convertToToiletEntities(List<JsonNode> itemList) {
-    List<Toilet> toiletsToSave = new ArrayList<>();
-    Set<String> processedMngNos = new HashSet<>();
+    int initialCapacity = itemList.size();
+    List<Toilet> toiletsToSave = new ArrayList<>(initialCapacity);
+    Set<String> processedMngNos = new HashSet<>(initialCapacity);
     for (JsonNode item : itemList) {
       String mngNo = item.path("MNG_NO").asText("");
       if (mngNo.isEmpty() || processedMngNos.contains(mngNo)) continue;
@@ -371,11 +372,13 @@ public class PublicDataSyncService {
       double lon = item.path("WGS84_LOT").asDouble(0.0);
 
       // 위치 데이터가 유효하지 않으면 DB NOT NULL 제약조건 위반을 방지하기 위해 스킵
-      if (!(lat >= 33.0 && lat <= 39.0 && lon >= 124.0 && lon <= 132.0)) {
+      if (!geometryUtil.isValidKoreaCoordinates(lon, lat)) {
+        log.warn("유효하지 않은 좌표 범위로 인해 Toilet 데이터를 건너뜁니다. 관리번호(MNG_NO): {}, 위도(Lat): {}, 경도(Lon): {}", mngNo, lat, lon);
         continue;
       }
       Point location = geometryUtil.createPoint(lon, lat);
 
+      String openHours = item.path("OPN_HR").asText("상시개방");
       toiletsToSave.add(
           Toilet.builder()
               .name(item.path("RSTRM_NM").asText("이름 없음"))
@@ -383,10 +386,8 @@ public class PublicDataSyncService {
               .location(location)
               .address(
                   item.path("LCTN_ROAD_NM_ADDR").asText(item.path("LCTN_LOTNO_ADDR").asText("")))
-              .openHours(item.path("OPN_HR").asText("상시개방"))
-              .is24h(
-                  item.path("OPN_HR").asText("").contains("24")
-                      || item.path("OPN_HR").asText("").contains("상시"))
+              .openHours(openHours)
+              .is24h(openHours.contains("24") || openHours.contains("상시"))
               .isUnisex(false)
               .build());
 
