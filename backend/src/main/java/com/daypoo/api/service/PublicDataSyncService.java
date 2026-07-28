@@ -369,10 +369,12 @@ public class PublicDataSyncService {
 
       double lat = item.path("WGS84_LAT").asDouble(0.0);
       double lon = item.path("WGS84_LOT").asDouble(0.0);
-      Point location =
-          (lat >= 33.0 && lat <= 39.0 && lon >= 124.0 && lon <= 132.0)
-              ? geometryUtil.createPoint(lon, lat)
-              : null;
+
+      // 위치 데이터가 유효하지 않으면 DB NOT NULL 제약조건 위반을 방지하기 위해 스킵
+      if (!(lat >= 33.0 && lat <= 39.0 && lon >= 124.0 && lon <= 132.0)) {
+        continue;
+      }
+      Point location = geometryUtil.createPoint(lon, lat);
 
       toiletsToSave.add(
           Toilet.builder()
