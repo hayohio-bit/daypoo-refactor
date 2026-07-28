@@ -7,21 +7,19 @@ import java.util.Base64;
 import java.util.Optional;
 
 /**
- * OAuth2 인증 플로우에서 사용하는 쿠키 유틸리티. Java 직렬화를 사용하되 Spring의 deprecated SerializationUtils 대신 직접 구현.
+ * OAuth2 인증 플로우에서 사용하는 쿠키 유틸리티.
  * OAuth2AuthorizationRequest가 Serializable 인터페이스를 구현하므로 Java 직렬화 사용.
  */
 public class CookieUtils {
 
   public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
     Cookie[] cookies = request.getCookies();
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if (cookie.getName().equals(name)) {
-          return Optional.of(cookie);
-        }
-      }
+    if (cookies == null) {
+      return Optional.empty();
     }
-    return Optional.empty();
+    return java.util.Arrays.stream(cookies)
+        .filter(cookie -> cookie.getName().equals(name))
+        .findFirst();
   }
 
   public static void addCookie(
@@ -36,17 +34,10 @@ public class CookieUtils {
 
   public static void deleteCookie(
       HttpServletRequest request, HttpServletResponse response, String name) {
-    Cookie[] cookies = request.getCookies();
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if (cookie.getName().equals(name)) {
-          // Set-Cookie 헤더로 삭제 (Max-Age=0)
-          String deleteValue =
-              String.format("%s=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0", name);
-          response.addHeader("Set-Cookie", deleteValue);
-        }
-      }
-    }
+    // Set-Cookie 헤더로 삭제 (Max-Age=0)
+    String deleteValue =
+        String.format("%s=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0", name);
+    response.addHeader("Set-Cookie", deleteValue);
   }
 
   /** 객체를 Java 직렬화 후 Base64 URL-safe 인코딩하여 쿠키 저장용 문자열로 변환. */
