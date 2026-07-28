@@ -3,10 +3,6 @@ package com.daypoo.api.security;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -55,12 +51,13 @@ public class CookieUtils {
 
   /** 객체를 Java 직렬화 후 Base64 URL-safe 인코딩하여 쿠키 저장용 문자열로 변환. */
   public static String serialize(Object object) {
+    if (object == null) {
+      return "";
+    }
     try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(object);
-      oos.flush();
-      return Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
+      return Base64.getUrlEncoder()
+          .withoutPadding()
+          .encodeToString(org.springframework.util.SerializationUtils.serialize(object));
     } catch (Exception e) {
       throw new RuntimeException("OAuth2 쿠키 직렬화 실패", e);
     }
@@ -69,12 +66,16 @@ public class CookieUtils {
   /** Base64 URL-safe 디코딩 후 Java 역직렬화. */
   @SuppressWarnings("unchecked")
   public static <T> T deserialize(Cookie cookie, Class<T> cls) {
+    if (cookie == null || cookie.getValue() == null || cookie.getValue().isEmpty()) {
+      return null;
+    }
     try {
       byte[] decoded = Base64.getUrlDecoder().decode(cookie.getValue());
-      ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(decoded));
-      return cls.cast(ois.readObject());
+      Object deserialized = org.springframework.util.SerializationUtils.deserialize(decoded);
+      return cls.cast(deserialized);
     } catch (Exception e) {
-      throw new RuntimeException("OAuth2 쿠키 역직렬화 실패", e);
+      // 역직렬화 실패 시 예외를 던져 500 에러를 발생시키는 대신 null을 리턴하여 안전하게 처리
+      return null;
     }
   }
 }
