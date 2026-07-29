@@ -272,10 +272,8 @@ public class PublicDataSyncService {
     if (toiletsToSave.isEmpty()) return new int[] {0, 0, 0};
 
     // upsert 전에 기존 데이터 상세 조회하여 실제 변경 여부 확인
-    List<String> mngNos =
-        toiletsToSave.stream().map(Toilet::getMngNo).collect(java.util.stream.Collectors.toList());
-    String placeholders =
-        mngNos.stream().map(m -> "?").collect(java.util.stream.Collectors.joining(","));
+    List<String> mngNos = toiletsToSave.stream().map(Toilet::getMngNo).toList();
+    String placeholders = String.join(",", Collections.nCopies(mngNos.size(), "?"));
 
     Map<String, ExistingToiletInfo> existingMap =
         jdbcTemplate.query(
@@ -366,7 +364,7 @@ public class PublicDataSyncService {
   private List<Toilet> convertToToiletEntities(List<JsonNode> itemList) {
     int initialCapacity = itemList.size();
     List<Toilet> toiletsToSave = new ArrayList<>(initialCapacity);
-    Set<String> processedMngNos = new HashSet<>(initialCapacity);
+    Set<String> processedMngNos = HashSet.newHashSet(initialCapacity);
     for (JsonNode item : itemList) {
       String mngNo = item.path("MNG_NO").asText("");
       if (mngNo.isEmpty() || processedMngNos.contains(mngNo)) continue;
