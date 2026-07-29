@@ -40,12 +40,6 @@ public interface ToiletRepository extends JpaRepository<Toilet, Long> {
       @Param("latitude") double latitude,
       @Param("longitude") double longitude);
 
-  @Query("SELECT t.mngNo FROM Toilet t WHERE t.mngNo IN :mngNos")
-  List<String> findAllMngNoIn(@Param("mngNos") List<String> mngNos);
-
-  @Query("SELECT t.mngNo FROM Toilet t")
-  List<String> findAllMngNos();
-
   boolean existsByMngNo(String mngNo);
 
   @Query("SELECT t FROM Toilet t WHERE t.reviewCount >= 5 AND t.aiSummary IS NULL")
