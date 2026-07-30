@@ -1,45 +1,46 @@
-# ⚙️ DayPoo 프로젝트 아키텍처 블루프린트 (Project Architecture Blueprint)
+# ⚙️ DayPoo 프로젝트 종합 아키텍처 블루프린트 (Project Architecture Blueprint)
 
-본 문서는 DayPoo 프로젝트의 전반적인 시스템 아키텍처 및 특히 **Spring Boot 백엔드 애플리케이션의 계층 구조와 의존성 흐름**을 상세히 정의합니다. 본 문서는 아키텍처의 일관성을 유지하고 향후 신규 개발 시 가이드라인 역할을 하기 위해 작성되었습니다.
+본 문서는 DayPoo 프로젝트의 전반적인 시스템 아키텍처, 구성요소, 데이터 흐름, 배포 사양 및 개발 규칙을 정의합니다. 본 문서는 프로젝트의 일관성을 유지하고 향후 신규 개발 시 가이드라인 역할을 하기 위해 작성되었습니다.
 
 ---
 
 ## 1. 아키텍처 개요 (Architectural Overview)
 
-DayPoo 백엔드는 **계층형 아키텍처(Layered Architecture)** 패턴을 채택하고 있습니다. 각 계층은 명확한 책임과 경계를 가지며, 의존성은 상위 계층에서 하위 계층으로만 흐르는 단방향 원칙을 엄격하게 준수합니다.
+DayPoo 프로젝트는 멀티티어 모노레포(Monorepo) 구조로 구성되어 있으며, 크게 세 가지 주요 서비스 레이어로 분리되어 상호작용합니다.
 
 ```
-[ Presentation Layer ] (Controller, DTO)
-         │
-         ▼
-[ Business Logic Layer ] (Service, Mapper, Event, Component)
-         │
-         ▼
-[ Data Access Layer ] (Repository, Entity)
-         │
-         ▼
-[ Database / Cache ] (PostgreSQL, Redis)
+                  [ Client / Frontend (React SPA) ]
+                                 │
+                     HTTP / REST │ (JSON, Auth Header)
+                                 ▼
+              [ Business / Backend (Spring Boot API) ]
+                 │                               │
+       SQL / Spatial 쿼리                        │ HTTP (REST)
+                 ▼                               ▼
+       [ Database / Storage ]          [ AI Service (FastAPI) ]
+    (PostgreSQL / PostGIS, Redis)          (Langchain + OpenAI)
 ```
 
 ### 아키텍처 설계 원칙
 
-1. **단방향 의존성**: 의존성은 `Controller -> Service -> Repository -> Entity/Database` 방향으로만 흐르며 역방향 의존성이나 순환 의존성은 허용되지 않습니다.
-2. **책임의 분리 (SOC)**: HTTP 요청 처리, 비즈니스 로직 연산, 데이터베이스 쿼리는 각각의 전용 계층에서 전담합니다.
-3. **영속성 객체 격리**: 엔티티(Entity) 객체가 프레젠테이션 계층(Controller/View)까지 노출되지 않도록 하며, 데이터 송수신에는 반드시 DTO(Data Transfer Object)를 사용합니다.
-4. **결합도 완화**: 계층 간의 상호작용 및 외부 연동(예: AI 분석 서비스, 알림 전송) 시 MapStruct 매퍼와 스프링 이벤트를 활용해 클래스 간의 강한 결합을 피합니다.
+1. **단방향 의존성**: 의존성은 상위 레이어에서 하위 레이어로만 흐르며 역방향 의존성이나 순환 의존성은 허용되지 않습니다.
+2. **책임의 분리 (SOC)**: 화면 프레젠테이션(React), 트랜잭션 및 비즈니스 제어(Spring Boot), 그리고 무거운 LLM 기반 AI 추론(FastAPI)의 책임을 계층별로 격리합니다.
+3. **영속성 객체 격리**: 엔티티(Entity) 객체가 프레젠테이션 레이어(Controller) 외부로 노출되지 않도록 하며, 클라이언트와의 데이터 송수신에는 반드시 DTO(Data Transfer Object)를 사용합니다.
+4. **결합도 완화**: 백엔드 내부 연동(예: 배변 기록 저장 후 AI 분석 트리거) 시 스프링 이벤트를 활용해 클래스 간의 강한 결합을 피합니다.
+5. **데이터 프라이버시 (이미지 비저장 원칙)**: 배변 이미지 분석 시 클라이언트가 보낸 이미지 데이터는 디스크나 DB에 영구 저장하지 않고, 분석 API 요청 직후 즉시 분석 결과만 영속화합니다.
 
 ---
 
-## 2. 백엔드 아키텍처 시각화 (Visualization)
+## 2. 아키텍처 시각화 (Visualization)
 
-### 2.1 계층 구조 및 의존성 흐름
-
-백엔드 내부 컴포넌트 간의 구체적인 호출 관계 및 의존성 방향을 보여주는 다이어그램입니다.
+### 2.1 전체 시스템 토폴로지 및 컴포넌트 의존성
 
 ```mermaid
 graph TD
-    subgraph Client ["Client / Frontend"]
-        SPA["React SPA (Vite)"]
+    subgraph Frontend_App ["Frontend (React SPA)"]
+        React["React Router 7 / Page Components"]
+        Hooks["Custom Hooks (useGeoTracking, etc.)"]
+        ClientAPI["apiClient (Axios / Interceptors)"]
     end
 
     subgraph Security_Layer ["Security Layer"]
@@ -47,219 +48,241 @@ graph TD
         OAuth["CustomOAuth2UserService / OAuth2SuccessHandler"]
     end
 
-    subgraph Web_Layer ["Web Layer (Presentation)"]
+    subgraph Backend_App ["Backend (Spring Boot)"]
         Controller["Controllers (PooRecordController, etc.)"]
         DTO["DTOs (Request / Response)"]
-    end
-
-    subgraph Business_Layer ["Business Layer (Service)"]
         Service["Services (PooRecordService, etc.)"]
-        Mapper["Mappers (MapStruct / Entity <-> DTO)"]
+        Mapper["Mappers (MapStruct)"]
         Event["Event Publisher (Spring Event)"]
-        AI["AiClient (FastAPI Integration)"]
+        AIClient["AiClient (WebClient / REST Call)"]
+        Repo["JPA Repositories / QueryDSL Custom"]
     end
 
-    subgraph Event_Layer ["Event & Async Layer"]
-        Listener["Event Listeners (@EventListener / @Async)"]
+    subgraph AI_Service_App ["AI Service (FastAPI)"]
+        Router["API Routers (analysis, report, review)"]
+        LChain["Langchain Service (OpenAI Integration)"]
     end
 
-    subgraph Data_Access_Layer ["Data Access Layer"]
-        Repo["JPA Repositories (PooRecordRepository, etc.)"]
-        Entity["JPA Entities (PooRecord, etc.)"]
-    end
-
-    subgraph External_Storage ["Storage & Cache"]
+    subgraph Databases ["Databases & Cache"]
         DB[(PostgreSQL / PostGIS)]
-        Cache[(Redis Cache / Sorted Set)]
+        Redis[(Redis Cache / Sorted Set)]
     end
 
-    %% Flow
-    SPA --> Filter
-    Filter --> Controller
+    %% Flow lines
+    React --> ClientAPI
+    ClientAPI --> Filter
     OAuth --> Controller
+    Filter --> Controller
     Controller -.-> DTO
     Controller --> Service
     Service -.-> Mapper
     Mapper -.-> DTO
-    Mapper -.-> Entity
     Service --> Repo
     Service --> Event
-    Service --> AI
-    Event -.-> Listener
-    Listener --> Repo
-    Repo -.-> Entity
+    Service --> AIClient
+    Service --> Redis
+    AIClient --> Router
+    Router --> LChain
     Repo --> DB
-    Service --> Cache
+    Event -.-> Repo
 ```
 
-### 2.2 데이터 처리 흐름 (Data Flow & Lifecyle)
-
-클라이언트의 요청이 유입되어 데이터베이스에 반영되고 응답이 나가기까지의 데이터 매핑 및 라이프사이클을 설명합니다.
+### 2.2 실시간 배변 기록 및 AI 비동기 분석 시퀀스
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as Client (React)
-    participant Ctrl as Controller
-    participant Dto as Request DTO
-    participant Svc as Service
-    participant Map as MapStruct Mapper
-    participant Ent as Entity
-    participant Repo as Repository
-    participant DB as PostgreSQL
+    actor User as 사용자 (React)
+    participant Ctrl as Backend Controller
+    participant Svc as Backend Service
+    participant Repo as DB Repository
+    participant Evt as Spring Event
+    participant AI as AI Service (FastAPI)
 
-    Client->>Ctrl: POST /api/v1/poo-records (JSON Data)
-    Note over Ctrl, Dto: Spring Validation (@Valid)
+    User->>Ctrl: POST /api/v1/poo-records (Image Base64)
     Ctrl->>Svc: createRecord(dto)
-    Svc->>Map: toEntity(dto)
-    Map-->>Svc: Entity Object
-    Svc->>Repo: save(entity)
-    Repo->>DB: INSERT INTO poo_records
-    DB-->>Repo: Saved Entity Data
-    Repo-->>Svc: Managed Entity
-    Svc->>Map: toDto(entity)
-    Map-->>Svc: Response DTO
+    Svc->>Repo: save(pooRecordEntity) (Base 정보 저장)
+    Svc->>Evt: publishEvent(PooRecordCreatedEvent)
     Svc-->>Ctrl: Response DTO
-    Ctrl-->>Client: 201 Created (JSON Response)
+    Ctrl-->>User: 201 Created (등록 성공 응답)
+
+    Note over Svc, AI: 트랜잭션 커밋 완료 후 비동기 리스너 구동
+    Evt->>AI: POST /api/v1/analysis (Image 전송)
+    AI-->>Evt: 200 OK (분석 피드백 반환)
+    Evt->>Repo: update(pooRecordEntity) (분석 결과 업데이트)
 ```
 
 ---
 
-## 3. 핵심 계층별 역할 및 명세 (Layer Details)
+## 3. 서비스 레이어별 구조 및 명세
 
-스프링 부트 백엔드의 패키지 구조는 `com.daypoo.api` 하위의 12개 주요 패키지로 세분화됩니다.
+### 3.1 프론트엔드 (frontend)
+React 19.2.0, Vite 7.3.1 기반 SPA 구조입니다. 스타일링에는 TailwindCSS 4.2.1, 린팅/포맷팅에는 Biome 1.9.4가 사용됩니다.
 
-### 3.1 Web Layer (Presentation)
+- **디렉토리 구조**:
+  - `src/components/`: 재사용 컴포넌트 (예: `AuthModal`, `LocationConsentBanner`)
+  - `src/context/`: 전역 상태 컨텍스트 (예: `AuthContext`, `ToiletContext` 지도 및 화장실 상태 관리)
+  - `src/hooks/`: 공통 커스텀 훅 (예: `useGeoTracking` 위치 추적 로직, `useRankings` 랭킹 상태 제어)
+  - `src/pages/`: 각 라우트별 페이지 컴포넌트
+  - `src/services/`: API 호출 클래스 및 Axios 설정 (`apiClient.ts` 공통 interceptor 설정)
+  - `src/types/`: TypeScript 타입 정의 파일
+  - `src/utils/`: 헬퍼 유틸리티 함수들
 
-- **`controller` (컨트롤러)**:
-  - **역할**: 외부 HTTP 요청을 수신하고 비즈니스 서비스에 위임한 후 응답을 포맷팅하여 반환합니다.
-  - **규칙**: 컨트롤러 클래스 내부에 비즈니스 로직을 포함하지 않고 오직 요청 검증, 서비스 호출, HTTP 응답 매핑만 수행합니다. OpenAPI/Swagger 어노테이션을 부착하여 API를 명세화합니다.
-- **`dto` (데이터 전송 객체)**:
-  - **역할**: 계층 간 데이터 교환을 수행하는 단순 데이터 홀더 객체입니다.
-  - **규칙**: Request DTO와 Response DTO를 엄격히 구분하여 정의합니다. Request DTO에는 `@NotNull`, `@Size` 등의 Validation 어노테이션을 사용하여 유효성 검증 규칙을 정의합니다.
+- **프론트엔드 통신 패턴**:
+  - `apiClient.ts`가 API base URL과 Request/Response 인터셉터를 관리합니다.
+  - 요청 헤더에 JWT 토큰을 자동으로 주입하며, 401 Unauthorized 발생 시 리프레시 토큰을 이용한 재인증을 수행합니다.
 
-### 3.2 Business Logic Layer
-
-- **`service` (서비스)**:
-  - **역할**: 핵심 비즈니스 요구사항 및 트랜잭션 흐름을 제어합니다.
-  - **규칙**: 메소드 수준 혹은 클래스 수준에서 `@Transactional`을 적용하여 데이터 정합성을 보장합니다. 여러 리포지토리나 컴포넌트를 조율하는 책임을 가집니다.
-- **`component` (공통 컴포넌트)**:
-  - **역할**: 비즈니스 도메인에 종속되지 않는 공통 비즈니스 로직이나 유틸리티 성격의 스프링 빈입니다.
-  - **규칙**: 특정 도메인의 영속성 저장소에 직접 접근하지 않는 순수 기술적 혹은 공통 유효성 기능을 담당합니다.
-- **`mapper` (객체 매퍼)**:
-  - **역할**: MapStruct 라이브러리를 활용해 DTO와 Entity 객체 간의 필드 매핑 및 변환을 자동화합니다.
-  - **규칙**: 수동으로 빌더를 작성하는 보일러플레이트 코드를 지양하고, 매퍼 인터페이스를 선언하여 컴파일 타임에 안전한 변환 코드를 구현합니다.
-- **`event` (비동기 이벤트)**:
-  - **역할**: 느슨한 결합이 필요한 로직 간의 통신을 스프링의 ApplicationEvent 시스템을 통해 처리합니다.
-  - **규칙**: 예컨대 배변 기록 저장 시 트리거되는 AI 분석 요구나 푸시 알림 발송 등은 트랜잭션 완료 후 비동기적으로 실행되도록 `@TransactionalEventListener` 및 `@Async`를 사용합니다.
-
-### 3.3 Data Access Layer
-
-- **`repository` (리포지토리)**:
-  - **역할**: 스프링 데이터 JPA를 사용하여 데이터베이스에 물리적으로 접근하고 쿼리를 수행합니다.
-  - **규칙**: 인터페이스로 선언하며, 복잡한 동적 쿼리가 필요한 경우 `QuerydslPredicateExecutor`나 Custom Repository 구현체를 병행 적용합니다.
-- **`entity` (엔티티)**:
-  - **역할**: 데이터베이스 테이블 스키마와 직접 매핑되는 영속성 모델입니다.
-  - **규칙**: 도메인 객체로서 비즈니스 행위(메소드)를 가질 수 있으나, 영속성 컨텍스트 외부(Presentation 계층)로 노출해서는 안 됩니다. 시스템 공통 필드(등록일, 수정일)는 `BaseTimeEntity`를 상속받아 자동으로 처리하고, Soft Delete 처리를 위해 `@Where(clause = "deleted_at IS NULL")` 구조를 권장합니다.
+- **린트/포맷 룰**:
+  - Biome 설정을 기반으로 하며, 커밋 전 스테이징 영역의 파일들에 대해 자동으로 format/lint 검사를 구동합니다.
 
 ---
 
-## 4. 횡단 관심사 구현 (Cross-Cutting Concerns)
+### 3.2 백엔드 (backend)
+Spring Boot 3.4.3 및 Java 21 기반 애플리케이션으로, Gradle 빌드 툴을 사용합니다.
 
-### 4.1 인증 & 인가 (Security & Auth)
+- **디렉토리 구조 (`com.daypoo.api`)**:
+  - `controller`: HTTP 요청 수신, API 파라미터 유효성 검증 (`@Valid`), 응답 DTO 포맷팅을 수행합니다.
+  - `dto`: 요청/응답 형식 정의. 엔티티 정보 노출 최소화를 위해 Layer 간 전송용 DTO를 엄격하게 격리합니다.
+  - `service`: 트랜잭션 경계(`@Transactional`) 내에서 핵심 비즈니스 규칙과 로직을 수행합니다.
+  - `repository`: JPA 인터페이스 및 QueryDSL 커스텀 구현체를 이용한 DB 조회.
+  - `entity`: JPA 매핑 도메인 객체로 `BaseTimeEntity`를 상속합니다.
+  - `mapper`: MapStruct 라이브러리를 활용해 Entity <-> DTO 자동 매핑 코드를 생성합니다.
+  - `event`: 스프링 애플리케이션 이벤트를 정의하고 `@TransactionalEventListener`를 통해 이벤트를 비동기로 수신합니다.
+  - `security`: Spring Security 필터 설정, JWT 토큰 파싱/생성 및 OAuth2 소셜 로그인 연동을 전담합니다.
 
-- **보안 아키텍처**:
-  - `security` 패키지는 Spring Security 필터 체인을 관리합니다.
-  - 소셜 로그인 성공 시 `OAuth2SuccessHandler`에서 JWT(Access / Refresh Token)를 발급합니다.
-  - `JwtAuthenticationFilter`가 모든 API 요청의 `Authorization` 헤더에서 Bearer Token을 추출하여 사용자 정보(Authentication)를 SecurityContextHolder에 주입합니다.
-  - Redis를 사용해 발급된 토큰의 무효화 상태(Blacklist) 및 Refresh Token의 유효 기간을 통합 관리합니다.
-
-### 4.2 예외 처리 (Global Exception Handling)
-
-- **전역 예외 감지**:
-  - `global.exception` 패키지 내부의 `@RestControllerAdvice`로 선언된 `GlobalExceptionHandler` 클래스를 통해 백엔드 전역에서 발생하는 예외를 포착합니다.
-  - 예외 발생 시 표준 응답 DTO 형식(예: `ErrorResponse`)으로 규격화하여 클라이언트에 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error 등의 정확한 HTTP 상태 코드와 에러 코드를 제공합니다.
-
-### 4.3 공간 데이터 처리 (Spatial Data with PostGIS)
-
-- **위치 기반 서비스**:
-  - 사용자 주변의 화장실 조회 및 50m 이내 거리 검증을 수행하기 위해 PostgreSQL의 공간 데이터 확장 모듈인 PostGIS를 활용합니다.
-  - 리포지토리 레이어에서 `ST_DWithin` 등의 공간 연산 쿼리를 직접 수행하여 대용량 지도 데이터 검색 성능을 최적화합니다.
+- **핵심 패키지 규칙**:
+  - `@Transactional(readOnly = true)`: 읽기 전용 서비스 로직에는 반드시 readOnly 옵션을 주어 하이버네이트 스냅샷 생성 비용을 절감합니다.
+  - 리포지토리 인터페이스에 QuerydslPredicateExecutor를 결합하거나 Custom Repository 아키텍처를 도입하여 동적 쿼리를 관리합니다.
 
 ---
 
-## 5. 신규 기능 개발을 위한 가이드라인 (Blueprint for New Development)
+### 3.3 AI 서비스 (ai-service)
+FastAPI 및 Python 3.12 기반의 LLM 오케스트레이션 서비스입니다.
 
-새로운 API 요구사항이 발생한 경우, 일관성 있는 아키텍처 유지를 위해 아래 워크플로우와 코딩 템플릿을 준수해야 합니다.
+- **디렉토리 구조 (`app`)**:
+  - `api/v1/endpoints/`: 라우터 모듈 (`analysis.py` 배변 이미지 분석, `report.py` 리포트 생성, `review.py` 코멘트)
+  - `core/`: 전역 설정 및 환경 변수 바인딩 (`config.py` - Pydantic Settings 사용)
+  - `schemas/`: Pydantic 모델을 이용한 Request/Response 데이터 직렬화 및 유효성 검증
+  - `services/`: Langchain 기반의 prompt 템플릿 처리 및 OpenAI 비즈니스 로직 연동
 
-### 5.1 개발 워크플로우
+- **특성**:
+  - 다량의 이미지/텍스트 비동기 처리를 위해 `async/await` 패턴을 준수합니다.
+  - 백엔드 서비스의 비동기 요청을 받기 때문에, 오류 발생 시 추적을 용이하게 하기 위해 `X-Correlation-Id` 헤더를 로깅 라이브러리(`loguru`)를 통해 전파합니다.
+
+---
+
+## 4. 데이터 아키텍처 (Data Architecture)
+
+### 4.1 공간 데이터 모델 (PostGIS)
+GPS 좌표 기반 화장실 검색 기능의 계산 병목을 방지하기 위해 PostgreSQL 공간 인덱스(GIST)를 활용합니다.
+- `Toilet` 테이블의 `location` 컬럼은 PostGIS `GEOMETRY(Point, 4326)` 타입으로 매핑됩니다.
+- 인접 화장실 조회를 위해 `ST_DWithin` 연산을 수행하여 인덱스를 타고 반경 내의 레코드만 빠르게 여과합니다.
+- 사용자가 화장실 반경 50m 이내에 도달했는지 확인하는 GPS 방문 인증 로직이 이 계층에서 구현됩니다.
+
+### 4.2 캐시 및 데이터 구조 (Redis)
+- **실시간 글로벌 및 지역 랭킹**: Redis의 `Sorted Set` 구조를 사용하여 실시간 경험치(EXP) 및 활동 점수를 정렬하여 쿼리 오버헤드 없이 랭킹 시스템을 운영합니다.
+- **인증 토큰 블랙리스트**: 로그아웃 처리되거나 탈취 가능성이 있는 JWT Access Token을 만료 시점까지 Redis에 캐싱하여 API 접근을 원천 차단합니다.
+- **API Rate Limiting**: Redis의 카운터를 사용하여 단시간 내 임의의 공격성 트래픽(메일 전송, 인증 시도)을 제한합니다.
+
+---
+
+## 5. 횡단 관심사 구현 (Cross-Cutting Concerns)
+
+### 5.1 인증 & 인가 (Security)
+Spring Security 및 JWT를 결합한 인증 모델입니다.
+1. 소셜 로그인(Google, Kakao) 성공 시 `OAuth2SuccessHandler`가 호출되어 Access 및 Refresh Token을 발행합니다.
+2. 클라이언트는 모든 API 헤더의 `Authorization: Bearer <Access Token>` 형태로 보안 리소스에 접근합니다.
+3. `JwtAuthenticationFilter`가 토큰을 디코딩하고 `SecurityContextHolder`에 사용자의 Principal과 GrantedAuthority를 바인딩합니다.
+4. 만약 시스템 점검 모드가 활성화되면 `MaintenanceModeFilter`가 가동되어 관리자 이외의 일반 API 요청을 503 Service Unavailable로 조기 차단합니다.
+
+### 5.2 글로벌 예외 처리
+- **백엔드**: `@RestControllerAdvice`인 `GlobalExceptionHandler`가 비즈니스 예외(`BusinessException`, `EntityNotFoundException` 등)를 포착하여 표준 규격인 `ErrorResponse` DTO로 변환하여 전송합니다.
+- **AI 서비스**: FastAPI Exception Handler를 사용하여 Pydantic validation 에러와 OpenAI API 호출 실패 등을 감지하고 정형화된 JSON 에러 구조로 변환합니다.
+- **프론트엔드**: React의 `ErrorBoundary`가 예기치 못한 컴포넌트 트리 내 크래시를 방지하고 UI 대안을 렌더링합니다.
+
+### 5.3 로깅 및 분산 트레이싱
+- 클라이언트로부터 들어온 HTTP 요청의 Unique ID(`X-Correlation-Id`)를 Spring Boot Mapped Diagnostic Context(MDC)와 FastAPI `loguru` 컨텍스트에 설정하여, 하나의 트랜잭션이 여러 분산 서버 간에 이동하더라도 동일한 트레이스 키로 디버깅 가능하도록 보장합니다.
+
+---
+
+## 6. 배포 및 인프라 아키텍처 (Deployment Architecture)
+
+DayPoo 프로젝트는 OCI(Oracle Cloud Infrastructure) 프리티어 **ARM64** 호스트 환경에 Docker Compose로 구성되어 있습니다.
 
 ```
-1. Entity 정의 (com.daypoo.api.entity)
-   └── 2. Repository 작성 (com.daypoo.api.repository)
-        └── 3. DTO 생성 (com.daypoo.api.dto)
-             └── 4. Mapper 작성 (com.daypoo.api.mapper)
-                  └── 5. Service 로직 구현 (com.daypoo.api.service)
-                       └── 6. Controller 엔드포인트 노출 (com.daypoo.api.controller)
-                            └── 7. 단위 테스트 작성 (src/test/java/com/daypoo/api/...)
+       [ Client HTTPS Request ]
+                  │
+                  ▼
+         [ Host OCI VM Firewall ] (Ports: 80 / 443 Ingress)
+                  │
+                  ▼
+         [ docker-compose.prod ]
+           ├── Nginx (Reverse Proxy & Frontend Dist static files)
+           ├── DayPoo Backend JVM (Port 8080)
+           ├── DayPoo AI Service FastAPI (Port 8000)
+           ├── PostgreSQL (PostGIS) Container
+           └── Redis Container
 ```
 
-### 5.2 계층별 코딩 가이드 및 템플릿
+### 6.1 크로스 아키텍처 멀티 플랫폼 빌드
+GitHub Actions의 기본 Runner는 AMD64 아키텍처이나 target 호스트는 ARM64입니다. 에뮬레이션 빌드 성능 향상을 위해 Docker Multi-stage Build 시 **컴파일 단계 분리** 방안을 적용합니다.
+- **백엔드/프론트엔드 빌드 스테이지**: `--platform=$BUILDPLATFORM` 지시자를 통해 Java 바이트코드 컴파일 및 Node.js React 빌드를 호스트 아키텍처(AMD64)에서 즉각 수행하여 CPU 지연을 피합니다.
+- **패키징 스테이지**: 최종 구동용 이미지 배포 단계에만 타겟 아키텍처인 `amazoncorretto:21-alpine` 및 `nginx:alpine`을 ARM64로 패키징하여 배포합니다.
 
-#### [Entity 템플릿]
+### 6.2 OCI 호스트 트러블슈팅 가이드
+- **OOM 장애 예방**: 백엔드 JVM 힙 메모리를 `-Xmx384m -Xms256m`으로 명시적으로 제한하고 호스트 우분투 상에서 **Swap Memory (2GB 이상)** 설정을 적용합니다.
+- **네트워크 방화벽 차단**: 인스턴스에서 애플리케이션 포트 포워딩이 정상이어도 외부 접속 지연이 있으면 OCI VCN의 수신 보안 규칙 및 호스트 OS 방화벽(`iptables` 내 `INPUT` 체인 정책)에 80 및 443 포트 개방 설정이 유효한지 검증합니다.
+
+---
+
+## 7. 신규 개발을 위한 블루프린트 (Blueprint for New Development)
+
+신규 비즈니스 요구사항이나 도메인을 작성하는 경우 다음 단계를 필히 준수합니다.
+
+### 7.1 백엔드 개발 절차 및 템플릿
+
+#### 1단계: Entity 선언
+데이터베이스 테이블 모델링을 반영하여 엔티티를 설계합니다.
 
 ```java
 package com.daypoo.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sample_domain")
+@Table(name = "features")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class SampleDomain extends BaseTimeEntity {
-
+public class Feature extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    public void updateName(String name) {
-        this.name = name;
-    }
-
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
-    }
+    private String title;
 }
 ```
 
-#### [Repository 템플릿]
+#### 2단계: Repository 생성
+기본 CRUD 처리를 위해 JPA 인터페이스를 상속합니다.
 
 ```java
 package com.daypoo.api.repository;
 
-import com.daypoo.api.entity.SampleDomain;
+import com.daypoo.api.entity.Feature;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
 
 @Repository
-public interface SampleDomainRepository extends JpaRepository<SampleDomain, Long> {
-    Optional<SampleDomain> findByNameAndDeletedAtIsNull(String name);
+public interface FeatureRepository extends JpaRepository<Feature, Long> {
 }
 ```
 
-#### [DTO 템플릿]
+#### 3단계: DTO 정의
+Request와 Response의 목적에 부합하도록 정적 중첩 클래스로 명명합니다.
 
 ```java
 package com.daypoo.api.dto;
@@ -267,15 +290,14 @@ package com.daypoo.api.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-public class SampleDto {
-
+public class FeatureDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class Request {
-        @NotBlank(message = "이름은 필수 항목입니다.")
-        private String name;
+        @NotBlank(message = "제목은 필수입니다.")
+        private String title;
     }
 
     @Getter
@@ -283,74 +305,64 @@ public class SampleDto {
     @Builder
     public static class Response {
         private Long id;
-        private String name;
+        private String title;
     }
 }
 ```
 
-#### [Mapper 템플릿 (MapStruct)]
+#### 4단계: MapStruct Mapper 매핑
+객체 변환 레이어 생성을 인터페이스로 정의합니다.
 
 ```java
 package com.daypoo.api.mapper;
 
-import com.daypoo.api.dto.SampleDto;
-import com.daypoo.api.entity.SampleDomain;
+import com.daypoo.api.dto.FeatureDto;
+import com.daypoo.api.entity.Feature;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
-public interface SampleMapper {
-    SampleMapper INSTANCE = Mappers.getMapper(SampleMapper.class);
-
-    SampleDomain toEntity(SampleDto.Request request);
-    SampleDto.Response toDto(SampleDomain entity);
+public interface FeatureMapper {
+    Feature toEntity(FeatureDto.Request request);
+    FeatureDto.Response toDto(Feature entity);
 }
 ```
 
-#### [Service 템플릿]
+#### 5단계: Service 작성 및 Transaction 바인딩
+핵심 비즈니스 흐름을 정의합니다.
 
 ```java
 package com.daypoo.api.service;
 
-import com.daypoo.api.dto.SampleDto;
-import com.daypoo.api.entity.SampleDomain;
-import com.daypoo.api.mapper.SampleMapper;
-import com.daypoo.api.repository.SampleDomainRepository;
+import com.daypoo.api.dto.FeatureDto;
+import com.daypoo.api.entity.Feature;
+import com.daypoo.api.mapper.FeatureMapper;
+import com.daypoo.api.repository.FeatureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class SampleService {
-
-    private final SampleDomainRepository repository;
-    private final SampleMapper mapper;
+public class FeatureService {
+    private final FeatureRepository repository;
+    private final FeatureMapper mapper;
 
     @Transactional
-    public SampleDto.Response createSample(SampleDto.Request request) {
-        SampleDomain entity = mapper.toEntity(request);
-        SampleDomain saved = repository.save(entity);
+    public FeatureDto.Response saveFeature(FeatureDto.Request request) {
+        Feature saved = repository.save(mapper.toEntity(request));
         return mapper.toDto(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public SampleDto.Response getSample(Long id) {
-        SampleDomain entity = repository.findById(id)
-                .filter(e -> e.getDeletedAt() == null)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리소스입니다."));
-        return mapper.toDto(entity);
     }
 }
 ```
 
-#### [Controller 템플릿]
+#### 6단계: Controller 노출 및 Validation
+외부 엔드포인트를 노출합니다.
 
 ```java
 package com.daypoo.api.controller;
 
-import com.daypoo.api.dto.SampleDto;
-import com.daypoo.api.service.SampleService;
+import com.daypoo.api.dto.FeatureDto;
+import com.daypoo.api.service.FeatureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -358,30 +370,42 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/samples")
+@RequestMapping("/api/v1/features")
 @RequiredArgsConstructor
-public class SampleController {
-
-    private final SampleService service;
+public class FeatureController {
+    private final FeatureService service;
 
     @PostMapping
-    public ResponseEntity<SampleDto.Response> create(@RequestBody @Valid SampleDto.Request request) {
-        SampleDto.Response response = service.createSample(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<SampleDto.Response> get(@PathVariable Long id) {
-        SampleDto.Response response = service.getSample(id);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<FeatureDto.Response> create(@RequestBody @Valid FeatureDto.Request request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.saveFeature(request));
     }
 }
 ```
 
 ---
 
-## 6. 개발 규정 및 아키텍처 제약사항
+### 7.2 프론트엔드 개발 절차
 
-1. **상호 교차 의존 금지**: 컨트롤러에서 여러 서비스를 체이닝하거나, 서비스 레이어에서 다른 서비스의 변경 사항에 강하게 결합되는 비즈니스 의존성이 존재할 경우 스프링의 Event Publisher를 활용해 비동기 이벤트 핸들러로 책임을 분리합니다.
-2. **트랜잭션 관리**: 조회용 쿼리는 반드시 `@Transactional(readOnly = true)`를 기입하여 JPA 영속성 컨텍스트의 스냅샷 관리 비용을 절감하고 성능을 확보해야 합니다.
-3. **단위 테스트 동시 작성**: 새 로직 작성 시 테스트 대상 파일과 동일한 패키지 경로에 테스트 코드(`*Test.java`)를 동시 생성하고 검증합니다.
+1. **타입 정의**: `src/types/` 내에 API 인터페이스 명세에 맞는 TypeScript 타입을 사전 작성합니다.
+2. **API 서비스 작성**: `src/services/` 디렉토리 하위에 apiClient를 임포트하여 백엔드 호출 메서드를 작성합니다.
+3. **커스텀 훅 및 상태 설계**: 컴포넌트의 렌더링 부하와 로직 분리를 위해 `useAsyncState` 등을 활용해 API 호출을 제어하는 훅을 설계합니다.
+4. **컴포넌트/페이지 구현**: JSX 마크업을 작성하고 화면을 구성합니다. 과도한 애니메이션이나 CSS 스타일 추가를 금지하며 심플하고 직관적인 UI 컨벤션을 유지합니다.
+5. **라우터 연동**: `src/App.tsx` 내에 레이지 로딩(`lazy`) 형태로 신규 경로를 할당합니다.
+
+---
+
+### 7.3 AI 서비스 엔드포인트 개발 절차
+
+1. **Pydantic 스키마 정의**: `app/schemas/` 에 데이터 유효성 및 파싱 필드 사양을 선언합니다.
+2. **라우터 생성**: `app/api/v1/endpoints/` 에 신규 파이썬 파일을 추가하고 라우트 함수(`@router.post(...)`)를 작성합니다.
+3. **핵심 분석 서비스 구현**: `app/services/` 내에서 Langchain의 LLMChain 혹은 prompt template을 조립하고 응답 형식을 설정합니다.
+4. **메인 인스턴스 등록**: `app/main.py`에 라우터를 등록합니다.
+5. **테스트 작성**: `pytest`를 활용하여 모의 AI 호출 및 Pydantic validation 테스트를 배치합니다.
+
+---
+
+## 8. 아키텍처 준수 및 테스트 규정
+
+1. **테스트 코드 동시 배치**: 새로운 클래스나 비즈니스 기능을 정의할 시 반드시 타겟 코드와 인접한 디렉토리에 테스트 코드 파일(FE는 Vitest, BE는 JUnit, AI는 Pytest)을 동시 생성해야 합니다.
+2. **린터 및 포매터 준수**: 모든 수정사항을 적용한 후에는 FE는 `npm run check`(또는 `biome check`), BE는 `./gradlew spotlessApply`, AI는 `black`과 `isort` 규칙을 실행하여 코드 컨벤션 위반이 없는지 빌드 전 자율 점검합니다.
+3. **임의의 모듈 임포트 금지**: 순방향 아키텍처 흐름(`Controller -> Service -> Repository`)을 위반하는 결합(예: Entity가 API 레이어에 직접 참조되거나, 프론트엔드가 하드코딩된 테마 상수를 남발하는 것)을 엄격히 금지합니다.
