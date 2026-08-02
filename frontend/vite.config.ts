@@ -83,7 +83,7 @@ export default defineConfig({
     }),
     visualizer({
       open: false,
-      filename: 'stats.html',
+      filename: 'dist/stats.html',
       gzipSize: true,
       brotliSize: true,
     }),

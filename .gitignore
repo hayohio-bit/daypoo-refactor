@@ -153,5 +153,4 @@ htmlcov/
 # ================================================
 tmp/
 runs.json
-stats.html
-*.html.stats
+
