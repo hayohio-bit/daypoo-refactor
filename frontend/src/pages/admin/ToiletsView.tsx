@@ -2,12 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, Database, Navigation, Plus, RefreshCw, Sparkles, Star, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
-import type { ToiletData } from '../../types/toilet';
-import type { ToiletReviewSummaryResponse } from '../../services/reviewService';
 import { AdminCard } from '../../components/admin/AdminCard';
 import { useToilets } from '../../hooks/useToilets';
 import { api } from '../../services/apiClient';
+import type { ToiletReviewSummaryResponse } from '../../services/reviewService';
 import type { AdminToiletListResponse, PageResponse, SyncStatusResponse } from '../../types/admin';
+import type { ToiletData } from '../../types/toilet';
 import { COLORS } from './adminCommons';
 
 // ── Recent Toilets Panel Component ────────────────────────────────────

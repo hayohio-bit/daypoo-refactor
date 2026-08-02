@@ -1,0 +1,10 @@
+# <type>: <subject>
+#
+# type: feat | fix | docs | style | refactor | test | chore
+# subject: 50자 이내, 마침표 없이
+#
+# --- 본문 (선택) ---
+#
+#
+# --- 꼬리말 (선택) ---
+# Refs: #이슈번호
