@@ -152,3 +152,6 @@ htmlcov/
 # 🗂️ 임시 파일
 # ================================================
 tmp/
+runs.json
+stats.html
+*.html.stats
