@@ -394,25 +394,17 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     [markVisited, pos.lat, pos.lng, refreshUser],
   );
 
-  // visitCount 병합
-  const toiletsWithVisitCount = toilets.map((t) => ({
-    ...t,
-    visitCount: visitCounts[t.id] || 0,
-  }));
-
   // 검색어가 있으면 ES 결과 사용, 없으면 지도 반경 내 화장실에 필터만 적용
-  const filteredToilets =
-    searchQuery.trim() !== ''
-      ? searchResults
-      : toiletsWithVisitCount.filter((t) =>
-          filter === 'all'
-            ? true
-            : filter === 'favorite'
-              ? t.isFavorite
-              : filter === 'visited'
-                ? t.isVisited
-                : true,
-        );
+  const filteredToilets = useMemo(() => {
+    const list = toilets.map((t) => ({
+      ...t,
+      visitCount: visitCounts[t.id] || 0,
+    }));
+    if (searchQuery.trim() !== '') return searchResults;
+    if (filter === 'favorite') return list.filter((t) => t.isFavorite);
+    if (filter === 'visited') return list.filter((t) => t.isVisited);
+    return list;
+  }, [toilets, visitCounts, searchQuery, searchResults, filter]);
 
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {

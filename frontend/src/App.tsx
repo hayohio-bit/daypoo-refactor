@@ -1,4 +1,4 @@
-import { LazyMotion, m } from 'framer-motion';
+import { LazyMotion } from 'framer-motion';
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -49,9 +49,11 @@ import { TransitionProvider } from './context/TransitionContext';
 // 동적 로드될 Framer Motion 기능들
 const loadFeatures = () => import('./utils/framerFeatures').then((res) => res.default);
 
-function LoginPage({
+function AuthRedirectPage({
+  mode,
   openAuth,
 }: {
+  mode: 'login' | 'signup';
   openAuth: (mode: 'login' | 'signup', callback?: () => void) => void;
 }) {
   const { isAuthenticated } = useAuth();
@@ -61,11 +63,19 @@ function LoginPage({
     if (isAuthenticated) {
       navigate('/main', { replace: true });
     } else {
-      openAuth('login');
+      openAuth(mode);
     }
-  }, [isAuthenticated, navigate, openAuth]);
+  }, [isAuthenticated, mode, navigate, openAuth]);
 
   return <MainPage openAuth={openAuth} />;
+}
+
+function LoginPage({
+  openAuth,
+}: {
+  openAuth: (mode: 'login' | 'signup', callback?: () => void) => void;
+}) {
+  return <AuthRedirectPage mode="login" openAuth={openAuth} />;
 }
 
 function SignupPage({
@@ -73,18 +83,7 @@ function SignupPage({
 }: {
   openAuth: (mode: 'login' | 'signup', callback?: () => void) => void;
 }) {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/main', { replace: true });
-    } else {
-      openAuth('signup');
-    }
-  }, [isAuthenticated, navigate, openAuth]);
-
-  return <MainPage openAuth={openAuth} />;
+  return <AuthRedirectPage mode="signup" openAuth={openAuth} />;
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {

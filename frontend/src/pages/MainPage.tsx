@@ -1,5 +1,4 @@
-import { AnimatePresence, Variants, motion, useReducedMotion } from 'framer-motion';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmergencyButton } from '../components/EmergencyButton';
 import { EmergencySheet } from '../components/EmergencySheet';
@@ -7,13 +6,10 @@ import { Footer } from '../components/Footer';
 import { HeroSection } from '../components/HeroSection';
 import { MapSection } from '../components/MapSection';
 import { Navbar } from '../components/Navbar';
-import { NovaGlow } from '../components/NovaGlow';
 import { WaveDivider } from '../components/WaveDivider';
-import { useAuth } from '../context/AuthContext';
 
 export function MainPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => void }) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   return (

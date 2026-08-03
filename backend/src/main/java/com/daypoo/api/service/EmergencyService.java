@@ -59,48 +59,32 @@ public class EmergencyService {
 
     if (geoResults != null && geoResults.getContent() != null) {
       for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : geoResults.getContent()) {
-        String toiletIdStr = geoResult.getContent().getName();
-        double distanceMeters = geoResult.getDistance().getValue() * 1000; // if unit was KM
+        String key = geoResult.getContent().getName();
+        double distanceMeters = geoResult.getDistance().getValue() * 1000;
 
-        Long toiletId = Long.valueOf(toiletIdStr);
-        Optional<Toilet> toiletOpt = toiletRepository.findById(toiletId);
+        Optional<Toilet> toiletOpt;
+        try {
+          Long toiletId = Long.valueOf(key);
+          toiletOpt = toiletRepository.findById(toiletId);
+        } catch (NumberFormatException e) {
+          toiletOpt = toiletRepository.findByMngNo(key);
+        }
 
         if (toiletOpt.isPresent()) {
           Toilet toilet = toiletOpt.get();
-
-          // 알고리즘: Weight = (Distance * 0.7) + (OpeningHours_Weight * 0.3)
-          // 거리가 짧을수록 점수가 낮아야 좋음 (혹은 높게 역전)
-          // 여기서는 낮을수록 좋은 Weight Score (Penalty)
-          double distancePenalty = distanceMeters * 0.7;
-          double timePenalty = toilet.is24h() ? 0 : 500; // 24시간인 경우 패널티 없음, 아니면 500점 패널티 부여
-
-          double finalWeight = distancePenalty + (timePenalty * 0.3);
-
           ToiletResponse toiletResponse = toiletMapper.toResponse(toilet);
-
-          ToiletResponse finalResponse =
-              ToiletResponse.builder()
-                  .id(toiletResponse.id())
-                  .name(toiletResponse.name())
-                  .address(toiletResponse.address())
-                  .openHours(toiletResponse.openHours())
-                  .is24h(toiletResponse.is24h())
-                  .latitude(toiletResponse.latitude())
-                  .longitude(toiletResponse.longitude())
-                  .build();
 
           calculatedResponses.add(
               EmergencyToiletResponse.builder()
-                  .id(finalResponse.id())
-                  .name(finalResponse.name())
+                  .id(toiletResponse.id())
+                  .name(toiletResponse.name())
                   .distance(distanceMeters)
-                  .is24h(finalResponse.is24h())
+                  .is24h(toiletResponse.is24h())
                   .build());
         }
       }
     }
 
-    // 거리 순으로 정렬하여 상위 3개 반환 (EmergencyToiletResponse 구조에 맞춰 수정)
     return calculatedResponses.stream()
         .sorted(Comparator.comparingDouble(EmergencyToiletResponse::distance))
         .limit(3)

@@ -22,7 +22,6 @@ public class BotOrchestrator {
 
   private final MorningRoutineScenario morningScenario;
   private final ExplorerScenario explorerScenario;
-  private final ShopperScenario shopperScenario;
   private final SupportScenario supportScenario;
   private final SocialScenario socialScenario;
 
@@ -44,11 +43,6 @@ public class BotOrchestrator {
     // Explorer (10:00 ~ 22:00, every 5 min -> approx 20 bots/cycle)
     if (now.isAfter(LocalTime.of(10, 0)) && now.isBefore(LocalTime.of(22, 0))) {
       runBots(explorerScenario, properties.getBot().getExplorer());
-    }
-
-    // Shopper (All day, every 10 min -> approx 10 bots/cycle)
-    if (now.getMinute() % 10 == 0) {
-      runBots(shopperScenario, properties.getBot().getShopper());
     }
 
     // Support (Every 3 hours -> approx 5 bots/cycle)

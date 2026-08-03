@@ -1,5 +1,5 @@
 import type React from 'react';
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { api } from '../services/apiClient';
 import type { ToiletData } from '../types/toilet';
 
@@ -147,10 +147,13 @@ export function ToiletProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const value = useMemo(
+    () => ({ toilets, loading, error, fetchToilets, toggleFavorite, markVisited }),
+    [toilets, loading, error, fetchToilets, toggleFavorite, markVisited],
+  );
+
   return (
-    <ToiletContext.Provider
-      value={{ toilets, loading, error, fetchToilets, toggleFavorite, markVisited }}
-    >
+    <ToiletContext.Provider value={value}>
       {children}
     </ToiletContext.Provider>
   );

@@ -82,12 +82,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
     navigate('/main');
   };
 
-  const handleLogoClick = () => {
-    if (window.location.pathname.endsWith('/main') || window.location.pathname.endsWith('/')) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
   const isActivePath = (path: string) => location.pathname === path;
 
 
