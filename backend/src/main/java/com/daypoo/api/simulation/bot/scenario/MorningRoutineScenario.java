@@ -6,8 +6,6 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.UserRepository;
-import com.daypoo.api.service.RankingService;
-import com.daypoo.api.service.TitleAchievementService;
 import com.daypoo.api.simulation.bot.BotUserPool;
 import com.daypoo.api.simulation.seeder.SeedDataGenerator;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +23,6 @@ public class MorningRoutineScenario implements BotScenario {
   private final UserRepository userRepository;
   private final ToiletRepository toiletRepository;
   private final PooRecordRepository recordRepository;
-  private final RankingService rankingService;
-  private final TitleAchievementService titleAchievementService;
   private final BotUserPool userPool;
 
   @Override
@@ -57,9 +53,6 @@ public class MorningRoutineScenario implements BotScenario {
     recordRepository.save(record);
 
     user.addExpAndPoints(10, 5);
-    rankingService.updateGlobalRank(user);
-    rankingService.updateRegionRank(user, region);
-    titleAchievementService.checkAndGrantTitles(user);
 
     log.debug("Bot {} executed MorningRoutine at toilet {}", user.getEmail(), toiletId);
   }

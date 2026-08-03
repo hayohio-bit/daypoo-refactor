@@ -1,7 +1,7 @@
 {
-  "name": "DayPoo - AI 장 건강 분석 & 화장실 지도",
+  "name": "DayPoo - 급똥 위치 기반 화장실 탐색",
   "short_name": "DayPoo",
-  "description": "데이푸가 분석하는 나만의 배변 건강 리포트. 전국 만 개 화장실 실시간 지도와 함께.",
+  "description": "급할 때 가장 가까운 화장실을 1초 만에 찾아주는 급똥 SOS 앱. 전국 5만 개 화장실 실시간 지도.",
   "lang": "ko-KR",
   "dir": "ltr",
   "id": "/",
@@ -83,10 +83,10 @@
   ],
   "shortcuts": [
     {
-      "name": "배변 기록하기",
-      "short_name": "기록",
-      "description": "오늘의 배변 상태를 기록합니다",
-      "url": "/record",
+      "name": "급똥 SOS",
+      "short_name": "SOS",
+      "description": "가장 가까운 화장실을 즉시 찾습니다",
+      "url": "/map?openNearest=true",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
@@ -111,7 +111,7 @@
     {
       "name": "마이페이지",
       "short_name": "마이",
-      "description": "내 건강 리포트를 확인합니다",
+      "description": "내 화장실 방문 기록을 확인합니다",
       "url": "/mypage",
       "icons": [
         {

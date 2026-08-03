@@ -8,9 +8,7 @@ const SplashPage = lazy(() =>
 );
 const MainPage = lazy(() => import('./pages/MainPage').then((m) => ({ default: m.MainPage })));
 const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
-const RankingPage = lazy(() =>
-  import('./pages/RankingPage').then((m) => ({ default: m.RankingPage })),
-);
+
 const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -25,9 +23,7 @@ const MyPage = lazy(() => import('./pages/MyPage').then((m) => ({ default: m.MyP
 const SupportPage = lazy(() =>
   import('./pages/SupportPage').then((m) => ({ default: m.SupportPage })),
 );
-const PaymentSuccessPage = lazy(() =>
-  import('./pages/PaymentSuccessPage').then((m) => ({ default: m.PaymentSuccessPage })),
-);
+
 const AuthCallback = lazy(() =>
   import('./pages/AuthCallback').then((m) => ({ default: m.AuthCallback })),
 );
@@ -35,9 +31,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default:
 const SocialSignupPage = lazy(() =>
   import('./pages/SocialSignupPage').then((m) => ({ default: m.SocialSignupPage })),
 );
-const PremiumPage = lazy(() =>
-  import('./pages/PremiumPage').then((m) => ({ default: m.PremiumPage })),
-);
+
 const ServerErrorPage = lazy(() =>
   import('./pages/ServerErrorPage').then((m) => ({ default: m.ServerErrorPage })),
 );
@@ -171,7 +165,7 @@ function App() {
                       <Route path="/login" element={<LoginPage openAuth={openAuth} />} />
                       <Route path="/signup" element={<SignupPage openAuth={openAuth} />} />
                       <Route path="/map" element={<MapPage openAuth={openAuth} />} />
-                      <Route path="/ranking" element={<RankingPage openAuth={openAuth} />} />
+
                       <Route path="/forgot-password" element={<ForgotPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
@@ -179,8 +173,8 @@ function App() {
                       <Route path="/support" element={<SupportPage openAuth={openAuth} />} />
                       <Route path="/auth/callback" element={<AuthCallback />} />
                       <Route path="/signup/social" element={<SocialSignupPage />} />
-                      <Route path="/payment/success" element={<PaymentSuccessPage />} />
-                      <Route path="/premium" element={<PremiumPage openAuth={openAuth} />} />
+
+
                       <Route path="/500" element={<ServerErrorPage />} />
                       <Route
                         path="/admin"

@@ -22,7 +22,6 @@ public class AdminController {
   private final AdminService adminService;
   private final AdminSettingsService adminSettingsService;
   private final com.daypoo.api.service.PublicDataSyncService syncService;
-  private final com.daypoo.api.service.RankingService rankingService;
 
   @Operation(
       summary = "공공데이터 화장실 정보 동기화",
@@ -62,13 +61,6 @@ public class AdminController {
   @GetMapping("/logs")
   public ResponseEntity<java.util.List<com.daypoo.api.dto.SystemLogResponse>> getSystemLogs() {
     return ResponseEntity.ok(adminService.getSystemLogs());
-  }
-
-  @Operation(summary = "랭킹 전체 재구축", description = "Redis 랭킹 데이터를 삭제하고 DB 기반으로 재계산하여 재적재합니다.")
-  @PostMapping("/rebuild-rankings")
-  public ResponseEntity<String> rebuildRankings() {
-    rankingService.rebuildAllRankings();
-    return ResponseEntity.ok("랭킹 전체 재구축이 완료되었습니다.");
   }
 
   @Operation(summary = "시스템 설정 조회", description = "관리자 설정 페이지에서 사용하는 시스템 전역 설정값을 조회합니다.")

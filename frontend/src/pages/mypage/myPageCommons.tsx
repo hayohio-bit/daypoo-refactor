@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { UserResponse } from '../../types/api';
 
-export type TabKey = 'home' | 'collection' | 'report' | 'settings';
+export type TabKey = 'home' | 'report' | 'settings';
 
 export interface AvatarItem {
   id: string;

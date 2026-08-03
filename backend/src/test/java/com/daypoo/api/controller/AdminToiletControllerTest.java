@@ -92,20 +92,5 @@ class AdminToiletControllerTest {
     assertThat(response.getBody()).isEqualTo(150L);
     verify(toiletIndexingService, times(1)).getIndexedCount();
   }
-
-  @Test
-  @DisplayName("성공: AI 리뷰 요약 일괄 생성 위임 확인")
-  void generateAiSummaries_success() {
-    // given
-    given(toiletReviewService.generateMissingAiSummaries()).willReturn(5);
-
-    // when
-    ResponseEntity<Map<String, Object>> response = adminToiletController.generateAiSummaries();
-
-    // then
-    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-    assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody().get("generated")).isEqualTo(5);
-    verify(toiletReviewService, times(1)).generateMissingAiSummaries();
-  }
 }
+

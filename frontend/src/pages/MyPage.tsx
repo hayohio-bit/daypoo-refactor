@@ -19,7 +19,6 @@ import { api } from '../services/apiClient';
 import type { UserResponse } from '../types/api';
 import { generateProfileAvatar, isEmoji, parseDicebearUrl } from '../utils/avatar';
 
-import { CollectionTab } from './mypage/CollectionTab';
 import { HomeTab } from './mypage/HomeTab';
 import { ReportTab } from './mypage/ReportTab';
 import { SettingsTab } from './mypage/SettingsTab';
@@ -297,7 +296,6 @@ function HeroBanner({
 // ── 탭 바 ─────────────────────────────────────────────────────────────
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'home', label: '홈', icon: <Sparkles size={22} /> },
-  { key: 'collection', label: '컬렉션', icon: <Trophy size={22} /> },
   { key: 'report', label: '리포트', icon: <BarChart3 size={22} /> },
   { key: 'settings', label: '설정', icon: <Settings size={22} /> },
 ];
@@ -490,7 +488,7 @@ export function MyPage() {
       <HeroBanner
         equippedItem={equipped}
         equippedEffect={equippedEffect}
-        onAvatarClick={() => setTab('collection')}
+        onAvatarClick={() => setTab('home')}
         user={user}
         records={records}
       />
@@ -521,18 +519,7 @@ export function MyPage() {
                 records={records}
               />
             )}
-            {tab === 'collection' && (
-              <CollectionTab
-                equipped={equipped}
-                setEquipped={setEquipped}
-                equippedEffect={equippedEffect}
-                setEquippedEffect={setEquippedEffect}
-                user={user}
-                avatarItems={avatarItems}
-                refreshUser={refreshUser}
-                fetchShopData={fetchShopData}
-              />
-            )}
+
             {tab === 'report' && <ReportTab isPro={isPro} membershipName={membershipName} />}
             {tab === 'settings' && (
               <SettingsTab

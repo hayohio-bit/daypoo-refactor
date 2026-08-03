@@ -6,7 +6,6 @@ import com.daypoo.api.service.ToiletIndexingService;
 import com.daypoo.api.service.ToiletReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,12 +45,5 @@ public class AdminToiletController {
       @RequestParam(required = false) String search,
       @PageableDefault(size = 20) Pageable pageable) {
     return ResponseEntity.ok(adminManagementService.getToilets(search, pageable));
-  }
-
-  @Operation(summary = "AI 리뷰 요약 일괄 생성", description = "리뷰 5개 이상이면서 AI 요약이 없는 화장실들에 대해 일괄 생성합니다.")
-  @PostMapping("/ai-summaries/generate")
-  public ResponseEntity<Map<String, Object>> generateAiSummaries() {
-    int count = toiletReviewService.generateMissingAiSummaries();
-    return ResponseEntity.ok(Map.of("generated", count));
   }
 }

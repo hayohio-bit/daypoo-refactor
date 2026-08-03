@@ -366,7 +366,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           ...prev,
           [String(result.toiletId)]: (prev[String(result.toiletId)] || 0) + 1,
         }));
-        // setTargetForVisit(null); // HealthLogModal에서 성공 화면을 보여주므로 여기서 닫지 않음
+        // 방문 인증 완료 후 모달 닫기
         // alert('방문 인증이 완료되었습니다! 💩✨');
       } catch (e: any) {
         const code = e.code || 'UNKNOWN';

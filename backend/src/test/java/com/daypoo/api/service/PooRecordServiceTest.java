@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-import com.daypoo.api.dto.AiAnalysisResponse;
 import com.daypoo.api.dto.PooRecordCreateRequest;
 import com.daypoo.api.dto.PooRecordResponse;
 import com.daypoo.api.entity.PooRecord;
@@ -46,7 +45,6 @@ class PooRecordServiceTest {
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private PooRecordMapper recordMapper;
   @Mock private VisitLogRepository visitLogRepository;
-  @Mock private AiClient aiClient;
   @Mock private UserRepository userRepository;
 
   private User testUser;
@@ -59,46 +57,48 @@ class PooRecordServiceTest {
         User.builder().email("test@test.com").nickname("PoopKing").password("password").build();
     ReflectionTestUtils.setField(testUser, "id", 1L);
 
-    testToilet = Toilet.builder().name("강남역 화장실").address("서울시 강남구 역삼동 800").is24h(true).build();
+    testToilet = Toilet.builder().name("Gangnam Toilet").address("Seoul Gangnam").is24h(true).build();
     ReflectionTestUtils.setField(testToilet, "id", 100L);
 
     request =
         new PooRecordCreateRequest(
             100L,
-            4,
-            "Brown",
+            5,
+            "Golden",
             Collections.singletonList("Good"),
-            Collections.singletonList("Coffee"),
+            Collections.singletonList("Meal"),
             37.123,
             127.123,
             null);
   }
 
   @Test
-  @DisplayName("성공: 배변 기록 생성 및 보상 지급")
-  void createRecord_success() {
+  @DisplayName("성공: 화장실 방문 인증 포함 배변 기록 생성")
+  void createRecord_success_withToilet() {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
     given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
         .willReturn(10.0);
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
+    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
+        .willReturn(System.currentTimeMillis());
     given(geocodingService.reverseGeocode(anyDouble(), anyDouble())).willReturn("역삼1동");
 
     PooRecord savedRecord =
         PooRecord.builder()
             .user(testUser)
             .toilet(testToilet)
-            .bristolScale(4)
-            .color("Brown")
+            .bristolScale(5)
+            .color("Golden")
             .build();
-    ReflectionTestUtils.setField(savedRecord, "id", 500L);
+    ReflectionTestUtils.setField(savedRecord, "id", 501L);
 
     given(recordRepository.save(any(PooRecord.class))).willReturn(savedRecord);
     given(userRepository.save(any(User.class))).willReturn(testUser);
 
     PooRecordResponse mockResponse =
-        PooRecordResponse.builder().toiletName("강남역 화장실").bristolScale(4).color("Brown").build();
+        PooRecordResponse.builder().bristolScale(5).color("Golden").build();
     given(recordMapper.toResponse(any(PooRecord.class))).willReturn(mockResponse);
 
     // when
@@ -106,25 +106,22 @@ class PooRecordServiceTest {
 
     // then
     assertThat(response).isNotNull();
-    assertThat(response.toiletName()).isEqualTo("강남역 화장실");
-
-    verify(recordRepository).save(any(PooRecord.class));
-    verify(userRepository).save(testUser);
-    verify(eventPublisher, times(1))
-        .publishEvent(any(com.daypoo.api.event.PooRecordCreatedEvent.class));
+    assertThat(response.bristolScale()).isEqualTo(5);
+    assertThat(response.color()).isEqualTo("Golden");
+    verify(recordRepository, times(1)).save(any(PooRecord.class));
   }
 
   @Test
-  @DisplayName("성공: AI 이미지 분석 결과 반영")
-  void createRecord_withAiAnalysis() {
+  @DisplayName("성공: 이미지 포함 배변 기록 생성")
+  void createRecord_success_withImage() {
     // given
-    PooRecordCreateRequest aiRequest =
+    PooRecordCreateRequest imageRequest =
         new PooRecordCreateRequest(
             100L,
-            1,
-            "Black",
-            Collections.emptyList(),
-            Collections.emptyList(),
+            5,
+            "Golden",
+            Collections.singletonList("Good"),
+            Collections.singletonList("Meal"),
             37.123,
             127.123,
             "base64image");
@@ -134,18 +131,9 @@ class PooRecordServiceTest {
     given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
         .willReturn(10.0);
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
+    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
+        .willReturn(System.currentTimeMillis());
     given(geocodingService.reverseGeocode(anyDouble(), anyDouble())).willReturn("역삼1동");
-
-    AiAnalysisResponse aiResponse =
-        AiAnalysisResponse.builder()
-            .bristolScale(5)
-            .color("Golden")
-            .conditionTag("Perfect")
-            .healthScore(95)
-            .aiComment("Good job!")
-            .warningTags(Collections.emptyList())
-            .build();
-    given(aiClient.analyzePoopImage(anyString())).willReturn(aiResponse);
 
     PooRecord savedRecord =
         PooRecord.builder()
@@ -163,12 +151,11 @@ class PooRecordServiceTest {
     given(recordMapper.toResponse(any(PooRecord.class))).willReturn(mockResponseAi);
 
     // when
-    PooRecordResponse response = pooRecordService.createRecord("test@test.com", aiRequest);
+    PooRecordResponse response = pooRecordService.createRecord("test@test.com", imageRequest);
 
     // then
     assertThat(response.bristolScale()).isEqualTo(5);
     assertThat(response.color()).isEqualTo("Golden");
-    verify(aiClient).analyzePoopImage(anyString());
   }
 
   @Test

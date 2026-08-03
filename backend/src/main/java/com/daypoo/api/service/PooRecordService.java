@@ -1,6 +1,5 @@
 package com.daypoo.api.service;
 
-import com.daypoo.api.dto.AiAnalysisResponse;
 import com.daypoo.api.dto.PooCheckInResponse;
 import com.daypoo.api.dto.PooRecordCreateRequest;
 import com.daypoo.api.dto.PooRecordResponse;
@@ -47,7 +46,6 @@ public class PooRecordService {
   private final ApplicationEventPublisher eventPublisher;
   private final PooRecordMapper recordMapper;
   private final VisitLogRepository visitLogRepository;
-  private final AiClient aiClient;
   private final com.daypoo.api.repository.UserRepository userRepository;
 
   // 보상 설정 (방문 1회당 경험치 5, 포인트 10 / 같은 화장실 하루 3회 상한)
@@ -127,7 +125,7 @@ public class PooRecordService {
       validateLocationAndTime(user, toilet, request.latitude(), request.longitude());
     }
 
-    // AI 분석 or 수동 입력값 결정 (실패 시 여기서 예외 발생 → 아래 resetArrivalTime 미호출)
+    // 수동 입력값 결정
     PoopAttributes attrs = resolvePoopAttributes(request);
 
     // AI 분석 성공 후, 방문 인증인 경우에만 타이머 리셋
@@ -290,27 +288,6 @@ public class PooRecordService {
   }
 
   private PoopAttributes resolvePoopAttributes(PooRecordCreateRequest request) {
-    boolean hasImage = request.imageBase64() != null && !request.imageBase64().isEmpty();
-
-    if (hasImage) {
-      AiAnalysisResponse ai = aiClient.analyzePoopImage(request.imageBase64());
-      if (Boolean.FALSE.equals(ai.isPoop())) {
-        throw new BusinessException(ErrorCode.NOT_POOP_IMAGE);
-      }
-      List<String> warnings = ai.warningTags() != null ? ai.warningTags() : Collections.emptyList();
-      log.info(
-          "AI Analysis: Bristol {}, Color {}, Warnings: {}",
-          ai.bristolScale(),
-          ai.color(),
-          warnings);
-      return new PoopAttributes(
-          ai.bristolScale(),
-          ai.color(),
-          Collections.emptyList(),
-          Collections.emptyList(),
-          warnings);
-    }
-
     Integer bristolScale = request.bristolScale();
     String color = request.color();
     List<String> conditionTags =
@@ -334,16 +311,6 @@ public class PooRecordService {
       List<String> conditionTags,
       List<String> dietTags,
       List<String> warningTags) {}
-
-  /** AI 이미지 분석만 수행 (기록 저장 안 함) 프론트엔드 분석 미리보기 UX 지원용 */
-  @Transactional(readOnly = true)
-  public AiAnalysisResponse analyzeImageOnly(String imageBase64) {
-    if (imageBase64 == null || imageBase64.isEmpty()) {
-      throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
-    }
-    log.info("Performing AI analysis only (no record creation)");
-    return aiClient.analyzePoopImage(imageBase64);
-  }
 
   @Transactional(readOnly = true)
   public Page<PooRecordResponse> getMyRecords(String email, Pageable pageable) {
