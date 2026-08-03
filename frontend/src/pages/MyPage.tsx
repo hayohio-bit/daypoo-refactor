@@ -376,9 +376,6 @@ export function MyPage() {
   const [tab, setTab] = useState<TabKey>('home');
 
   // 상점 데이터 상태 관리
-  const [avatarItems, setAvatarItems] = useState<AvatarItem[]>([]);
-  const [equipped, setEquipped] = useState<AvatarItem | null>(null);
-  const [equippedEffect, setEquippedEffect] = useState<AvatarItem | null>(null);
   const [records, setRecords] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -391,56 +388,6 @@ export function MyPage() {
         ? 'PRO'
         : 'FREE';
 
-  // 상점 데이터 호출 API
-  const fetchShopData = useCallback(async () => {
-    try {
-      const [shopData, inventoryData] = await Promise.all([
-        api.get<any[]>('/shop/items'),
-        api.get<any[]>('/shop/inventory'),
-      ]);
-
-      const inventoryMap = new Map<string, any>();
-      if (Array.isArray(inventoryData)) {
-        inventoryData.forEach((inv) => {
-          inventoryMap.set(String(inv.itemId), inv);
-        });
-      }
-
-      const mergedItems: AvatarItem[] = (shopData || []).map((item) => {
-        const invItem = inventoryMap.get(String(item.id));
-        const owned = !!invItem;
-        const isEquipped = invItem?.equipped ?? false;
-
-        const avatarItem: AvatarItem = {
-          id: String(item.id),
-          name: item.name,
-          emoji: item.imageUrl && isEmoji(item.imageUrl) ? item.imageUrl : '💩',
-          imageUrl: item.imageUrl || undefined,
-          type: item.type === 'EFFECT' ? '이펙트' : '헤드',
-          rawType: item.type,
-          owned,
-          price: item.price,
-          discountPrice: item.discountPrice,
-          inventoryId: invItem?.id ? String(invItem.id) : undefined,
-          isEquipped,
-        };
-
-        if (isEquipped) {
-          if (item.type === 'AVATAR') {
-            setEquipped(avatarItem);
-          } else if (item.type === 'EFFECT') {
-            setEquippedEffect(avatarItem);
-          }
-        }
-
-        return avatarItem;
-      });
-
-      setAvatarItems(mergedItems);
-    } catch (err) {
-      console.error('상점 데이터 조회 실패:', err);
-    }
-  }, []);
 
   // 전체 데이터 로드
   useEffect(() => {
@@ -454,7 +401,7 @@ export function MyPage() {
     const loadAll = async () => {
       setLoadingData(true);
       try {
-        await Promise.all([fetchShopData(), api.get<any[]>('/records/me').then(setRecords)]);
+        await api.get<any[]>('/records/me').then(setRecords);
       } catch (err) {
         console.error('마이페이지 데이터 조회 실패:', err);
       } finally {
@@ -463,7 +410,7 @@ export function MyPage() {
     };
 
     loadAll();
-  }, [authLoading, user, navigate, fetchShopData]);
+  }, [authLoading, user, navigate]);
 
   if (authLoading || loadingData) {
     return (
@@ -486,8 +433,8 @@ export function MyPage() {
       style={{ background: '#f8faf9' }}
     >
       <HeroBanner
-        equippedItem={equipped}
-        equippedEffect={equippedEffect}
+        equippedItem={null}
+        equippedEffect={null}
         onAvatarClick={() => setTab('home')}
         user={user}
         records={records}
@@ -508,13 +455,8 @@ export function MyPage() {
           >
             {tab === 'home' && (
               <HomeTab
-                equipped={equipped}
-                setEquipped={setEquipped}
                 user={user}
-                avatarItems={avatarItems}
-                setAvatarItems={setAvatarItems}
                 refreshUser={refreshUser}
-                fetchShopData={fetchShopData}
                 onTabChange={setTab}
                 records={records}
               />

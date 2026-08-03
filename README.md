@@ -9,7 +9,6 @@ _React · Spring Boot 3.4 (Virtual Threads) · Python/FastAPI · OpenAI Vision_
 [![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/jhyeon9185/daypoo)
 [![Frontend](https://img.shields.io/badge/Frontend-React_18+_TypeScript-61DAFB?logo=react&logoColor=white)](./frontend)
 [![Backend](https://img.shields.io/badge/Backend-Spring_Boot_3.4.3-6DB33F?logo=springboot&logoColor=white)](./backend)
-[![AI](https://img.shields.io/badge/AI_Service-FastAPI_Implemented-009688?logo=fastapi&logoColor=white)](./ai-service)
 [![License](https://img.shields.io/badge/License-ISC-yellow)](./LICENSE)
 
 **원본 팀 프로젝트**: [jhyeon9185/daypoo](https://github.com/jhyeon9185/daypoo)
@@ -70,12 +69,6 @@ graph TB
         Simulation[Load Simulation Engine]
     end
 
-    subgraph AI["🤖 Python AI 서비스 (FastAPI)"]
-        FastAPI[FastAPI Server]
-        Vision[OpenAI Vision / Stool Analysis]
-        Report[Health Report Engine]
-    end
-
     subgraph Data["💾 데이터 레이어"]
         PG[(PostgreSQL 16 \n+ PostGIS)]
         Redis[(Redis \nGeoIndex/Rank/Cache)]
@@ -84,9 +77,6 @@ graph TB
     UI -->|HTTPS/REST| API
     API -->|JPA/JDBC| PG
     API -->|Lettuce| Redis
-    API -->|Multipart/REST| FastAPI
-    FastAPI --> Vision
-    FastAPI --> Redis
     Sync -->|Bulk Insert| PG
 ```
 
@@ -99,8 +89,6 @@ graph TB
 | **Frontend**   | React 19.2, TypeScript, Vite | WebRTC 기반 무음 캡처 및 고성능 지도 UI 구현 (Port: 5173) |
 | **Backend**    | Spring Boot 3.4.3 (Java 21) | **가상 스레드(Virtual Threads)** 기반 고성능 병렬 처리    |
 |                | QueryDSL 5.0 / Flyway       | 타입 세이프한 쿼리 작성 및 DB 형상 관리 자동화            |
-| **AI Service** | FastAPI (Python 3.12)       | **In-Memory Pipeline** 기반 무저장 이미지 분석            |
-|                | OpenAI GPT-4o Vision        | 브리스톨 척도 및 배변 패턴 정밀 분석                      |
 | **Data Layer** | PostgreSQL 16 + PostGIS     | 5만 건 공간 데이터 처리 및 공간 인덱싱(GIST)              |
 |                | Redis (Geo, ZSET, Cache)    | **지역별 실시간 랭킹** 및 JWT 세션 관리                   |
 | **DevOps**     | Terraform (IaC), Docker     | 코드형 인프라 관리 및 컨테이너 기반 운영                  |
@@ -148,10 +136,9 @@ cp .env.example .env
 
 - **Docker** (DB/인프라): `docker-compose up -d`
 - **Backend**: `cd backend && ./gradlew bootRun` (URL: `http://localhost:8080`)
-- **AI Service**: `cd ai-service && python main.py` (URL: `http://localhost:8000`)
 - **Frontend**: `cd frontend && npm install && npm run dev` (URL: `http://localhost:5173`)
 
-> 순서대로 실행 권장 — Docker(DB) → Backend → AI Service → Frontend
+> 순서대로 실행 권장 — Docker(DB) → Backend → Frontend
 
 ---
 
@@ -161,7 +148,6 @@ cp .env.example .env
 daypoo/
 ├── frontend/             # React + Vite SPA
 ├── backend/              # Spring Boot 3.4.3 (Core Business Logic)
-├── ai-service/           # FastAPI AI Microservice (Python)
 ├── terraform/            # Infrastructure as Code (AWS)
 ├── docs/                 # 통합 문서 저장소
 ├── scripts/              # 유틸리티 및 배포 스크립트

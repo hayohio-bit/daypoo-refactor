@@ -8,7 +8,6 @@ import static org.mockito.Mockito.*;
 import com.daypoo.api.dto.AdminToiletListResponse;
 import com.daypoo.api.service.AdminManagementService;
 import com.daypoo.api.service.ToiletIndexingService;
-import com.daypoo.api.service.ToiletReviewService;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
@@ -31,7 +30,6 @@ class AdminToiletControllerTest {
   @InjectMocks private AdminToiletController adminToiletController;
 
   @Mock private AdminManagementService adminManagementService;
-  @Mock private ToiletReviewService toiletReviewService;
   @Mock private ToiletIndexingService toiletIndexingService;
 
   @Test

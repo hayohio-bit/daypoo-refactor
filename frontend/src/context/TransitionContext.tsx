@@ -19,17 +19,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
   const transitionTo = useCallback(
     (path: string) => {
-      // 1. Only '/ranking' uses the special curtain, and ONLY ONCE per session.
-      if (path === '/ranking') {
-        const hasPlayedRanking = sessionStorage.getItem('has_played_ranking');
-        if (hasPlayedRanking) {
-          navigate(path);
-          return;
-        }
-        sessionStorage.setItem('has_played_ranking', 'true');
-      }
       // 2. Only Splash ('/') to Main ('/main') uses the curtain.
-      else if (path === '/main') {
+      if (path === '/main') {
         if (window.location.pathname !== '/') {
           navigate(path);
           return;

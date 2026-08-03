@@ -3,7 +3,6 @@ package com.daypoo.api.controller;
 import com.daypoo.api.dto.AdminToiletListResponse;
 import com.daypoo.api.service.AdminManagementService;
 import com.daypoo.api.service.ToiletIndexingService;
-import com.daypoo.api.service.ToiletReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class AdminToiletController {
 
   private final AdminManagementService adminManagementService;
-  private final ToiletReviewService toiletReviewService;
   private final ToiletIndexingService toiletIndexingService;
 
   @Operation(

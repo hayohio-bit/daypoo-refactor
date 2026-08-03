@@ -167,12 +167,7 @@ export function TimelineSteps({ openAuth }: { openAuth: (mode: 'login' | 'signup
 
   const handleAction = () => {
     if (isAuthenticated) {
-      // PRO 또는 PREMIUM 사용자가 아니면 결제 페이지로 이동
-      if (user?.role === 'PRO' || user?.role === 'PREMIUM') {
-        navigate('/mypage');
-      } else {
-        navigate('/premium');
-      }
+      navigate('/mypage');
     } else {
       // 로그인이 되어 있지 않으면 로그인 모달 표시
       openAuth('login');
