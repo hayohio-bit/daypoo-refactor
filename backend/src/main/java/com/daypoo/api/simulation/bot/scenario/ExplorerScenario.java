@@ -6,7 +6,6 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.ToiletReviewRepository;
 import com.daypoo.api.repository.UserRepository;
-import com.daypoo.api.service.RankingService;
 import com.daypoo.api.simulation.bot.BotUserPool;
 import com.daypoo.api.simulation.seeder.SeedDataGenerator;
 import java.util.Random;
@@ -25,7 +24,6 @@ public class ExplorerScenario implements BotScenario {
   private final UserRepository userRepository;
   private final ToiletRepository toiletRepository;
   private final ToiletReviewRepository reviewRepository;
-  private final RankingService rankingService;
   private final BotUserPool userPool;
   private final Random random = new Random();
 
@@ -53,8 +51,6 @@ public class ExplorerScenario implements BotScenario {
             .comment(SeedDataGenerator.generateRandomReviewComment())
             .build();
     reviewRepository.save(review);
-
-    rankingService.getGlobalRanking();
 
     log.debug("Bot {} executed Explorer at toilet {}", user.getEmail(), toiletId);
   }

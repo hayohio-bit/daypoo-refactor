@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ConditionTag, FoodTag, PoopColor, ToiletData } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
 import { BaseModal } from '../common/BaseModal';
-import { HealthLogModal, type HealthLogResult } from './HealthLogModal';
 
 // 방문 인증 결과 타입
 // bristolType / color: 상태 기록 추가 시 채워짐, 건너뛰기 시 null
@@ -26,13 +25,9 @@ interface VisitModalProps {
 }
 
 export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitModalProps) {
-  // 방문 인증 완료 여부 (API 미호출 상태, 선택 화면 표시)
+  // 방문 인증 완료 여부
   const [visitDone, setVisitDone] = useState(false);
-  // 상태 기록 모달 표시 여부
-  const [showHealthLog, setShowHealthLog] = useState(false);
-  const [healthLogStartStep, setHealthLogStartStep] = useState<number | undefined>(undefined);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-  const [isRecordSubmitted, setIsRecordSubmitted] = useState(false);
   const [showNoPhotoConfirm, setShowNoPhotoConfirm] = useState(false);
   // 인증 완료 시각 (onComplete 호출 시 사용)
   const completedAtRef = useRef<string>('');
@@ -115,13 +110,13 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
     return () => stopCamera();
   }, [stopCamera]);
 
-  // VisitModalResult 생성 (상태 기록 병합 옵션)
-  const buildResult = (healthData?: HealthLogResult): VisitModalResult => ({
+  // VisitModalResult 생성
+  const buildResult = (): VisitModalResult => ({
     toiletId: toilet.id,
-    bristolType: healthData?.bristolType ?? null,
-    color: healthData?.color ?? null,
-    conditionTags: healthData?.conditionTags ?? [],
-    foodTags: healthData?.foodTags ?? [],
+    bristolType: 4, // 정상 기본값
+    color: 'golden',
+    conditionTags: ['쾌적함'],
+    foodTags: ['채소위주'],
     imageBase64: capturedImage,
     createdAt: completedAtRef.current,
   });
@@ -142,28 +137,22 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
     setVisitDone(true);
   };
 
-  const handleConfirmNoPhoto = () => {
+  const handleConfirmNoPhoto = async () => {
     setShowNoPhotoConfirm(false);
     completedAtRef.current = new Date().toISOString();
-    setVisitDone(true);
-    setHealthLogStartStep(1); // 바로 모양 선택으로 진입
-    setShowHealthLog(true);
+    try {
+      await onComplete(buildResult());
+      onClose();
+    } catch (e: any) {
+      // 에러 시 사용자에게 알림
+      alert(`인증 실패: ${e.message || '서버 오류'}`);
+    }
   };
 
-  // 건너뛰기: 배변 상태 기록 없이 방문만 POST (백엔드 필수값 우회를 위해 기본값 전송)
-  const handleSkipHealthLog = async () => {
-    setShowCloseConfirm(false);
+  // 방문 인증 완료 처리
+  const handleVisitComplete = async () => {
     try {
-      // 백엔드 validation을 통과하기 위해 최소한의 기본값 세팅
-      const defaultResult: HealthLogResult = {
-        bristolType: 4, // 정상 (바나나)
-        color: 'golden', // 황금색
-        conditionTags: ['쾌적함'],
-        foodTags: ['채소위주'],
-        imageBase64: null,
-      };
-      await onComplete(buildResult(defaultResult));
-      setIsRecordSubmitted(true);
+      await onComplete(buildResult());
       onClose();
     } catch (e: any) {
       if (e.code === 'R007') {
@@ -171,24 +160,9 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
         setCapturedImage(null);
         setVisitDone(false);
         await startCamera();
+      } else {
+        alert(`인증 실패: ${e.message || '서버 오류'}`);
       }
-    }
-  };
-
-  // 상태 기록 완료: 방문 + 상태 데이터 합쳐서 POST
-  const handleHealthLogComplete = async (healthResult: HealthLogResult) => {
-    try {
-      await onComplete(buildResult(healthResult));
-      setIsRecordSubmitted(true);
-    } catch (e: any) {
-      if (e.code === 'R007') {
-        alert('똥 사진이 아닌 것 같아요!\n변기 안의 변을 다시 촬영해주세요. 💩');
-        setCapturedImage(null);
-        setVisitDone(false);
-        setShowHealthLog(false);
-        await startCamera();
-      }
-      throw e; // 모든 에러(R007 포함)를 다시 던져서 HealthLogModal의 성공 화면 진입을 방지
     }
   };
 
@@ -257,37 +231,25 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
               transition={{ duration: 0.2 }}
             >
               {visitDone ? (
-                /* ── 방문 인증 완료: 상태 기록 추가 여부 선택 ── */
+                /* ── 방문 인증 완료 ── */
                 <div className="flex flex-col items-center justify-center py-6 space-y-6">
                   <div className="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center">
                     <Check size={48} className="text-emerald-500" />
                   </div>
                   <div className="text-center space-y-2">
                     <p className="font-black text-2xl text-[#1a2b22]">방문 인증 완료!</p>
-                    <p className="text-sm text-[#7a9e8a]">배변 상태 기록도 남겨볼까요?</p>
-                    <p className="text-xs text-[#b5c9bc]">
-                      기록하면 배변 패턴 리포트에 반영됩니다.
-                    </p>
+                    <p className="text-sm text-[#7a9e8a]">화장실 방문이 기록됩니다.</p>
                   </div>
                   <div className="w-full space-y-3 pt-2">
                     <WaveButtonComponent
-                      onClick={() => {
-                        if (!capturedImage) setHealthLogStartStep(1);
-                        setShowHealthLog(true);
-                      }}
+                      onClick={handleVisitComplete}
                       variant="primary"
                       size="lg"
                       className="w-full shadow-lg"
                       icon={<Sparkles size={20} />}
                     >
-                      상태 기록 추가하기
+                      인증 완료하기
                     </WaveButtonComponent>
-                    <button
-                      onClick={handleSkipHealthLog}
-                      className="w-full py-3 text-[#7a9e8a] font-bold text-sm hover:underline"
-                    >
-                      건너뛰기
-                    </button>
                   </div>
                 </div>
               ) : (
@@ -388,16 +350,6 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
                   ) : (
                     <div className="text-center space-y-4">
                       <p className="text-[#7a9e8a] text-sm font-bold">촬영은 선택 사항입니다</p>
-                      <button
-                        onClick={() => {
-                          handleComplete();
-                          setHealthLogStartStep(1); // 1단계(브리스톨)부터 시작하도록 설정
-                          setShowHealthLog(true);
-                        }}
-                        className="text-[11px] font-black text-emerald-600/60 hover:text-emerald-600 transition-colors underline underline-offset-4"
-                      >
-                        사진 없이 기록만 남기기
-                      </button>
                     </div>
                   )}
                 </div>
@@ -504,7 +456,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
                   계속 작성
                 </WaveButtonComponent>
                 <WaveButtonComponent
-                  onClick={visitDone ? handleSkipHealthLog : onClose}
+                  onClick={visitDone ? handleVisitComplete : onClose}
                   variant="error"
                   size="md"
                   className="flex-1"
@@ -517,27 +469,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
         )}
       </AnimatePresence>
 
-      {/* 상태 기록 모달 (visitDone 이후에만 마운트) */}
-      <AnimatePresence>
-        {showHealthLog && (
-          <HealthLogModal
-            toilet={toilet}
-            initialBristolType={null}
-            initialColor={null}
-            initialImage={capturedImage} // 촬영된 이미지를 상태 기록 모달로 전달
-            startStep={healthLogStartStep}
-            onClose={() => {
-              setShowHealthLog(false);
-              setHealthLogStartStep(undefined); // 상태 초기화
-              // 기록이 완료된 상태에서 상태기록 모달을 닫으면 방문인증 모달도 함께 닫음
-              if (isRecordSubmitted) {
-                onClose();
-              }
-            }}
-            onComplete={handleHealthLogComplete}
-          />
-        )}
-      </AnimatePresence>
+
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }

@@ -165,6 +165,5 @@ simulation:
   bot:
     morning-routine: 50
     explorer: 20
-    shopper: 10
     support: 5
     social: 33

@@ -1,14 +1,11 @@
 import { AnimatePresence, m, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import {
   Bell,
-  Crown,
   HelpCircle,
   Home,
   LogOut,
   Map,
   Menu,
-  Plus,
-  Trophy,
   User,
   X,
 } from 'lucide-react';
@@ -16,19 +13,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { useTransitionContext } from '../context/TransitionContext';
 import { isTouchDevice } from '../hooks/useIsTouchDevice';
-import { api } from '../services/apiClient';
-import type { HealthRecordRequest } from '../types/api';
 import { AnimatedUnderlink } from './AnimatedUnderlink';
 import { NotificationPanel } from './NotificationPanel';
-import WaveButton from './WaveButton';
-import { HealthLogModal, type HealthLogResult } from './map/HealthLogModal';
 
 const NAV_LINKS = [
-  { label: '지도', path: '/map', icon: Map, variant: 0 },
-  { label: '랭킹', path: '/ranking', icon: Trophy, variant: 1 },
-  { label: 'FAQ', path: '/support', icon: HelpCircle, variant: 0 },
+  { label: '급똥 지도', path: '/map', icon: Map, variant: 0 },
+  { label: '고객 지원', path: '/support', icon: HelpCircle, variant: 0 },
 ];
 
 export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => void }) {
@@ -37,10 +28,8 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
   const [hidden, setHidden] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
   const { unreadCount, fetchNotifications } = useNotification();
-  const { transitionTo } = useTransitionContext();
   const [notifOpen, setNotifOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showHealthLog, setShowHealthLog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const navRef = useRef<HTMLDivElement>(null);
@@ -93,33 +82,9 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
     navigate('/main');
   };
 
-  const handleLogoClick = () => {
-    if (window.location.pathname.endsWith('/main') || window.location.pathname.endsWith('/')) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
   const isActivePath = (path: string) => location.pathname === path;
 
-  const handleHealthLogComplete = async (result: HealthLogResult) => {
-    try {
-      const payload: HealthRecordRequest = {
-        conditionTags: result.conditionTags,
-        dietTags: result.foodTags,
-        ...(result.bristolType !== null && { bristolScale: result.bristolType }),
-        ...(result.color !== null && { color: result.color }),
-        ...(result.imageBase64 && { imageBase64: result.imageBase64 }),
-      };
-      await api.post('/records', payload);
-    } catch (e: any) {
-      if (e.code === 'R007') {
-        alert('똥 사진이 아닌 것 같아요!\n변기 안의 변을 다시 촬영해주세요. 💩');
-      } else {
-        alert(`기록 저장 실패: ${e.message || '서버 오류'}`);
-      }
-      throw e;
-    }
-  };
+
 
   return (
     <>
@@ -179,16 +144,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                {/* 글로벌 기록하기 버튼 (로그인 시에만) */}
-                <WaveButton
-                  onClick={() => setShowHealthLog(true)}
-                  variant="accent"
-                  size="sm"
-                  icon={<Plus size={14} />}
-                  className="shadow-lg shadow-amber-500/20 whitespace-nowrap"
-                >
-                  기록하기
-                </WaveButton>
 
                 <Link
                   to="/mypage"
@@ -321,11 +276,7 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                       key={link.path}
                       onClick={() => {
                         setDrawerOpen(false);
-                        if (link.path === '/ranking') {
-                          transitionTo(link.path);
-                        } else {
-                          navigate(link.path);
-                        }
+                        navigate(link.path);
                       }}
                       className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${
                         isActivePath(link.path)
@@ -362,34 +313,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                   </button>
                 )}
 
-                {/* 글로벌 기록하기 버튼 — 로그인 시에만 표시 */}
-                {isAuthenticated && (
-                  <button
-                    onClick={() => {
-                      setDrawerOpen(false);
-                      setShowHealthLog(true);
-                    }}
-                    className="flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all w-full bg-[#E8A838]/10 text-[#E8A838]"
-                  >
-                    <Plus size={20} />
-                    <span className="text-[15px] font-bold">기록하기</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    setDrawerOpen(false);
-                    navigate('/premium');
-                  }}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-left ${
-                    isActivePath('/premium')
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/60 active:bg-white/5 active:text-white/80'
-                  }`}
-                >
-                  <Crown size={20} />
-                  <span className="text-[15px] font-bold">프리미엄</span>
-                </button>
               </div>
 
               {/* 하단 인증 영역 */}
@@ -443,15 +366,7 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
 
       <NotificationPanel isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
 
-      {/* 글로벌 건강 기록 모달 */}
-      <AnimatePresence>
-        {showHealthLog && (
-          <HealthLogModal
-            onClose={() => setShowHealthLog(false)}
-            onComplete={handleHealthLogComplete}
-          />
-        )}
-      </AnimatePresence>
+
     </>
   );
 }

@@ -366,7 +366,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           ...prev,
           [String(result.toiletId)]: (prev[String(result.toiletId)] || 0) + 1,
         }));
-        // setTargetForVisit(null); // HealthLogModal에서 성공 화면을 보여주므로 여기서 닫지 않음
+        // 방문 인증 완료 후 모달 닫기
         // alert('방문 인증이 완료되었습니다! 💩✨');
       } catch (e: any) {
         const code = e.code || 'UNKNOWN';
@@ -394,25 +394,17 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     [markVisited, pos.lat, pos.lng, refreshUser],
   );
 
-  // visitCount 병합
-  const toiletsWithVisitCount = toilets.map((t) => ({
-    ...t,
-    visitCount: visitCounts[t.id] || 0,
-  }));
-
   // 검색어가 있으면 ES 결과 사용, 없으면 지도 반경 내 화장실에 필터만 적용
-  const filteredToilets =
-    searchQuery.trim() !== ''
-      ? searchResults
-      : toiletsWithVisitCount.filter((t) =>
-          filter === 'all'
-            ? true
-            : filter === 'favorite'
-              ? t.isFavorite
-              : filter === 'visited'
-                ? t.isVisited
-                : true,
-        );
+  const filteredToilets = useMemo(() => {
+    const list = toilets.map((t) => ({
+      ...t,
+      visitCount: visitCounts[t.id] || 0,
+    }));
+    if (searchQuery.trim() !== '') return searchResults;
+    if (filter === 'favorite') return list.filter((t) => t.isFavorite);
+    if (filter === 'visited') return list.filter((t) => t.isVisited);
+    return list;
+  }, [toilets, visitCounts, searchQuery, searchResults, filter]);
 
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {

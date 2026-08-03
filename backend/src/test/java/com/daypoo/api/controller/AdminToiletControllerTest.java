@@ -8,10 +8,8 @@ import static org.mockito.Mockito.*;
 import com.daypoo.api.dto.AdminToiletListResponse;
 import com.daypoo.api.service.AdminManagementService;
 import com.daypoo.api.service.ToiletIndexingService;
-import com.daypoo.api.service.ToiletReviewService;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +29,6 @@ class AdminToiletControllerTest {
   @InjectMocks private AdminToiletController adminToiletController;
 
   @Mock private AdminManagementService adminManagementService;
-  @Mock private ToiletReviewService toiletReviewService;
   @Mock private ToiletIndexingService toiletIndexingService;
 
   @Test
@@ -91,21 +88,5 @@ class AdminToiletControllerTest {
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
     assertThat(response.getBody()).isEqualTo(150L);
     verify(toiletIndexingService, times(1)).getIndexedCount();
-  }
-
-  @Test
-  @DisplayName("성공: AI 리뷰 요약 일괄 생성 위임 확인")
-  void generateAiSummaries_success() {
-    // given
-    given(toiletReviewService.generateMissingAiSummaries()).willReturn(5);
-
-    // when
-    ResponseEntity<Map<String, Object>> response = adminToiletController.generateAiSummaries();
-
-    // then
-    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-    assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody().get("generated")).isEqualTo(5);
-    verify(toiletReviewService, times(1)).generateMissingAiSummaries();
   }
 }

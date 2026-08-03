@@ -67,7 +67,6 @@ docker-compose.prod.yml에 필요한 모든 환경변수 포함
 
 ### Dockerfiles
 - ✅ [backend/Dockerfile](backend/Dockerfile) - Java 21, Gradle 멀티스테이지 빌드
-- ✅ [ai-service/Dockerfile](ai-service/Dockerfile) - Python 3.12, uvicorn
 
 ### Docker Compose
 - ✅ [docker-compose.yml](docker-compose.yml) - 로컬 개발용
@@ -192,7 +191,7 @@ curl http://localhost:8000/health
 ### ✅ 완료된 것:
 - [x] Frontend 수정 (GPS → homeRegion)
 - [x] GitHub Actions 워크플로우 (deploy-aws.yml)
-- [x] Dockerfiles (backend, ai-service)
+- [x] Dockerfile (backend)
 - [x] docker-compose.prod.yml
 - [x] 배포 문서 작성
 

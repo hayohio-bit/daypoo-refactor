@@ -4,7 +4,6 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.repository.NotificationRepository;
 import com.daypoo.api.repository.ToiletReviewRepository;
 import com.daypoo.api.repository.UserRepository;
-import com.daypoo.api.service.RankingService;
 import com.daypoo.api.simulation.bot.BotUserPool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,6 @@ public class SocialScenario implements BotScenario {
   private final UserRepository userRepository;
   private final NotificationRepository notificationRepository;
   private final ToiletReviewRepository reviewRepository;
-  private final RankingService rankingService;
   private final BotUserPool userPool;
 
   @Override
@@ -30,8 +28,6 @@ public class SocialScenario implements BotScenario {
   public void execute(Long userId) {
     User user = userRepository.findById(userId).orElse(null);
     if (user == null) return;
-
-    rankingService.getGlobalRanking();
 
     Long toiletId = userPool.getRandomToiletId();
     if (toiletId != null) {

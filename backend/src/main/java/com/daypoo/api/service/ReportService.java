@@ -1,7 +1,5 @@
 package com.daypoo.api.service;
 
-import com.daypoo.api.dto.AiMonthlyReportRequest;
-import com.daypoo.api.dto.AiReportRequest;
 import com.daypoo.api.dto.HealthReportHistoryResponse;
 import com.daypoo.api.dto.HealthReportResponse;
 import com.daypoo.api.dto.VisitLogResponse;
@@ -43,13 +41,11 @@ public class ReportService {
 
   private final PooRecordRepository recordRepository;
   private final UserRepository userRepository;
-  private final AiClient aiClient;
   private final StringRedisTemplate redisTemplate;
   private final ObjectMapper objectMapper;
   private final NotificationService notificationService;
   private final HealthReportSnapshotRepository snapshotRepository;
   private final VisitLogRepository visitLogRepository;
-  private final RankingService rankingService;
 
   private static final String REPORT_CACHE_KEY_PREFIX = "daypoo:reports:v18:";
 
@@ -185,25 +181,8 @@ public class ReportService {
 
     log.info("User {} - isPremium: {}", user.getId(), isPremium);
 
-    // 5. AI 서비스 요청 데이터 구성
-    List<AiReportRequest.PooRecordData> recordDataList =
-        records.stream()
-            .map(
-                r ->
-                    new AiReportRequest.PooRecordData(
-                        r.getBristolScale(),
-                        r.getColor(),
-                        r.getConditionTags(),
-                        r.getDietTags(),
-                        r.getCreatedAt().toString()))
-            .collect(Collectors.toList());
-
-    AiReportRequest requestDto =
-        new AiReportRequest(user.getId().toString(), type.name(), recordDataList, isPremium);
-
-    // 6. AI 호출 및 결과 수신 (캐시/스냅샷 미스 → OpenAI 실제 호출)
-    log.warn("⚠️ CACHE/SNAPSHOT MISS → CALLING OpenAI for user {} [{}]", user.getId(), type);
-    HealthReportResponse aiResponse;
+    // 6. 로컬 통계 기반 리포트 생성 (AI 제거됨)
+    log.info("로컬 통계 기반 리포트 생성 for user {} [{}]", user.getId(), type);
     List<Integer> weeklyHealthScores = null;
     String improvementTrend = null;
     Map<Integer, Integer> bristolDistribution = null;
@@ -211,26 +190,13 @@ public class ReportService {
 
     if (type == ReportType.MONTHLY) {
       List<WeeklySummaryData> weeklySummaries = buildWeeklySummaries(records, startTime);
-      log.info(
-          "Computing MONTHLY stats for user {}. Weekly summaries: {}",
-          user.getId(),
-          weeklySummaries);
-
       weeklyHealthScores =
           weeklySummaries.stream()
               .map(s -> s.recordCount() == 0 ? 0 : 50 + s.healthyRatio() / 2)
               .collect(Collectors.toList());
-
       improvementTrend = computeImprovementTrend(weeklyHealthScores);
       bristolDistribution = computeBristolDistribution(records);
       avgDailyRecordCount = computeAvgDailyRecordCount(records, startTime);
-
-      AiMonthlyReportRequest monthlyRequest =
-          new AiMonthlyReportRequest(
-              user.getId().toString(), type.name(), weeklySummaries, isPremium);
-      aiResponse = aiClient.analyzeMonthlyReport(monthlyRequest);
-    } else {
-      aiResponse = aiClient.analyzeHealthReport(requestDto);
     }
 
     // 7. 통계 계산 (공통)
@@ -268,15 +234,23 @@ public class ReportService {
             .count();
     Integer healthyRatio = records.isEmpty() ? null : (int) (healthyCount * 100 / records.size());
 
-    // 8. 최종 리포트 구성 (AI 응답 + 계산된 통계 + MONTHLY 필드)
+    // 로컬 통계 기반 건강 점수 계산
+    int healthScore = healthyRatio != null ? healthyRatio : 50;
+    String summary =
+        String.format(
+            "총 %d건의 기록 중 건강한 배변 비율은 %d%%입니다.",
+            records.size(), healthyRatio != null ? healthyRatio : 0);
+    String solution = "규칙적인 식사와 충분한 수분 섭취를 유지해주세요.";
+
+    // 8. 최종 리포트 구성
     HealthReportResponse response =
         HealthReportResponse.builder()
-            .reportType(aiResponse.reportType())
-            .healthScore(aiResponse.healthScore())
-            .summary(aiResponse.summary())
-            .solution(aiResponse.solution())
-            .premiumSolution(aiResponse.premiumSolution())
-            .insights(aiResponse.insights())
+            .reportType(type.name())
+            .healthScore(healthScore)
+            .summary(summary)
+            .solution(solution)
+            .premiumSolution(null)
+            .insights(List.of())
             .recordCount(records.size())
             .periodStart(startTime)
             .periodEnd(endTime)
@@ -294,11 +268,6 @@ public class ReportService {
 
     // 7. DB 영구 저장 (Snapshot)
     saveSnapshot(user, type, response);
-
-    // DAILY 리포트 생성 시 쾌변왕 랭킹 업데이트
-    if (type == ReportType.DAILY) {
-      rankingService.updateHealthRank(user, (double) response.healthScore());
-    }
 
     // 8. 결과 캐싱 (24시간 유지)
     try {

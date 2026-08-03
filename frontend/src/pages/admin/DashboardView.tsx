@@ -202,21 +202,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
   const totalUsersCount = stats?.totalUsers || 0;
   const [liveUsers, setLiveUsers] = useState(342);
   const [chartRange, setChartRange] = useState<'7D' | '30D'>('7D');
-  const [boosting, setBoosting] = useState(false);
-
-  const handleEngineBoost = async () => {
-    if (boosting) return;
-    setBoosting(true);
-    try {
-      await api.post('/admin/rebuild-rankings');
-      alert('🚀 엔진 가속 및 캐시 최적화가 완료되었습니다!');
-    } catch (error: any) {
-      console.error('엔진 가속 실패:', error);
-      alert('엔진 가속 실행 중 오류가 발생했습니다.');
-    } finally {
-      setBoosting(false);
-    }
-  };
 
   useEffect(() => {
     const base = Math.max(10, Math.floor(totalUsersCount * 0.05));
@@ -626,15 +611,8 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                   Engine Healthy
                 </span>
               </div>
-              <h4 className="text-lg font-black mb-1 text-black">시스템 최적화</h4>
-              <p className="text-xs font-bold text-black mb-6">리소스 사용량 82% 임계치 접근</p>
-              <button
-                onClick={handleEngineBoost}
-                disabled={boosting}
-                className="w-full py-3 bg-[#1B4332] text-white rounded-xl text-[11px] font-black transition-all hover:bg-[#E8A838] shadow-lg shadow-green-900/20 disabled:opacity-50"
-              >
-                {boosting ? '가속 실행 중...' : '엔진 가속 실행'}
-              </button>
+              <h4 className="text-lg font-black mb-1 text-black">시스템 상태</h4>
+              <p className="text-xs font-bold text-black mb-6">모든 시스템이 정상 작동 중입니다.</p>
             </div>
             <Zap className="absolute -right-8 -bottom-8 w-32 h-32 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none" />
           </GlassCard>

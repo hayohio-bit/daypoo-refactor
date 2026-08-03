@@ -1,12 +1,8 @@
-import { Link } from 'react-router-dom';
-import { useTransitionContext } from '../context/TransitionContext';
-
-const FOOTER_LINKS = [
+import { Link } from 'react-router-dom';const FOOTER_LINKS = [
   {
     title: '서비스',
     links: [
       { label: '지도', to: '/map' },
-      { label: '랭킹', to: '/ranking' },
       { label: 'AI 장 컨디션 체크', to: '/main#health-section' },
     ],
   },
@@ -27,7 +23,6 @@ const FOOTER_LINKS = [
 ];
 
 export function Footer() {
-  const { transitionTo } = useTransitionContext();
 
   const handleLinkClick = (e: React.MouseEvent, to: string) => {
     if (to.includes('#')) {
@@ -43,12 +38,6 @@ export function Footer() {
         }
         return;
       }
-    }
-
-    // Only ranking uses transition
-    if (to === '/ranking') {
-      e.preventDefault();
-      transitionTo(to);
     }
   };
 

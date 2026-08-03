@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToilets } from '../hooks/useToilets';
+import { calculateDistance } from '../utils/distance';
 import { EmergencySheetPreview } from './EmergencySheetPreview';
 
 interface EmergencySheetProps {
@@ -14,21 +15,6 @@ declare global {
     kakao: any;
   }
 }
-
-// 거리 계산 유틸리티 (Haversine formula)
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const R = 6371e3; // 지구 반지름 (m)
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c);
-};
 
 // 도보 시간 계산 (평균 4.5km/h -> 1px/s 약 75m/min)
 const calculateWalkTime = (meters: number) => {
