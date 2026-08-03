@@ -57,7 +57,8 @@ class PooRecordServiceTest {
         User.builder().email("test@test.com").nickname("PoopKing").password("password").build();
     ReflectionTestUtils.setField(testUser, "id", 1L);
 
-    testToilet = Toilet.builder().name("Gangnam Toilet").address("Seoul Gangnam").is24h(true).build();
+    testToilet =
+        Toilet.builder().name("Gangnam Toilet").address("Seoul Gangnam").is24h(true).build();
     ReflectionTestUtils.setField(testToilet, "id", 100L);
 
     request =

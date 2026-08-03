@@ -10,7 +10,6 @@ import com.daypoo.api.service.AdminManagementService;
 import com.daypoo.api.service.ToiletIndexingService;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,4 +90,3 @@ class AdminToiletControllerTest {
     verify(toiletIndexingService, times(1)).getIndexedCount();
   }
 }
-
