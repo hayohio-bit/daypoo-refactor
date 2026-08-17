@@ -11,14 +11,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const copyWellKnownPlugin = (): Plugin => ({
   name: 'copy-well-known',
-  writeBundle() {
-    const srcDir = path.resolve(__dirname, 'public/.well-known');
-    const destDir = path.resolve(__dirname, 'dist/.well-known');
-    if (fs.existsSync(srcDir)) {
-      fs.mkdirSync(destDir, { recursive: true });
-      fs.cpSync(srcDir, destDir, { recursive: true });
-    }
-  },
   closeBundle() {
     const srcDir = path.resolve(__dirname, 'public/.well-known');
     const destDir = path.resolve(__dirname, 'dist/.well-known');
