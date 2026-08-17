@@ -469,8 +469,6 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
         )}
       </AnimatePresence>
 
-
-
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #eef5f0; border-radius: 10px; }

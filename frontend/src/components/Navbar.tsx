@@ -1,14 +1,5 @@
 import { AnimatePresence, m, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
-import {
-  Bell,
-  HelpCircle,
-  Home,
-  LogOut,
-  Map,
-  Menu,
-  User,
-  X,
-} from 'lucide-react';
+import { Bell, HelpCircle, Home, LogOut, Map, Menu, User, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -84,8 +75,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
 
   const isActivePath = (path: string) => location.pathname === path;
 
-
-
   return (
     <>
       <div
@@ -144,7 +133,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
-
                 <Link
                   to="/mypage"
                   className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:bg-white/10 text-white/85"
@@ -312,7 +300,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
                     )}
                   </button>
                 )}
-
               </div>
 
               {/* 하단 인증 영역 */}
@@ -365,8 +352,6 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
       </AnimatePresence>
 
       <NotificationPanel isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
-
-
     </>
   );
 }

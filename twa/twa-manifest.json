@@ -1,0 +1,65 @@
+{
+  "packageId": "site.eighto2.daypoo",
+  "host": "daypoo.8o2.site",
+  "name": "DayPoo - 급똥 위치 기반 화장실 탐색",
+  "launcherName": "DayPoo",
+  "display": "standalone",
+  "themeColor": "#111E18",
+  "themeColorDark": "#111E18",
+  "navigationColor": "#111E18",
+  "navigationColorDark": "#111E18",
+  "navigationDividerColor": "#00000000",
+  "navigationDividerColorDark": "#00000000",
+  "backgroundColor": "#111E18",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://daypoo.8o2.site/icons/icon-512x512.png",
+  "maskableIconUrl": "https://daypoo.8o2.site/icons/icon-512x512-maskable.png",
+  "monochromeIconUrl": "https://daypoo.8o2.site/icons/icon.svg",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "daypoo"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "급똥 SOS",
+      "shortName": "SOS",
+      "url": "https://daypoo.8o2.site/map?openNearest=true",
+      "chosenIconUrl": "https://daypoo.8o2.site/icons/icon-96x96.png"
+    },
+    {
+      "name": "화장실 지도",
+      "shortName": "지도",
+      "url": "https://daypoo.8o2.site/map",
+      "chosenIconUrl": "https://daypoo.8o2.site/icons/icon-96x96.png"
+    },
+    {
+      "name": "마이페이지",
+      "shortName": "마이",
+      "url": "https://daypoo.8o2.site/mypage",
+      "chosenIconUrl": "https://daypoo.8o2.site/icons/icon-96x96.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://daypoo.8o2.site/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 21,
+  "orientation": "portrait"
+}

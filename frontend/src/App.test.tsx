@@ -24,7 +24,6 @@ describe('[P2] 페이지 lazy import 전제: named export 구조', () => {
     expect(typeof mod.MapPage).toBe('function');
   }, 30000);
 
-
   it('SplashPage가 named export로 정의되어야 한다', async () => {
     const mod = await import('./pages/SplashPage');
     expect(typeof mod.SplashPage).toBe('function');

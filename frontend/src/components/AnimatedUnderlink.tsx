@@ -62,8 +62,7 @@ export function AnimatedUnderlink({
   const [underlineHeightPx, setUnderlineHeightPx] = useState(0);
   const textRef = useRef<HTMLSpanElement>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
-  };
+  const handleClick = (e: React.MouseEvent) => {};
 
   useEffect(() => {
     if (variant === undefined && nextIndex === null) {

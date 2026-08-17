@@ -1,0 +1,16 @@
+{
+  "name": "daypoo-twa",
+  "version": "1.0.0",
+  "description": "Trusted Web Activity (TWA) packaging for DayPoo PWA using Bubblewrap",
+  "private": true,
+  "scripts": {
+    "init": "bubblewrap init --manifest=https://daypoo.8o2.site/manifest.json",
+    "build": "bubblewrap build",
+    "validate": "bubblewrap validate",
+    "update": "bubblewrap update",
+    "fingerprint": "keytool -list -v -keystore android.keystore -alias daypoo"
+  },
+  "devDependencies": {
+    "@bubblewrap/cli": "^1.21.1"
+  }
+}
