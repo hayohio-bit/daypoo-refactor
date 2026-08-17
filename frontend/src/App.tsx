@@ -173,7 +173,6 @@ function App() {
                       <Route path="/auth/callback" element={<AuthCallback />} />
                       <Route path="/signup/social" element={<SocialSignupPage />} />
 
-
                       <Route path="/500" element={<ServerErrorPage />} />
                       <Route
                         path="/admin"

@@ -152,11 +152,7 @@ export function ToiletProvider({ children }: { children: React.ReactNode }) {
     [toilets, loading, error, fetchToilets, toggleFavorite, markVisited],
   );
 
-  return (
-    <ToiletContext.Provider value={value}>
-      {children}
-    </ToiletContext.Provider>
-  );
+  return <ToiletContext.Provider value={value}>{children}</ToiletContext.Provider>;
 }
 
 export function useToiletContext() {

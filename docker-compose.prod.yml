@@ -71,15 +71,6 @@ services:
       retries: 5
       start_period: 10s
 
-  ai:
-    image: ${DOCKERHUB_USERNAME}/daypoo-ai:latest
-    container_name: daypoo-ai
-    ports:
-      - "8000:8000"
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    restart: always
-
   redis:
     image: redis:7-alpine
     container_name: daypoo-redis

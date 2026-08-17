@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';const FOOTER_LINKS = [
+import { Link } from 'react-router-dom';
+const FOOTER_LINKS = [
   {
     title: '서비스',
     links: [
@@ -23,7 +24,6 @@ import { Link } from 'react-router-dom';const FOOTER_LINKS = [
 ];
 
 export function Footer() {
-
   const handleLinkClick = (e: React.MouseEvent, to: string) => {
     if (to.includes('#')) {
       const [path, hash] = to.split('#');

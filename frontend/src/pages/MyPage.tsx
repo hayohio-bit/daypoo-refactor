@@ -388,7 +388,6 @@ export function MyPage() {
         ? 'PRO'
         : 'FREE';
 
-
   // 전체 데이터 로드
   useEffect(() => {
     if (authLoading) return;
