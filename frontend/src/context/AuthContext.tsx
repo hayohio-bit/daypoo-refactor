@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api } from '../services/apiClient';
+import { api, STAY_LOGGED_IN_DURATION_MS } from '../services/apiClient';
 import type { UserResponse } from '../types/api';
 
 interface AuthContextType {
@@ -83,11 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 기존 토큰 정리
       removeTokens();
       if (stayLoggedIn) {
-        // 로그인 유지: localStorage에 저장 + 3일 만료 시간 설정
-        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        // 로그인 유지: localStorage에 저장 + 만료 시간 설정
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('tokenExpiresAt', String(Date.now() + THREE_DAYS_MS));
+        localStorage.setItem('tokenExpiresAt', String(Date.now() + STAY_LOGGED_IN_DURATION_MS));
       } else {
         // 로그인 유지 안 함: sessionStorage (브라우저 닫으면 삭제)
         sessionStorage.setItem('accessToken', accessToken);

@@ -2,6 +2,10 @@ import { ApiResponse } from '../types/api';
 
 const BASE_URL = '/api/v1';
 
+// '로그인 유지' 선택 시 클라이언트 세션 유지 기간.
+// 백엔드 리프레시 토큰 유효기간(14일)보다 짧아야 갱신이 항상 성공한다.
+export const STAY_LOGGED_IN_DURATION_MS = 3 * 24 * 60 * 60 * 1000;
+
 export interface ApiError extends Error {
   code: string;
   status: number;
@@ -92,6 +96,9 @@ class ApiClient {
 
           // 💡 핵심: 토큰이 잘못되었거나 만료되어 401이 났을 때, 토큰 제거 후 게스트 권한으로 한 번 더 시도
           // 이로 인해 게스트 접근이 가능한 API(예: 화장실 조회)는 중단 없이 정상적으로 로딩됨
+          // 원 요청의 타임아웃은 이미 해제되었으므로 폴백 요청에는 새 컨트롤러로 타임아웃을 건다
+          const guestController = new AbortController();
+          const guestTimeoutId = setTimeout(() => guestController.abort(), timeout);
           try {
             const guestHeaders: Record<string, string> = { ...headers };
             delete guestHeaders['Authorization'];
@@ -100,7 +107,7 @@ class ApiClient {
               method,
               headers: guestHeaders,
               body: body ? JSON.stringify(body) : undefined,
-              signal: controller.signal,
+              signal: guestController.signal,
             });
 
             if (guestResponse.ok) {
@@ -108,6 +115,8 @@ class ApiClient {
             }
           } catch (retryErr) {
             console.error('Guest fallback retry failed:', retryErr);
+          } finally {
+            clearTimeout(guestTimeoutId);
           }
 
           const error = new Error('인증이 만료되었습니다.') as ApiError;
@@ -217,8 +226,7 @@ class ApiClient {
         // tokenExpiresAt 갱신: 로그인 유지 사용 시 기존 만료 시간 연장
         const existingExpiresAt = localStorage.getItem('tokenExpiresAt');
         if (existingExpiresAt) {
-          const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-          localStorage.setItem('tokenExpiresAt', String(Date.now() + THREE_DAYS_MS));
+          localStorage.setItem('tokenExpiresAt', String(Date.now() + STAY_LOGGED_IN_DURATION_MS));
         }
         return true;
       }
