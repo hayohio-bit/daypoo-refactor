@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DayPoo — 전국 화장실 위치 검색·배변 기록 분석 서비스. 팀 프로젝트를 개인 포트폴리오용으로 포크해 리팩토링 중인 저장소다(원본: jhyeon9185/daypoo).
 
-모노레포 구성: `backend/`(Spring Boot 3.4, Java 21), `frontend/`(React 19 + Vite + TypeScript), `terraform/`(OCI 인프라), `twa/`(Play Store TWA 패키징).
+모노레포 구성: `backend/`(Spring Boot 3.4, Java 21), `frontend/`(React 19 + Vite + TypeScript), `terraform/`(AWS 인프라 IaC — 운영 배포는 `.github/workflows/deploy-oci.yml`의 Oracle Cloud 경로를 쓴다), `twa/`(Play Store TWA 패키징).
 
 ## 로컬 개발 실행
 

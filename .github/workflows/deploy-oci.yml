@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── Job 1: 백엔드, AI, 프론트엔드 Docker 이미지 빌드 및 푸시 ──
+  # ── Job 1: 백엔드, 프론트엔드 Docker 이미지 빌드 및 푸시 ──
   build-and-push-images:
     runs-on: ubuntu-latest
     steps:
@@ -162,7 +162,7 @@ jobs:
             ENVEOF
 
             # 기존 컨테이너 이름 충돌 방지
-            docker rm -f daypoo-frontend daypoo-backend daypoo-ai daypoo-redis daypoo-postgres 2>/dev/null || true
+            docker rm -f daypoo-frontend daypoo-backend daypoo-redis daypoo-postgres 2>/dev/null || true
 
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down --remove-orphans

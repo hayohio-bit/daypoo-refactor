@@ -2,9 +2,9 @@
 
 <div align="center">
 
-**대한민국 스마트한 배변 문화를 위한 공간 정보 및 AI 분석 서비스**
+**대한민국 스마트한 배변 문화를 위한 위치 기반 공간 정보 서비스**
 
-_React · Spring Boot 3.4 (Virtual Threads) · Python/FastAPI · OpenAI Vision_
+_React · Spring Boot 3.4 (Virtual Threads) · PostgreSQL + PostGIS · Redis_
 
 [![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/jhyeon9185/daypoo)
 [![Frontend](https://img.shields.io/badge/Frontend-React_18+_TypeScript-61DAFB?logo=react&logoColor=white)](./frontend)
@@ -27,9 +27,9 @@ _React · Spring Boot 3.4 (Virtual Threads) · Python/FastAPI · OpenAI Vision_
 
 ## 📖 프로젝트 소개
 
-**DayPoo**는 대한민국 화장실 정보를 지도 위에 시각화하고, 사용자의 배변 기록을 AI로 분석하여 생활 습관 인사이트를 제공하는 위치 기반 서비스입니다.
+**DayPoo**는 대한민국 화장실 정보를 지도 위에 시각화하고, 사용자의 배변 기록을 분석하여 생활 습관 인사이트를 제공하는 위치 기반 서비스입니다.
 
-전국 약 5만 건의 공공데이터를 Java 21 가상 스레드(Virtual Threads) 기반 엔진으로 초고속 동기화하며, PostGIS 공간 쿼리와 OpenAI Vision 기반의 분석 리포팅 시스템을 통해 실용적인 사용자 경험을 제공합니다.
+전국 약 5만 건의 공공데이터를 Java 21 가상 스레드(Virtual Threads) 기반 엔진으로 초고속 동기화하며, PostGIS 공간 쿼리와 배변 기록 리포팅 시스템을 통해 실용적인 사용자 경험을 제공합니다.
 
 ---
 
@@ -49,7 +49,7 @@ _React · Spring Boot 3.4 (Virtual Threads) · Python/FastAPI · OpenAI Vision_
 - 코드베이스 정적 조사를 통해 우선순위 백로그 수립 — 상세: [docs/refactoring-plan.md](./docs/refactoring-plan.md)
   - **P0 보안**: 관리자 기본 비밀번호 제거, OAuth2 쿠키의 Java 역직렬화 제거
   - **P1 동작 결함**: API 클라이언트 폴백 타임아웃 미적용, 예외 체계 이탈 정리
-  - **P2 테스트**: 결제·회원탈퇴·관리자 서비스 테스트 신설 (현재 서비스 25개 중 2개만 테스트 보유)
+  - **P2 테스트**: 회원탈퇴·관리자 서비스 등 테스트 미보유 서비스에 테스트 신설
   - **P3 구조**: 대형 서비스 분할, 중복 제거, 정책값 설정 외부화
 - 완료: 클라이언트 오류(404/405/400)가 500으로 오분류되던 전역 예외 처리 수정
 
@@ -57,7 +57,7 @@ _React · Spring Boot 3.4 (Virtual Threads) · Python/FastAPI · OpenAI Vision_
 
 ## 🏗️ 시스템 아키텍처
 
-DayPoo는 고성능 데이터 처리와 AI 확장을 위해 **서비스 지향 아키텍처(SOA)**를 채택하였습니다.
+DayPoo는 고성능 데이터 처리를 위해 **서비스 지향 아키텍처(SOA)**를 채택하였습니다.
 
 ```mermaid
 graph TB
@@ -109,7 +109,6 @@ graph TB
 
 ### 2. 🛡️ 보안 및 개인정보 보호 (Privacy-First)
 
-- **무저장 AI 분석**: 배변 이미지를 서버 DB에 저장하지 않고 AI 분석 즉시 메모리에서 폐기하여 민감 정보 보호.
 - **Maintenance Filter**: 시스템 점검 시 어드민을 제외한 접근을 일괄 제어하는 전역 필터 적용.
 
 ### 3. 🗺️ 정밀 공간 데이터 처리
@@ -169,7 +168,7 @@ cp .env.example .env
 daypoo/
 ├── frontend/             # React + Vite SPA
 ├── backend/              # Spring Boot 3.4.3 (Core Business Logic)
-├── terraform/            # Infrastructure as Code (AWS)
+├── terraform/            # Infrastructure as Code (AWS)  ※ 운영 배포는 OCI 워크플로 사용
 ├── docs/                 # 통합 문서 저장소
 ├── scripts/              # 유틸리티 및 배포 스크립트
 └── docker-compose.yml    # 로컬 인프라 (PostgreSQL, Redis)
