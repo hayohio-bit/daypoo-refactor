@@ -17,6 +17,7 @@ DayPoo 저장소의 문서를 용도별로 정리한 색인이다. 새로 합류
 | [architecture/backend-detailed-design.md](./architecture/backend-detailed-design.md) | 백엔드 상세 설계 |
 | [architecture/detailed_design.md](./architecture/detailed_design.md) | 전체 상세 설계 |
 | [api-docs.md](./api-docs.md) | OpenAPI(Swagger) 명세 안내 — 실제 명세는 서버 기동 후 `/api/docs` |
+| [local-run-guide.md](./local-run-guide.md) | 로컬 실행 절차, 화면별 사용 방법과 스크린샷, 포트 충돌 등 자주 겪는 문제 |
 
 ## 인프라·배포
 

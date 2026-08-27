@@ -126,6 +126,20 @@ graph TB
 
 ---
 
+## 🖼️ 화면 미리보기
+
+| 급똥 지도 | 화장실 상세 |
+|---|---|
+| ![지도 화면](./docs/screenshots/03-map.jpg) | ![화장실 상세](./docs/screenshots/06-toilet-detail.jpg) |
+
+| 메인 | 로그인 |
+|---|---|
+| ![메인 화면](./docs/screenshots/01-main-hero.jpg) | ![로그인 모달](./docs/screenshots/04-login-modal.jpg) |
+
+각 화면의 사용 방법과 로컬 실행 시 주의할 점은 [로컬 실행 및 화면 가이드](./docs/local-run-guide.md)에 정리했습니다.
+
+---
+
 ## 🚀 시작하기 (Quick Start)
 
 ### 1단계: 환경 설정
@@ -144,6 +158,8 @@ cp .env.example .env
 - **Frontend**: `cd frontend && npm install && npm run dev` (URL: `http://localhost:5173`)
 
 > 순서대로 실행 권장 — Docker(DB) → Backend → Frontend
+
+기동 확인은 헬스체크(`http://localhost:8080/actuator/health`)와 Swagger UI(`http://localhost:8080/api/docs`)에서 합니다. 포트 충돌 등 자주 겪는 문제와 해결 방법은 [로컬 실행 및 화면 가이드](./docs/local-run-guide.md)를 참고해 주세요.
 
 ---
 
