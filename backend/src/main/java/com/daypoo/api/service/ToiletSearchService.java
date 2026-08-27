@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class ToiletSearchService {
 
-  private static final String INDEX_NAME = "toilets_v2";
+  private static final String INDEX_NAME = ToiletIndexingService.INDEX_NAME;
   private static final String GEO_FILTER_DISTANCE = "20km";
 
   private final WebClient.Builder webClientBuilder;

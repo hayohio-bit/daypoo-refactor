@@ -24,7 +24,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class ToiletIndexingService {
 
-  private static final String INDEX_NAME = "toilets_v2";
+  // OpenSearch 인덱스명의 단일 출처. 검색(ToiletSearchService)과 색인이 같은 인덱스를 바라봐야 한다.
+  public static final String INDEX_NAME = "toilets_v2";
   private static final int PAGE_SIZE = 200;
   private static final int NGRAM_MAX = 6;
 

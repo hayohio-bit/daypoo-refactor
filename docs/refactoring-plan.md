@@ -9,14 +9,10 @@
 
 ## P1 — 동작 결함
 
-- [ ] **apiClient 게스트 폴백에 타임아웃 미적용** — `frontend/src/services/apiClient.ts:99-104`의 재시도 fetch가 이미 `clearTimeout`(`:73`)된 컨트롤러의 signal을 재사용해서, 폴백 요청은 타임아웃 없이 무한정 대기할 수 있다. 새 AbortController로 교체한다.
-- [ ] **토큰 만료 시간 하드코딩 불일치** — `apiClient.ts:220`의 `THREE_DAYS_MS`(3일)가 백엔드 리프레시 토큰 유효기간 `refresh-token-validity-in-seconds: 1209600`(14일, `application.yml:52`)과 다르다. 서버 응답의 만료 정보를 쓰거나 상수를 일치시킨다.
-- [ ] **BusinessException 체계를 벗어난 예외 정리** — 다음 위치들이 `RuntimeException`/`IllegalStateException`/`IllegalArgumentException`을 직접 던져서 전역 예외 처리기의 캐치올(500 C004)로 떨어진다. 실제로는 4xx로 응답해야 하는 경우다.
-  - `controller/ReportController.java:45,56,68` — PRO 멤버십 검사(403이어야 함)
-  - `service/AdminService.java:129`, `service/AdminManagementService.java:546` — 테스트 데이터 생성 시 유저 없음
-  - `event/PooRecordEventListener.java:30` — 유저 없음
-  - `global/config/AdminSettingsService` 계열의 `IllegalStateException` 사용처
-- [ ] **OpenSearch 인덱스명 이중 정의** — `INDEX_NAME = "toilets_v2"`가 `ToiletSearchService.java:22`와 `ToiletIndexingService.java:27`에 각각 하드코딩되어 있어 한쪽만 바꾸면 검색이 조용히 깨진다. 공통 상수나 설정으로 단일화한다.
+- [x] **apiClient 게스트 폴백에 타임아웃 미적용** — 폴백 fetch가 이미 타임아웃이 해제된 컨트롤러의 signal을 재사용하던 것을 전용 AbortController로 교체하고 테스트를 추가했다 (`e31257e`).
+- [x] **토큰 만료 시간 하드코딩 중복** — 조사 결과 3일은 "로그인 유지" 클라이언트 세션 정책으로 의도된 값이며 백엔드 14일보다 짧아 갱신 동작에는 문제가 없었다. 다만 AuthContext와 apiClient 두 곳에 중복 정의되어 있어 `STAY_LOGGED_IN_DURATION_MS` 단일 상수로 추출했다 (`e31257e`).
+- [x] **BusinessException 체계를 벗어난 예외 정리** — PRO 멤버십 검사(403 B002 신설), 포인트 부족(400 S001), 유저 없음(404 U001)을 `BusinessException`으로 전환하고 테스트를 추가했다 (`9fd1dd9`). `AdminSettingsService`의 "System settings not initialized"는 서버 불변식 위반이라 500이 올바르므로 유지하기로 결정했다.
+- [x] **OpenSearch 인덱스명 이중 정의** — `ToiletIndexingService.INDEX_NAME`을 단일 출처로 삼고 검색 서비스가 참조하도록 변경했다 (`90ba44b`).
 
 ## P2 — 테스트 공백
 
