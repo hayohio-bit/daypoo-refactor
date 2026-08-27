@@ -4,8 +4,8 @@
 
 ## P0 — 보안
 
-- [ ] **관리자 계정 기본 비밀번호 제거** — `backend/src/main/resources/application.yml:102`의 `${ADMIN_PASSWORD:p00dle****}` 기본값이 소스에 커밋되어 있고, `DataInitializer`가 이 값으로 ROLE_ADMIN 계정을 자동 생성한다. 환경 변수 누락 시 알려진 비밀번호의 관리자 계정이 만들어지므로, 기본값을 제거하고 미설정 시 계정 생성을 건너뛰거나 기동을 실패시켜야 한다. 개인 이메일 기본값(`application.yml:103`)도 함께 제거한다.
-- [ ] **CookieUtils의 Java 역직렬화 제거** — `backend/.../security/CookieUtils.java:47-62`가 클라이언트가 제어하는 쿠키 값을 `SerializationUtils.deserialize`(Spring 6.1부터 deprecated)로 Java 역직렬화한다. 역직렬화 가젯 공격 표면이므로 Jackson 기반 JSON 직렬화로 교체하고, `Set-Cookie` 문자열 수동 조립(`:18-27`)은 `ResponseCookie` 빌더로 바꾼다. 예외를 삼키고 null을 반환하는 부분(`:59-61`)에 로깅을 추가한다.
+- [x] **관리자 계정 기본 비밀번호 제거** — `application.yml`의 비밀번호·관리자 이메일 목록 기본값을 제거하고, `ADMIN_PASSWORD` 미설정 시 관리자 계정 생성을 건너뛰도록 변경했다. `.env.example`에 항목을 문서화하고 단위 테스트 3건을 추가했다 (`58cfb95`). **후속 조치 필요**: 기존 기본값 문자열은 git 이력에 남아 있으므로, 운영 환경이 이 값을 사용 중이었다면 배포 환경에서 비밀번호를 교체해야 한다.
+- [x] **CookieUtils의 Java 역직렬화 제거** — Spring Security 허용 목록 기반 Jackson JSON 직렬화로 교체하고, `Set-Cookie` 수동 조립을 `ResponseCookie` 빌더로, `Secure` 플래그를 설정(`app.cookie.secure`, 기본 true)으로 전환했다. 역직렬화 실패에 WARN 로깅을 추가하고 왕복·변조·쿠키 속성 테스트 4건을 작성했다 (`3e1163f`). 기존 Java 직렬화 형식의 쿠키는 null로 무해하게 무시되어 플로우가 재시작된다.
 
 ## P1 — 동작 결함
 
@@ -33,6 +33,7 @@
 - [ ] **대형 파일 분해** — 프론트 928줄 `SupportPage.tsx`(FAQ 데이터를 별도 모듈로), 731줄 `admin/DashboardView.tsx`, 711줄 `mypage/ReportTab.tsx` 등. 백엔드 552줄 `ReportService`(집계와 캐시 관리 분리).
 - [ ] **정책값 설정 외부화** — 체크인 허용 반경(`LocationVerificationService.java:19`), 보상 정책(`PooRecordService.java:52-54`), Toss URL(`PaymentService.java:55`), 동기화 튜닝값(`PublicDataSyncService.java:45-46`) 등을 `@ConfigurationProperties`로 이동한다.
 - [ ] **공통 에러 UX** — 프론트 catch/alert 블록이 파일별로 산재한다(StoreView 18회, SettingsTab 15회, MapPage 14회). 공통 에러 토스트/바운더리를 도입한다.
+- [ ] **RestTemplateBuilder deprecated API 교체** — `global/RestTemplateConfig.java:20-21`의 `setConnectTimeout`/`setReadTimeout`(Duration)이 removal 예정으로 표시되어 컴파일 경고가 발생한다. 신규 API로 교체한다.
 
 ## 완료
 
