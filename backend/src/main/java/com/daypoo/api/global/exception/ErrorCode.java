@@ -43,14 +43,9 @@ public enum ErrorCode {
   ADMIN_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "사용자를 찾을 수 없습니다."),
   ADMIN_INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND, "A002", "문의를 찾을 수 없습니다."),
   ADMIN_TOILET_NOT_FOUND(HttpStatus.NOT_FOUND, "A003", "화장실을 찾을 수 없습니다."),
-  ADMIN_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "A004", "아이템을 찾을 수 없습니다."),
   ADMIN_INQUIRY_ALREADY_ANSWERED(HttpStatus.BAD_REQUEST, "A005", "이미 답변 완료된 문의입니다."),
   ADMIN_CANNOT_CHANGE_OWN_ROLE(HttpStatus.BAD_REQUEST, "A006", "자신의 역할은 변경할 수 없습니다."),
-  ADMIN_ITEM_IN_USE(HttpStatus.CONFLICT, "A007", "유저가 보유 중인 아이템은 삭제할 수 없습니다."),
   ADMIN_CANNOT_DELETE_SELF(HttpStatus.BAD_REQUEST, "A008", "자신의 계정은 삭제할 수 없습니다."),
-  ADMIN_TITLE_NOT_FOUND(HttpStatus.NOT_FOUND, "A009", "칭호를 찾을 수 없습니다."),
-  ADMIN_TITLE_IN_USE(HttpStatus.CONFLICT, "A010", "유저가 획득한 칭호는 삭제할 수 없습니다."),
-  ADMIN_TITLE_NAME_DUPLICATE(HttpStatus.CONFLICT, "A011", "이미 존재하는 칭호 이름입니다."),
 
   // Toilet
   TOILET_NOT_FOUND(HttpStatus.NOT_FOUND, "T001", "화장실을 찾을 수 없습니다."),

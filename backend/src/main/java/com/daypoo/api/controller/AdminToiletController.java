@@ -1,7 +1,7 @@
 package com.daypoo.api.controller;
 
 import com.daypoo.api.dto.AdminToiletListResponse;
-import com.daypoo.api.service.AdminManagementService;
+import com.daypoo.api.service.AdminToiletService;
 import com.daypoo.api.service.ToiletIndexingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminToiletController {
 
-  private final AdminManagementService adminManagementService;
+  private final AdminToiletService adminToiletService;
   private final ToiletIndexingService toiletIndexingService;
 
   @Operation(
@@ -42,6 +42,6 @@ public class AdminToiletController {
   public ResponseEntity<Page<AdminToiletListResponse>> getToilets(
       @RequestParam(required = false) String search,
       @PageableDefault(size = 20) Pageable pageable) {
-    return ResponseEntity.ok(adminManagementService.getToilets(search, pageable));
+    return ResponseEntity.ok(adminToiletService.getToilets(search, pageable));
   }
 }

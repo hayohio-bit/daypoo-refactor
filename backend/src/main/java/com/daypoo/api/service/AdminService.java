@@ -4,7 +4,6 @@ import com.daypoo.api.dto.AdminStatsResponse;
 import com.daypoo.api.dto.AdminStatsResponse.DailyStat;
 import com.daypoo.api.dto.AdminStatsResponse.UserDistribution;
 import com.daypoo.api.dto.SystemLogResponse;
-import com.daypoo.api.entity.Inquiry;
 import com.daypoo.api.entity.Payment;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.InquiryStatus;
@@ -38,6 +37,7 @@ public class AdminService {
   private final PaymentRepository paymentRepository;
   private final SubscriptionRepository subscriptionRepository;
   private final SystemLogService systemLogService;
+  private final AdminInquiryService adminInquiryService;
 
   @Transactional(readOnly = true)
   public AdminStatsResponse getAdminStats() {
@@ -150,38 +150,8 @@ public class AdminService {
       }
     }
 
-    generateInquiryTestData(user);
+    adminInquiryService.generateInquiryTestData(user);
 
     log.info("Successfully generated test data.");
-  }
-
-  private void generateInquiryTestData(User user) {
-    log.info("Generating 30 mock inquiries...");
-    String[] titles = {
-      "화장실 청소 상태가 안 좋아요",
-      "결제가 자꾸 실패합니다",
-      "비밀번호를 잊어버렸어요",
-      "앱이 너무 느려요",
-      "위치 정보가 정확하지 않습니다",
-      "새로운 기능을 제안합니다",
-      "포인트 적립이 안 됐어요",
-      "아이템 사용법을 모르겠어요"
-    };
-
-    com.daypoo.api.entity.enums.InquiryType[] types =
-        com.daypoo.api.entity.enums.InquiryType.values();
-
-    for (int i = 1; i <= 30; i++) {
-      Inquiry inquiry =
-          Inquiry.builder()
-              .user(user)
-              .type(types[i % types.length])
-              .title(titles[i % titles.length] + " (" + i + ")")
-              .content("이것은 테스트를 위한 " + i + "번째 문의 내용입니다. 상세한 처리를 부탁드립니다.")
-              .build();
-
-      inquiryRepository.save(inquiry);
-    }
-    inquiryRepository.flush();
   }
 }

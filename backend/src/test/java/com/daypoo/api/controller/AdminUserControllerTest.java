@@ -12,7 +12,7 @@ import com.daypoo.api.dto.AdminUserDetailResponse;
 import com.daypoo.api.dto.AdminUserListResponse;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.entity.enums.SubscriptionPlan;
-import com.daypoo.api.service.AdminManagementService;
+import com.daypoo.api.service.AdminUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ class AdminUserControllerTest {
   // JavaTimeModule 등록으로 LocalDateTime 직렬화 지원
   private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-  @Mock private AdminManagementService adminManagementService;
+  @Mock private AdminUserService adminUserService;
 
   @InjectMocks private AdminUserController adminUserController;
 
@@ -76,7 +76,7 @@ class AdminUserControllerTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    given(adminManagementService.getUsers(any(), any(), any(), any(Pageable.class)))
+    given(adminUserService.getUsers(any(), any(), any(), any(Pageable.class)))
         .willReturn(
             new PageImpl<>(
                 new ArrayList<>(Collections.singletonList(userResponse)),
@@ -112,7 +112,7 @@ class AdminUserControllerTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    given(adminManagementService.getUserDetail(1L)).willReturn(detailResponse);
+    given(adminUserService.getUserDetail(1L)).willReturn(detailResponse);
 
     // when & then
     mockMvc
@@ -127,7 +127,7 @@ class AdminUserControllerTest {
   void updateUserRole_success() throws Exception {
     // given
     AdminRoleUpdateRequest request = new AdminRoleUpdateRequest(Role.ROLE_ADMIN);
-    doNothing().when(adminManagementService).updateUserRole(eq(1L), eq(Role.ROLE_ADMIN), any());
+    doNothing().when(adminUserService).updateUserRole(eq(1L), eq(Role.ROLE_ADMIN), any());
 
     // when & then
     mockMvc
@@ -142,7 +142,7 @@ class AdminUserControllerTest {
   @DisplayName("성공: 유저 영구 삭제 API")
   void deleteUser_success() throws Exception {
     // given
-    doNothing().when(adminManagementService).deleteUser(eq(1L), any());
+    doNothing().when(adminUserService).deleteUser(eq(1L), any());
 
     // when & then
     mockMvc

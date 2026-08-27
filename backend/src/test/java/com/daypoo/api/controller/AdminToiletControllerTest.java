@@ -6,7 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.daypoo.api.dto.AdminToiletListResponse;
-import com.daypoo.api.service.AdminManagementService;
+import com.daypoo.api.service.AdminToiletService;
 import com.daypoo.api.service.ToiletIndexingService;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,7 +28,7 @@ class AdminToiletControllerTest {
 
   @InjectMocks private AdminToiletController adminToiletController;
 
-  @Mock private AdminManagementService adminManagementService;
+  @Mock private AdminToiletService adminToiletService;
   @Mock private ToiletIndexingService toiletIndexingService;
 
   @Test
@@ -47,7 +47,7 @@ class AdminToiletControllerTest {
             .build();
 
     Pageable pageable = PageRequest.of(0, 20);
-    given(adminManagementService.getToilets(any(), any(Pageable.class)))
+    given(adminToiletService.getToilets(any(), any(Pageable.class)))
         .willReturn(new PageImpl<>(Collections.singletonList(toiletResponse)));
 
     // when
@@ -60,7 +60,7 @@ class AdminToiletControllerTest {
     assertThat(body).isNotNull();
     assertThat(body.getContent()).hasSize(1);
     assertThat(body.getContent().get(0).name()).isEqualTo("테스트 화장실");
-    verify(adminManagementService, times(1)).getToilets(eq("테스트"), eq(pageable));
+    verify(adminToiletService, times(1)).getToilets(eq("테스트"), eq(pageable));
   }
 
   @Test

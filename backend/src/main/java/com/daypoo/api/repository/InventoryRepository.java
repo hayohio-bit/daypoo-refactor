@@ -28,7 +28,5 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
   boolean existsByUserAndItemId(User user, Long itemId);
 
-  boolean existsByItemId(Long itemId);
-
   void deleteAllByUser(User user);
 }

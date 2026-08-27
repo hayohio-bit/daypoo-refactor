@@ -5,7 +5,7 @@ import com.daypoo.api.dto.AdminUserDetailResponse;
 import com.daypoo.api.dto.AdminUserListResponse;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.entity.enums.SubscriptionPlan;
-import com.daypoo.api.service.AdminManagementService;
+import com.daypoo.api.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminUserController {
 
-  private final AdminManagementService adminManagementService;
+  private final AdminUserService adminUserService;
 
   @Operation(
       summary = "유저 목록 조회 및 검색",
@@ -34,7 +34,7 @@ public class AdminUserController {
       @RequestParam(required = false) Role role,
       @RequestParam(required = false) SubscriptionPlan plan,
       @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(adminManagementService.getUsers(search, role, plan, pageable));
+    return ResponseEntity.ok(adminUserService.getUsers(search, role, plan, pageable));
   }
 
   @Operation(
@@ -42,7 +42,7 @@ public class AdminUserController {
       description = "특정 유저의 활동 지표(기록 수, 결제 정보 등)를 포함한 상세 정보를 조회합니다.")
   @GetMapping("/{id}")
   public ResponseEntity<AdminUserDetailResponse> getUserDetail(@PathVariable Long id) {
-    return ResponseEntity.ok(adminManagementService.getUserDetail(id));
+    return ResponseEntity.ok(adminUserService.getUserDetail(id));
   }
 
   @Operation(summary = "유저 역할(권한) 변경", description = "특정 유저의 역할을 변경합니다 (본인 역할 변경은 불가).")
@@ -51,7 +51,7 @@ public class AdminUserController {
       @PathVariable Long id,
       @RequestBody AdminRoleUpdateRequest request,
       @AuthenticationPrincipal String email) {
-    adminManagementService.updateUserRole(id, request.role(), email);
+    adminUserService.updateUserRole(id, request.role(), email);
     return ResponseEntity.ok().build();
   }
 
@@ -61,7 +61,7 @@ public class AdminUserController {
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(
       @PathVariable Long id, @AuthenticationPrincipal String email) {
-    adminManagementService.deleteUser(id, email);
+    adminUserService.deleteUser(id, email);
     return ResponseEntity.ok().build();
   }
 }

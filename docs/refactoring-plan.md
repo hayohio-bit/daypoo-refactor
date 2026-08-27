@@ -25,7 +25,7 @@
 
 ## P3 — 구조 개선
 
-- [ ] **AdminManagementService 분할** — 587줄, 유저/화장실/문의/아이템/칭호 5개 도메인 혼재, Repository 9개 주입. 도메인별 서비스로 나누고, `AdminService`(185줄)와의 역할 중복(테스트 데이터 생성이 양쪽에 존재: `AdminService.java:122`, `AdminManagementService.java:533`)을 해소한다.
+- [x] **AdminManagementService 분할** — `AdminUserService`·`AdminToiletService`·`AdminInquiryService`로 분할하고 컨트롤러를 재배선했다. 문의 테스트 데이터 생성 중복은 `AdminInquiryService`로 단일화했다(`AdminService.generateTestData`가 위임 — 생성 문의 3건 중 1건이 답변 완료 상태가 되는 동작 변화 있음). 아이템·칭호 관리 섹션은 `061d822`(shop·title 모듈 제거)가 컨트롤러를 지운 뒤 호출부가 없는 죽은 코드였으므로 DTO 6종·에러 코드 5종·전용 리포지토리 쿼리와 함께 삭제했다 (`cd3b1ce`).
 - [x] **사용자 조회 중복 제거** — 착수 시 재조사 결과 실제 패턴은 main 소스 기준 10곳이었다(최초 조사의 36곳은 과대 집계). AuthService 6곳·FavoriteService 2곳·ToiletReviewService 1곳·PooRecordEventListener 1곳을 `UserService.getByEmail()`로 통일하고 UserServiceTest를 신설했다 (`58c0035`). 제외: `AuthService.login`(실패 시 디버그 로그가 있는 조회), `AdminManagementService:539`(테스트 데이터용 이중 이메일 조회 — 서비스 분할 항목에서 처리), `OAuth2SuccessHandler`·`DataInitializer`(예외를 던지지 않는 Optional 분기).
 - [ ] **프론트엔드 도메인 서비스 모듈 추출** — 서비스 계층이 `apiClient.ts` + `reviewService.ts` 2개뿐이고, 10개 이상의 페이지가 `api.get/post`를 직접 호출한다. 도메인별(toilet, admin, auth 등) 서비스 모듈로 추출한다. `apiClient.request()`(110줄 단일 함수)도 헤더 구성/리프레시/폴백/에러 매핑으로 분리한다.
 - [x] **프론트엔드 토큰 조회 공용화** — `apiClient.ts`에서 `getAccessToken()`·`removeTokens()`를 export하고, MapPage(2곳)·SupportPage·NotificationSubscriber·useGeoTracking의 복붙 조회와 AuthContext의 중복 만료 검사·토큰 정리 로직을 교체했다 (`7cc7cbb`). 이로써 모든 호출부가 '로그인 유지' 만료 검사를 일관되게 거친다.
@@ -33,6 +33,7 @@
 - [ ] **대형 파일 분해** — 프론트 928줄 `SupportPage.tsx`(FAQ 데이터를 별도 모듈로), 731줄 `admin/DashboardView.tsx`, 711줄 `mypage/ReportTab.tsx` 등. 백엔드 552줄 `ReportService`(집계와 캐시 관리 분리).
 - [ ] **정책값 설정 외부화** — 체크인 허용 반경(`LocationVerificationService.java:19`), 보상 정책(`PooRecordService.java:52-54`), Toss URL(`PaymentService.java:55`), 동기화 튜닝값(`PublicDataSyncService.java:45-46`) 등을 `@ConfigurationProperties`로 이동한다.
 - [ ] **공통 에러 UX** — 프론트 catch/alert 블록이 파일별로 산재한다(StoreView 18회, SettingsTab 15회, MapPage 14회). 공통 에러 토스트/바운더리를 도입한다.
+- [ ] **제거된 엔드포인트를 호출하는 admin 화면 정리** — `061d822`가 shop·title 백엔드 모듈을 제거했지만 프론트엔드 `admin/StoreView.tsx`·`AddItemView.tsx`·`EditItemView.tsx`·`TitleManagementView.tsx`·`AddTitleView.tsx`는 여전히 `/admin/shop/items`·`/admin/titles`를 호출해 404가 난다. 화면을 함께 제거하거나 엔드포인트를 복원해야 한다 (2026-08-27 AdminManagementService 분할 작업 중 발견).
 - [ ] **RestTemplateBuilder deprecated API 교체** — `global/RestTemplateConfig.java:20-21`의 `setConnectTimeout`/`setReadTimeout`(Duration)이 removal 예정으로 표시되어 컴파일 경고가 발생한다. 신규 API로 교체한다.
 
 ## 완료

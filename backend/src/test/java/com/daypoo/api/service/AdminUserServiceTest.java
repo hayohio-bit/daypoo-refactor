@@ -10,15 +10,9 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
-import com.daypoo.api.repository.InquiryRepository;
-import com.daypoo.api.repository.InventoryRepository;
-import com.daypoo.api.repository.ItemRepository;
 import com.daypoo.api.repository.PaymentRepository;
 import com.daypoo.api.repository.PooRecordRepository;
-import com.daypoo.api.repository.TitleRepository;
-import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.UserRepository;
-import com.daypoo.api.repository.UserTitleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,22 +22,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("관리자 관리 서비스 단위 테스트 (사용자 권한·삭제)")
-class AdminManagementServiceTest {
+@DisplayName("관리자 유저 서비스 단위 테스트 (사용자 권한·삭제)")
+class AdminUserServiceTest {
 
-  @InjectMocks private AdminManagementService adminManagementService;
+  @InjectMocks private AdminUserService adminUserService;
 
   @Mock private UserRepository userRepository;
-  @Mock private ToiletRepository toiletRepository;
-  @Mock private InquiryRepository inquiryRepository;
-  @Mock private ItemRepository itemRepository;
-  @Mock private InventoryRepository inventoryRepository;
   @Mock private PaymentRepository paymentRepository;
   @Mock private PooRecordRepository pooRecordRepository;
   @Mock private UserDeletionService userDeletionService;
-  @Mock private TitleRepository titleRepository;
-  @Mock private UserTitleRepository userTitleRepository;
-  @Mock private NotificationService notificationService;
 
   private static final String ADMIN_EMAIL = "admin@daypoo.com";
 
@@ -59,7 +46,7 @@ class AdminManagementServiceTest {
   void updateUserRole_self_throws() {
     User self = givenUser(1L, ADMIN_EMAIL);
 
-    assertThatThrownBy(() -> adminManagementService.updateUserRole(1L, Role.ROLE_USER, ADMIN_EMAIL))
+    assertThatThrownBy(() -> adminUserService.updateUserRole(1L, Role.ROLE_USER, ADMIN_EMAIL))
         .isInstanceOf(BusinessException.class)
         .extracting(e -> ((BusinessException) e).getErrorCode())
         .isEqualTo(ErrorCode.ADMIN_CANNOT_CHANGE_OWN_ROLE);
@@ -71,7 +58,7 @@ class AdminManagementServiceTest {
   void updateUserRole_otherUser_updates() {
     User target = givenUser(2L, "user@daypoo.com");
 
-    adminManagementService.updateUserRole(2L, Role.ROLE_ADMIN, ADMIN_EMAIL);
+    adminUserService.updateUserRole(2L, Role.ROLE_ADMIN, ADMIN_EMAIL);
 
     verify(target).updateRole(Role.ROLE_ADMIN);
   }
@@ -81,8 +68,7 @@ class AdminManagementServiceTest {
   void updateUserRole_notFound_throws() {
     given(userRepository.findById(99L)).willReturn(Optional.empty());
 
-    assertThatThrownBy(
-            () -> adminManagementService.updateUserRole(99L, Role.ROLE_USER, ADMIN_EMAIL))
+    assertThatThrownBy(() -> adminUserService.updateUserRole(99L, Role.ROLE_USER, ADMIN_EMAIL))
         .isInstanceOf(BusinessException.class)
         .extracting(e -> ((BusinessException) e).getErrorCode())
         .isEqualTo(ErrorCode.ADMIN_USER_NOT_FOUND);
@@ -93,7 +79,7 @@ class AdminManagementServiceTest {
   void deleteUser_self_throws() {
     givenUser(1L, ADMIN_EMAIL);
 
-    assertThatThrownBy(() -> adminManagementService.deleteUser(1L, ADMIN_EMAIL))
+    assertThatThrownBy(() -> adminUserService.deleteUser(1L, ADMIN_EMAIL))
         .isInstanceOf(BusinessException.class)
         .extracting(e -> ((BusinessException) e).getErrorCode())
         .isEqualTo(ErrorCode.ADMIN_CANNOT_DELETE_SELF);
@@ -106,7 +92,7 @@ class AdminManagementServiceTest {
   void deleteUser_otherUser_delegates() {
     User target = givenUser(2L, "user@daypoo.com");
 
-    adminManagementService.deleteUser(2L, ADMIN_EMAIL);
+    adminUserService.deleteUser(2L, ADMIN_EMAIL);
 
     verify(userDeletionService).deleteUserAndRelatedData(target);
   }
