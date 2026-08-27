@@ -48,6 +48,12 @@ public class DataInitializer implements CommandLineRunner {
               }
             },
             () -> {
+              if (adminPassword == null || adminPassword.isBlank()) {
+                log.warn(
+                    "⚠️ ADMIN_PASSWORD가 설정되지 않아 관리자 계정을 생성하지 않습니다. "
+                        + "관리자 계정이 필요하면 환경 변수 ADMIN_PASSWORD를 설정하세요.");
+                return;
+              }
               userRepository.save(
                   User.builder()
                       .password(passwordEncoder.encode(adminPassword))

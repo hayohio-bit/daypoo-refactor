@@ -99,8 +99,9 @@ spring:
 app:
   admin:
     email: ${ADMIN_EMAIL:admin@daypoo.com}
-    password: ${ADMIN_PASSWORD:p00dle****}
-    emails: ${ADMIN_EMAILS:hayohio@gmail.com}
+    # 미설정 시 관리자 계정을 생성하지 않는다 (DataInitializer 참조)
+    password: ${ADMIN_PASSWORD:}
+    emails: ${ADMIN_EMAILS:}
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
   cors:
