@@ -1,18 +1,6 @@
 import type { ComponentType } from 'react';
 
-export type AdminTab =
-  | 'dashboard'
-  | 'users'
-  | 'toilets'
-  | 'cs'
-  | 'store'
-  | 'titles'
-  | 'system'
-  | 'add-item'
-  | 'edit-item'
-  | 'add-title'
-  | 'edit-title'
-  | 'logs';
+export type AdminTab = 'dashboard' | 'users' | 'toilets' | 'cs' | 'system' | 'logs';
 
 export const COLORS = {
   primary: '#1B4332',

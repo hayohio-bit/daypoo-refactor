@@ -688,17 +688,8 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-2 gap-4">
           <div
-            onClick={() => setActiveTab('add-item')}
-            className="relative overflow-hidden rounded-[24px] p-6 bg-white border border-black/5 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1B4332]/30 group transition-all"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-[#1B4332]/5 text-[#1B4332] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Plus size={24} />
-            </div>
-            <span className="text-sm font-black text-black">아이템 등록</span>
-          </div>
-          <div
             onClick={() => setActiveTab('toilets')}
-            className="relative overflow-hidden rounded-[24px] p-6 bg-white border border-black/5 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#E8A838]/30 group transition-all"
+            className="col-span-2 relative overflow-hidden rounded-[24px] p-6 bg-white border border-black/5 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#E8A838]/30 group transition-all"
           >
             <div className="w-12 h-12 rounded-2xl bg-[#E8A838]/5 text-[#E8A838] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
               <MapPin size={24} />

@@ -10,20 +10,17 @@ import {
   MapPin,
   MessageSquare,
   Settings,
-  Star,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/apiClient';
-import type { AdminStatsResponse, AdminTitleResponse, ItemResponse } from '../types/admin';
+import type { AdminStatsResponse } from '../types/admin';
 
-import { AddTitleView } from './admin/AddTitleView';
 import { CsView } from './admin/CsView';
 import { DashboardView } from './admin/DashboardView';
 import { LogsView } from './admin/LogsView';
 import { type SystemLog, SystemView } from './admin/SystemView';
-import { TitleManagementView } from './admin/TitleManagementView';
 import { ToiletsView } from './admin/ToiletsView';
 import { UsersView } from './admin/UsersView';
 // ── 분할된 서브 뷰 임포트 ───────────────────────────────────────────────
@@ -37,7 +34,6 @@ export function AdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [editingTitle, setEditingTitle] = useState<AdminTitleResponse | null>(null);
 
   // Dashboard 통계 데이터 상태 관리
   const [stats, setStats] = useState<AdminStatsResponse | null>(null);
@@ -141,7 +137,6 @@ export function AdminPage() {
           ? stats.pendingInquiries
           : undefined,
     },
-    { id: 'titles', label: '칭호 시스템', icon: Star },
     { id: 'system', label: '시스템 설정', icon: Settings },
   ];
 
@@ -273,8 +268,6 @@ export function AdminPage() {
                 <MapPin size={20} style={{ color: COLORS.primary }} />
               ) : activeTab === 'cs' ? (
                 <MessageSquare size={20} style={{ color: COLORS.primary }} />
-              ) : activeTab === 'titles' ? (
-                <Star size={20} style={{ color: COLORS.primary }} />
               ) : (
                 <Settings size={20} style={{ color: COLORS.primary }} />
               )}
@@ -289,13 +282,9 @@ export function AdminPage() {
                       ? '맵 엔진 관제'
                       : activeTab === 'cs'
                         ? '고객 통합 지원'
-                        : activeTab === 'titles'
-                          ? '칭호 시스템 엔진'
-                          : activeTab === 'add-title'
-                            ? '신규 칭호 마스터 클래스'
-                            : activeTab === 'logs'
-                              ? '시스템 런타임 로그'
-                              : '시스템 인프라 설정'}
+                        : activeTab === 'logs'
+                          ? '시스템 런타임 로그'
+                          : '시스템 인프라 설정'}
               </h2>
               <div className="flex items-center gap-2 text-[10px] text-black/40 font-bold">
                 <Calendar size={12} /> {currentTime.toLocaleDateString()}
@@ -340,15 +329,6 @@ export function AdminPage() {
               {activeTab === 'users' && <UsersView />}
               {activeTab === 'toilets' && <ToiletsView />}
               {activeTab === 'cs' && <CsView stats={stats} onStatsRefresh={fetchStats} />}
-              {activeTab === 'titles' && (
-                <TitleManagementView
-                  setActiveTab={handleTabChange}
-                  setEditingTitle={setEditingTitle}
-                />
-              )}
-              {activeTab === 'add-title' && (
-                <AddTitleView setActiveTab={handleTabChange} editingTitle={editingTitle} />
-              )}
               {activeTab === 'system' && (
                 <SystemView
                   stats={stats}

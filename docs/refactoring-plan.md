@@ -33,7 +33,7 @@
 - [ ] **대형 파일 분해** — 프론트 928줄 `SupportPage.tsx`(FAQ 데이터를 별도 모듈로), 731줄 `admin/DashboardView.tsx`, 711줄 `mypage/ReportTab.tsx` 등. 백엔드 552줄 `ReportService`(집계와 캐시 관리 분리).
 - [ ] **정책값 설정 외부화** — 체크인 허용 반경(`LocationVerificationService.java:19`), 보상 정책(`PooRecordService.java:52-54`), Toss URL(`PaymentService.java:55`), 동기화 튜닝값(`PublicDataSyncService.java:45-46`) 등을 `@ConfigurationProperties`로 이동한다.
 - [ ] **공통 에러 UX** — 프론트 catch/alert 블록이 파일별로 산재한다(StoreView 18회, SettingsTab 15회, MapPage 14회). 공통 에러 토스트/바운더리를 도입한다.
-- [ ] **제거된 엔드포인트를 호출하는 admin 화면 정리** — `061d822`가 shop·title 백엔드 모듈을 제거했지만 프론트엔드 `admin/StoreView.tsx`·`AddItemView.tsx`·`EditItemView.tsx`·`TitleManagementView.tsx`·`AddTitleView.tsx`는 여전히 `/admin/shop/items`·`/admin/titles`를 호출해 404가 난다. 화면을 함께 제거하거나 엔드포인트를 복원해야 한다 (2026-08-27 AdminManagementService 분할 작업 중 발견).
+- [x] **제거된 엔드포인트를 호출하는 admin 화면 정리** — `061d822`가 shop·title 백엔드 모듈을 제거해 고아가 된 화면 5종을 사용자 결정에 따라 삭제했다 (`16094c4`). StoreView·AddItemView·EditItemView는 import하는 곳이 없어 도달 불가능한 죽은 파일이었고, TitleManagementView·AddTitleView는 AdminPage의 칭호 탭에 마운트되어 있었으나 삭제된 `/admin/titles` 호출로 항상 404가 나던 화면이었다. 칭호 탭 배선, 대시보드의 아이템 등록 퀵 액션, AdminTab의 사어 항목, 미참조 아이템·칭호 타입 8종도 함께 정리했다.
 - [x] **RestTemplateBuilder deprecated API 교체** — `setConnectTimeout`/`setReadTimeout`을 Spring Boot 3.4의 `connectTimeout`/`readTimeout`으로 교체해 removal 경고를 제거했다 (`1b1a85b`).
 
 ## 완료
