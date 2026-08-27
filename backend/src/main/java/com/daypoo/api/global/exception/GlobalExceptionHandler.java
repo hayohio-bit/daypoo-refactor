@@ -7,9 +7,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -42,6 +46,41 @@ public class GlobalExceptionHandler {
             .collect(Collectors.toList());
 
     ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, fieldErrors);
+    return new ResponseEntity<>(response, ErrorCode.INVALID_INPUT_VALUE.getStatus());
+  }
+
+  /** 존재하지 않는 경로 요청 처리 (404) */
+  @ExceptionHandler(NoResourceFoundException.class)
+  protected ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e) {
+    log.warn("No resource found: {} {}", e.getHttpMethod(), e.getResourcePath());
+    ErrorResponse response = ErrorResponse.of(ErrorCode.RESOURCE_NOT_FOUND);
+    return new ResponseEntity<>(response, ErrorCode.RESOURCE_NOT_FOUND.getStatus());
+  }
+
+  /** 허용되지 않은 HTTP 메서드 요청 처리 (405) */
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  protected ResponseEntity<ErrorResponse> handleMethodNotSupported(
+      HttpRequestMethodNotSupportedException e) {
+    log.warn("Method not supported: {}", e.getMessage());
+    ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED);
+    return new ResponseEntity<>(response, ErrorCode.METHOD_NOT_ALLOWED.getStatus());
+  }
+
+  /** 요청 파라미터 타입 불일치 처리 (400) */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  protected ResponseEntity<ErrorResponse> handleTypeMismatch(
+      MethodArgumentTypeMismatchException e) {
+    log.warn("Argument type mismatch: parameter '{}'", e.getName());
+    ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_TYPE_VALUE);
+    return new ResponseEntity<>(response, ErrorCode.INVALID_TYPE_VALUE.getStatus());
+  }
+
+  /** 필수 요청 파라미터 누락 처리 (400) */
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  protected ResponseEntity<ErrorResponse> handleMissingParameter(
+      MissingServletRequestParameterException e) {
+    log.warn("Missing request parameter: '{}'", e.getParameterName());
+    ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE);
     return new ResponseEntity<>(response, ErrorCode.INVALID_INPUT_VALUE.getStatus());
   }
 

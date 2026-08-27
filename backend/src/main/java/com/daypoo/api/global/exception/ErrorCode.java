@@ -14,6 +14,7 @@ public enum ErrorCode {
   HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "C006", "접근 권한이 없습니다."),
   DUPLICATE_KEY(HttpStatus.CONFLICT, "C007", "중복된 데이터가 존재합니다."),
   TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "C008", "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요."),
+  RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "C009", "요청한 리소스를 찾을 수 없습니다."),
 
   // User
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
