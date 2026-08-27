@@ -9,6 +9,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// 로컬에서 8080을 다른 앱이 쓸 때 BACKEND_URL 환경 변수로 프록시 대상을 바꿀 수 있다.
+const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
+
 const copyWellKnownPlugin = (): Plugin => ({
   name: 'copy-well-known',
   closeBundle() {
@@ -206,11 +209,11 @@ export default defineConfig({
   envDir: '../',
   server: {
     proxy: {
-      '/api': { target: 'http://localhost:8080', changeOrigin: true },
-      '/oauth2': { target: 'http://localhost:8080', changeOrigin: true },
-      '/login/oauth2': { target: 'http://localhost:8080', changeOrigin: true },
-      '/swagger-ui': { target: 'http://localhost:8080', changeOrigin: true },
-      '/v3/api-docs': { target: 'http://localhost:8080', changeOrigin: true },
+      '/api': { target: backendUrl, changeOrigin: true },
+      '/oauth2': { target: backendUrl, changeOrigin: true },
+      '/login/oauth2': { target: backendUrl, changeOrigin: true },
+      '/swagger-ui': { target: backendUrl, changeOrigin: true },
+      '/v3/api-docs': { target: backendUrl, changeOrigin: true },
     },
     middlewareMode: false,
   },
