@@ -16,12 +16,12 @@
 
 ## P2 — 테스트 공백
 
-서비스 25개 중 테스트가 있는 것은 AuthService, PooRecordService 2개뿐이다. 위험도 순으로 신설한다.
+위험도 순으로 신설한다. 1차분 4건은 완료 (`4e2634a`), 나머지 서비스(NotificationService, ToiletIndexingService, ReportService 등 19개)는 리팩토링 시 함께 작성한다.
 
-- [ ] **PaymentService** — 결제 금액 계산과 Toss 연동 로직. 금전 오류 위험이 가장 크다.
-- [ ] **UserDeletionService** — Repository 13개를 주입받아 연쇄 삭제를 수행한다. 삭제 누락·순서 오류를 테스트로 고정한다.
-- [ ] **AdminManagementService** — 권한 변경, 자기 자신 변경 금지 등 보안성 규칙 검증.
-- [ ] **PublicDataSyncTest 재작성** — 현재 `@Disabled` + 실 API 호출 + 항상 참인 단언(`isGreaterThanOrEqualTo(0)`)으로 실질 커버리지가 0이다. WebClient를 모킹한 단위 테스트로 교체한다.
+- [x] **PaymentService** — Toss 승인 성공·거절, 플랜 판정(orderId·금액), 포인트 적립, 예외 래핑 5건 (`4e2634a`).
+- [x] **UserDeletionService** — FK 의존 순서(InOrder 검증), 리뷰 통계 재계산, AI 요약 초기화 3건 (`4e2634a`).
+- [x] **AdminManagementService** — 자기 역할 변경·자기 삭제 금지, 미존재 사용자, 정상 위임 5건 (`4e2634a`).
+- [x] **PublicDataSyncTest 재작성** — 무의미한 `@Disabled` 통합 테스트를 삭제하고, 외부 API 호출만 스텁한 단위 테스트로 교체했다. 삽입·변경·동일·빈 응답 집계와 좌표 검증, WKT 정규화를 검증한다 (`4e2634a`).
 
 ## P3 — 구조 개선
 

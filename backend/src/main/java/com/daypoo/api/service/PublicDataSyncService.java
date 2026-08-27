@@ -343,7 +343,8 @@ public class PublicDataSyncService {
     return new int[] {toiletsToSave.size(), inserted, updated};
   }
 
-  private String fetchResponseBody(int pageNo, int numOfRows) {
+  // 테스트에서 외부 API 호출을 스텁할 수 있도록 package-private로 둔다
+  String fetchResponseBody(int pageNo, int numOfRows) {
     return webClient
         .get()
         .uri(
