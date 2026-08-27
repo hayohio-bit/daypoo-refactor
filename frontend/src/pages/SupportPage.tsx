@@ -28,7 +28,7 @@ import { Navbar } from '../components/Navbar';
 import WaveButtonComponent from '../components/WaveButton';
 import { WaveDivider } from '../components/WaveDivider';
 import { BaseModal } from '../components/common/BaseModal';
-import { api } from '../services/apiClient';
+import { api, getAccessToken } from '../services/apiClient';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type SupportTab = 'faq' | 'inquiry' | 'myinquiry';
@@ -674,7 +674,7 @@ export function SupportPage({
 
   const handleTabChange = (k: SupportTab) => {
     if (k !== 'faq') {
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const token = getAccessToken();
       if (!token) {
         openAuth?.('login', () => {
           setActiveTab(k);

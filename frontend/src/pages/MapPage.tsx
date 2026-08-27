@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { useGeoTracking } from '../hooks/useGeoTracking';
 import { useToilets } from '../hooks/useToilets';
-import { api } from '../services/apiClient';
+import { api, getAccessToken } from '../services/apiClient';
 import type { CreateRecordRequest } from '../types/api';
 import type { ToiletData } from '../types/toilet';
 import { calculateDistance } from '../utils/distance';
@@ -165,7 +165,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   // ── 방문 횟수 데이터 가져오기 ──────────────────────────────
   useEffect(() => {
     const fetchVisitCounts = async () => {
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const token = getAccessToken();
       if (!token) {
         setVisitCounts({});
         return;
@@ -184,7 +184,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   // ── 즐겨찾기 목록 가져오기 ──────────────────────────────
   useEffect(() => {
     const fetchFavorites = async () => {
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const token = getAccessToken();
       if (!token) return; // 비로그인 상태면 기존 상태 유지 (sync useEffect 트리거 방지)
       try {
         const data = await api.get<number[]>('/favorites');

@@ -2,7 +2,7 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { api } from '../services/apiClient';
+import { api, getAccessToken } from '../services/apiClient';
 
 const MAX_RETRY_COUNT = 10; // F4: 최대 재시도 횟수
 const BASE_RETRY_DELAY = 1000; // F4: 기본 재시도 지연 (1초)
@@ -20,8 +20,7 @@ export const NotificationSubscriber: React.FC = () => {
     const SSE_ENABLED = true;
     if (!SSE_ENABLED) return;
 
-    const accessToken =
-      localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const accessToken = getAccessToken();
     if (!accessToken || !user) return;
 
     // 기존 연결 정리

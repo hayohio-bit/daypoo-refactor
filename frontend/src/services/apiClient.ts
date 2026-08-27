@@ -29,11 +29,16 @@ function getToken(key: string): string | null {
   return token;
 }
 
+/** 액세스 토큰 조회. '로그인 유지' 만료 시 저장된 토큰을 정리하고 null을 반환한다. */
+export function getAccessToken(): string | null {
+  return getToken('accessToken');
+}
+
 function getTokenStorage(): Storage {
   return sessionStorage.getItem('accessToken') ? sessionStorage : localStorage;
 }
 
-function removeTokens() {
+export function removeTokens() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('tokenExpiresAt');

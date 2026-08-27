@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../services/apiClient';
+import { api, getAccessToken } from '../services/apiClient';
 import type { ToiletData } from '../types/toilet';
 import { getDistance } from '../utils/geoUtils';
 
@@ -58,9 +58,7 @@ export function useGeoTracking(
             localStorage.setItem('location_prompted', 'true');
           }
 
-          const isLogged = !!(
-            localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')
-          );
+          const isLogged = !!getAccessToken();
           if (!isLogged) return;
 
           toiletsRef.current.forEach((toilet) => {

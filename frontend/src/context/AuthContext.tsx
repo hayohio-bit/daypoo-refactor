@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api, STAY_LOGGED_IN_DURATION_MS } from '../services/apiClient';
+import {
+  api,
+  getAccessToken,
+  removeTokens,
+  STAY_LOGGED_IN_DURATION_MS,
+} from '../services/apiClient';
 import type { UserResponse } from '../types/api';
 
 interface AuthContextType {
@@ -18,39 +23,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isTokenExpiredByTime = useCallback(() => {
-    const expiresAt = localStorage.getItem('tokenExpiresAt');
-    if (!expiresAt) return false; // 만료 시간 없으면 (로그인 유지 미사용) 세션 기반
-    return Date.now() > Number(expiresAt);
-  }, []);
-
-  const getToken = useCallback(
-    (key: string) => {
-      // 로그인 유지 만료 체크
-      if (isTokenExpiredByTime()) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresAt');
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        return null;
-      }
-      return localStorage.getItem(key) || sessionStorage.getItem(key);
-    },
-    [isTokenExpiredByTime],
-  );
-
-  const removeTokens = useCallback(() => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('tokenExpiresAt');
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('refreshToken');
-  }, []);
-
   const refreshUser = useCallback(async () => {
     setLoading(true);
-    const token = getToken('accessToken');
+    const token = getAccessToken();
 
     if (!token) {
       setUser(null);
@@ -68,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [getToken, removeTokens]);
+  }, []);
 
   useEffect(() => {
     refreshUser();
@@ -94,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       await refreshUser();
     },
-    [removeTokens, refreshUser],
+    [refreshUser],
   );
 
   const logout = useCallback(async () => {
@@ -107,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       removeTokens();
       setUser(null);
     }
-  }, [removeTokens]);
+  }, []);
 
   const deleteMe = useCallback(async () => {
     try {
