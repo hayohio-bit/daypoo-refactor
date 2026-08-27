@@ -543,7 +543,7 @@ public class AdminManagementService {
                     userRepository.findAll().stream()
                         .filter(u -> u.getRole() != Role.ROLE_ADMIN)
                         .findFirst()
-                        .orElseThrow(() -> new RuntimeException("테스트 문의를 생성할 유저가 없습니다.")));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)));
 
     log.info("Using test user: {}", testUser.getEmail());
 

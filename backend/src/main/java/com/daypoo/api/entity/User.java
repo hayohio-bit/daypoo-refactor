@@ -2,6 +2,8 @@ package com.daypoo.api.entity;
 
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.global.BaseTimeEntity;
+import com.daypoo.api.global.exception.BusinessException;
+import com.daypoo.api.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +109,7 @@ public class User extends BaseTimeEntity {
 
   public void deductPoints(long amount) {
     if (this.points < amount) {
-      throw new IllegalStateException("포인트가 부족합니다.");
+      throw new BusinessException(ErrorCode.INSUFFICIENT_POINTS);
     }
     this.points -= amount;
   }

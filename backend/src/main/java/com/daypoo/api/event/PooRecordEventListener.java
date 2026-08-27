@@ -1,6 +1,8 @@
 package com.daypoo.api.event;
 
 import com.daypoo.api.entity.User;
+import com.daypoo.api.global.exception.BusinessException;
+import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,7 @@ public class PooRecordEventListener {
     User user =
         userRepository
             .findByEmail(event.email())
-            .orElseThrow(() -> new IllegalArgumentException("User not found: " + event.email()));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
     // 경험치 및 포인트 추가
     user.addExpAndPoints(event.rewardExp(), event.rewardPoints());

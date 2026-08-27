@@ -9,6 +9,8 @@ import com.daypoo.api.entity.Payment;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.InquiryStatus;
 import com.daypoo.api.entity.enums.Role;
+import com.daypoo.api.global.exception.BusinessException;
+import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.InquiryRepository;
 import com.daypoo.api.repository.PaymentRepository;
 import com.daypoo.api.repository.SubscriptionRepository;
@@ -126,7 +128,7 @@ public class AdminService {
         userRepository.findAll().stream()
             .filter(u -> u.getRole() != Role.ROLE_ADMIN)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("테스트 데이터를 생성할 유저가 없습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
     for (int i = 13; i >= 0; i--) {
       LocalDate date = LocalDate.now().minusDays(i);

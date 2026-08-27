@@ -58,6 +58,7 @@ public enum ErrorCode {
 
   // Subscription
   SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "B001", "구독 정보를 찾을 수 없습니다."),
+  PRO_MEMBERSHIP_REQUIRED(HttpStatus.FORBIDDEN, "B002", "PRO 멤버십 전용 기능입니다."),
 
   // Global Settings
   SIGNUP_DISABLED(HttpStatus.FORBIDDEN, "G001", "현재 신규 회원가입이 제한된 상태입니다."),

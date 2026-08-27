@@ -5,6 +5,8 @@ import com.daypoo.api.dto.HealthReportResponse;
 import com.daypoo.api.dto.VisitLogResponse;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.ReportType;
+import com.daypoo.api.global.exception.BusinessException;
+import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.service.ReportService;
 import com.daypoo.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,9 +43,7 @@ public class ReportController {
   public ResponseEntity<List<HealthReportHistoryResponse>> getReportHistory(
       @AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);
-    if (!user.isPro()) {
-      throw new IllegalStateException("PRO 멤버십 전용 기능입니다.");
-    }
+    requirePro(user);
     return ResponseEntity.ok(reportService.getReportHistory(user));
   }
 
@@ -52,9 +52,7 @@ public class ReportController {
   @GetMapping("/trend")
   public ResponseEntity<List<Integer>> getHealthTrend(@AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);
-    if (!user.isPro()) {
-      throw new IllegalStateException("PRO 멤버십 전용 기능입니다.");
-    }
+    requirePro(user);
     return ResponseEntity.ok(reportService.getHealthTrend(user));
   }
 
@@ -64,9 +62,13 @@ public class ReportController {
   public ResponseEntity<List<VisitLogResponse>> getVisitPatterns(
       @AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);
-    if (!user.isPro()) {
-      throw new IllegalStateException("PRO 멤버십 전용 기능입니다.");
-    }
+    requirePro(user);
     return ResponseEntity.ok(reportService.getVisitPatterns(user));
+  }
+
+  private static void requirePro(User user) {
+    if (!user.isPro()) {
+      throw new BusinessException(ErrorCode.PRO_MEMBERSHIP_REQUIRED);
+    }
   }
 }
