@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Activity, Database, Navigation, Plus, RefreshCw, Sparkles, Star, X } from 'lucide-react';
+import { Activity, Database, Navigation, Plus, RefreshCw, Star, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { AdminCard } from '../../components/admin/AdminCard';
@@ -295,28 +295,6 @@ export const ToiletsView = () => {
               >
                 {syncing ? '동기화 중...' : '공공데이터 동기화'}
               </WaveButtonComponent>
-              <button
-                onClick={async () => {
-                  if (
-                    !confirm(
-                      '리뷰 5개 이상 & AI 요약 미생성 화장실에 대해 일괄 생성합니다. 진행할까요?',
-                    )
-                  )
-                    return;
-                  try {
-                    const res: any = await api.post('/admin/toilets/ai-summaries/generate');
-                    alert(`AI 요약 ${res?.generated ?? 0}건 생성 완료`);
-                  } catch {
-                    alert('AI 요약 일괄 생성 실패');
-                  }
-                }}
-                className="px-6 py-3 rounded-2xl border-2 bg-white/90 backdrop-blur-md border-black/10 text-xs font-black text-black/60 hover:bg-white hover:border-emerald-500/30 hover:text-emerald-700 transition-all shadow-xl"
-              >
-                <span className="flex items-center gap-2">
-                  <Sparkles size={14} />
-                  AI 요약 일괄 생성
-                </span>
-              </button>
             </div>
 
             {syncResult && (
