@@ -50,13 +50,6 @@ public class AdminController {
     return ResponseEntity.ok(adminService.getAdminStats());
   }
 
-  @Operation(summary = "테스트 데이터 생성", description = "통계 그래프 확인을 위해 과거 14일치 결제 테스트 데이터를 생성합니다.")
-  @PostMapping("/generate-test-data")
-  public ResponseEntity<String> generateTestData() {
-    adminService.generateTestData();
-    return ResponseEntity.ok("테스트 데이터가 생성되었습니다.");
-  }
-
   @Operation(summary = "시스템 로그 조회", description = "시스템의 주요 이벤트 로그를 최신순으로 조회합니다.")
   @GetMapping("/logs")
   public ResponseEntity<java.util.List<com.daypoo.api.dto.SystemLogResponse>> getSystemLogs() {

@@ -6,6 +6,7 @@ import com.daypoo.api.repository.*;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,12 @@ public class UserDeletionService {
   private final NotificationRepository notificationRepository;
   private final InventoryRepository inventoryRepository;
   private final UserTitleRepository userTitleRepository;
-  private final SubscriptionRepository subscriptionRepository;
-  private final PaymentRepository paymentRepository;
   private final InquiryRepository inquiryRepository;
   private final ToiletReviewRepository toiletReviewRepository;
   private final ToiletRepository toiletRepository;
   private final FavoriteRepository favoriteRepository;
   private final HealthReportSnapshotRepository healthReportSnapshotRepository;
+  private final JdbcTemplate jdbcTemplate;
 
   /** 회원과 연관된 모든 데이터를 FK 의존성 순서에 맞춰 삭제 후 최종적으로 회원 삭제 */
   @Transactional
@@ -63,12 +63,13 @@ public class UserDeletionService {
     // VisitLog는 PooRecord를 참조하므로 먼저 삭제
     visitLogRepository.deleteAllByUser(user);
 
-    // Subscription은 Payment와 관계가 있을 수 있으므로 먼저 삭제 (사양에 따라 다름)
-    subscriptionRepository.deleteAllByUser(user);
+    // 결제 기능 제거 후에도 과거 데이터가 남은 DB가 있을 수 있어, users FK 정합성을 위해
+    // subscriptions(payments 참조) → payments 순서로 잔여 행을 직접 삭제한다
+    jdbcTemplate.update("DELETE FROM subscriptions WHERE user_id = ?", userId);
+    jdbcTemplate.update("DELETE FROM payments WHERE user_id = ?", userId);
 
     // 3. 2단계 삭제 완료 후 안전하게 삭제 가능한 엔티티
     pooRecordRepository.deleteAllByUser(user);
-    paymentRepository.deleteAllByUser(user);
 
     // 4. 최종적으로 유저 삭제
     userRepository.delete(user);

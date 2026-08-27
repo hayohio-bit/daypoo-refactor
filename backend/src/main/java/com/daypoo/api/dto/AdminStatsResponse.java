@@ -16,10 +16,8 @@ public class AdminStatsResponse {
   private long pendingInquiries;
   private long todayNewUsers;
   private long todayInquiries;
-  private long totalRevenue;
   private long todayApiCalls;
   private List<DailyStat> weeklyTrend;
-  private UserDistribution userDistribution;
 
   @Getter
   @Builder
@@ -29,16 +27,5 @@ public class AdminStatsResponse {
     private String date;
     private long users;
     private long inquiries;
-    private long sales;
-  }
-
-  @Getter
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class UserDistribution {
-    private long pro;
-    private long basic;
-    private long free;
   }
 }

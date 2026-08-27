@@ -2,8 +2,6 @@ package com.daypoo.api.entity;
 
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.global.BaseTimeEntity;
-import com.daypoo.api.global.exception.BusinessException;
-import com.daypoo.api.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +41,6 @@ public class User extends BaseTimeEntity {
   @Column(nullable = false)
   private long exp = 0L;
 
-  @Column(nullable = false)
-  private long points = 0L;
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
@@ -63,13 +58,7 @@ public class User extends BaseTimeEntity {
   private List<Inventory> inventories = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-  private List<Payment> payments = new ArrayList<>();
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<ToiletReview> reviews = new ArrayList<>();
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-  private List<Subscription> subscriptions = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Favorite> favorites = new ArrayList<>();
@@ -91,27 +80,18 @@ public class User extends BaseTimeEntity {
     this.role = role != null ? role : Role.ROLE_USER;
     this.level = 1;
     this.exp = 0L;
-    this.points = 0L;
   }
 
   private static final int MAX_LEVEL = 30;
 
-  public void addExpAndPoints(long addedExp, long addedPoints) {
+  public void addExp(long addedExp) {
     this.exp += addedExp;
-    this.points += addedPoints;
 
     // Simple level up logic: level * 100 exp to level up
     while (this.level < MAX_LEVEL && this.exp >= this.level * 100) {
       this.exp -= this.level * 100;
       this.level += 1;
     }
-  }
-
-  public void deductPoints(long amount) {
-    if (this.points < amount) {
-      throw new BusinessException(ErrorCode.INSUFFICIENT_POINTS);
-    }
-    this.points -= amount;
   }
 
   public void equipTitle(Long titleId) {
@@ -134,26 +114,5 @@ public class User extends BaseTimeEntity {
 
   public void updateRole(Role role) {
     this.role = role;
-  }
-
-  /** 현재 활성 구독 조회 */
-  public Subscription getActiveSubscription() {
-    return subscriptions.stream().filter(Subscription::isActive).findFirst().orElse(null);
-  }
-
-  /** PRO 멤버십 여부 확인 */
-  public boolean isPro() {
-    Subscription active = getActiveSubscription();
-    if (active == null) return false;
-
-    com.daypoo.api.entity.enums.SubscriptionPlan plan = active.getPlan();
-    return plan == com.daypoo.api.entity.enums.SubscriptionPlan.PRO
-        || plan == com.daypoo.api.entity.enums.SubscriptionPlan.PREMIUM;
-  }
-
-  /** 특정 플랜 확인 */
-  public boolean hasPlan(com.daypoo.api.entity.enums.SubscriptionPlan plan) {
-    Subscription active = getActiveSubscription();
-    return active != null && active.getPlan() == plan;
   }
 }

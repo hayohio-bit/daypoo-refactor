@@ -379,15 +379,6 @@ export function MyPage() {
   const [records, setRecords] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  // 구독 플랜 명칭 파싱
-  const isPro = user?.isPro ?? false;
-  const membershipName =
-    user?.subscription?.plan === 'PREMIUM'
-      ? 'PREMIUM'
-      : user?.subscription?.plan === 'PRO'
-        ? 'PRO'
-        : 'FREE';
-
   // 전체 데이터 로드
   useEffect(() => {
     if (authLoading) return;
@@ -461,7 +452,7 @@ export function MyPage() {
               />
             )}
 
-            {tab === 'report' && <ReportTab isPro={isPro} membershipName={membershipName} />}
+            {tab === 'report' && <ReportTab />}
             {tab === 'settings' && (
               <SettingsTab
                 user={user}

@@ -139,8 +139,7 @@ public class AdminInquiryService {
   }
 
   /** 지정한 사용자 명의로 30개의 문의 테스트 데이터를 생성한다. 3건 중 1건은 답변 완료 상태로 만든다. */
-  @Transactional
-  public void generateInquiryTestData(User testUser) {
+  private void generateInquiryTestData(User testUser) {
     log.info("Generating 30 inquiry test data for user: {}", testUser.getEmail());
 
     InquiryType[] types = InquiryType.values();

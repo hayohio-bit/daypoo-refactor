@@ -23,7 +23,6 @@ export const UsersView = () => {
   const [userDetail, setUserDetail] = useState<AdminUserDetailResponse | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [roleFilter, setRoleFilter] = useState('ALL');
-  const [planFilter, setPlanFilter] = useState('ALL');
   const [searchInput, setSearchInput] = useState('');
 
   const fetchUsers = async () => {
@@ -35,7 +34,6 @@ export const UsersView = () => {
       });
       if (search) params.append('search', search);
       if (roleFilter && roleFilter !== 'ALL') params.append('role', roleFilter);
-      if (planFilter && planFilter !== 'ALL') params.append('plan', planFilter);
 
       const response = await api.get<PageResponse<AdminUserListResponse>>(`/admin/users?${params}`);
       setUsers(response.content);
@@ -59,7 +57,7 @@ export const UsersView = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search, roleFilter, planFilter]);
+  }, [page, search, roleFilter]);
 
   const handleOpenUserDetail = async (user: AdminUserListResponse) => {
     setSelectedUser(user);
@@ -124,29 +122,6 @@ export const UsersView = () => {
     return role === 'ROLE_ADMIN' ? 'ADMIN' : 'USER';
   };
 
-  const getPlanBadge = (plan: 'BASIC' | 'PRO' | 'PREMIUM') => {
-    switch (plan) {
-      case 'PRO':
-        return (
-          <span className="bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
-            PRO
-          </span>
-        );
-      case 'PREMIUM':
-        return (
-          <span className="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
-            PREMIUM
-          </span>
-        );
-      default:
-        return (
-          <span className="bg-black/5 text-black/40 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
-            BASIC
-          </span>
-        );
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -187,24 +162,6 @@ export const UsersView = () => {
             </div>
           </div>
 
-          <div className="relative group">
-            <select
-              value={planFilter}
-              onChange={(e) => {
-                setPlanFilter(e.target.value);
-                setPage(0);
-              }}
-              className="pl-4 pr-10 py-3 rounded-2xl border border-black/5 bg-white/50 backdrop-blur-xl focus:outline-none focus:border-[#1B4332]/30 transition-all font-black text-sm appearance-none cursor-pointer text-[#1B4332] hover:bg-white hover:shadow-md"
-            >
-              <option value="ALL">플랜: 전체</option>
-              <option value="BASIC">BASIC (미구독)</option>
-              <option value="PRO">PRO</option>
-              <option value="PREMIUM">PREMIUM</option>
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-black/20 group-hover:text-[#1B4332] transition-colors">
-              <ChevronRight size={14} className="rotate-90" />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -225,13 +182,7 @@ export const UsersView = () => {
                     가입일
                   </th>
                   <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                    구독 정보
-                  </th>
-                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
                     레벨
-                  </th>
-                  <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
-                    포인트
                   </th>
                   <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-black/40">
                     기록 수
@@ -273,11 +224,7 @@ export const UsersView = () => {
                     <td className="px-8 py-5 text-sm font-bold text-black/60">
                       {formatDate(u.createdAt)}
                     </td>
-                    <td className="px-8 py-5">{getPlanBadge(u.plan)}</td>
                     <td className="px-8 py-5 font-black text-[#2D6A4F]">Lv.{u.level}</td>
-                    <td className="px-8 py-5 font-black text-[#E8A838]">
-                      {u.points.toLocaleString()} P
-                    </td>
                     <td className="px-8 py-5 font-bold text-black/60">{u.recordCount}건</td>
                     <td className="px-8 py-5 text-right">
                       <button
@@ -378,39 +325,9 @@ export const UsersView = () => {
                     </div>
                     <div className="bg-black/[0.02] rounded-2xl p-4">
                       <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
-                        포인트
-                      </p>
-                      <p className="text-sm font-black text-[#E8A838]">
-                        {userDetail.points.toLocaleString()} P
-                      </p>
-                    </div>
-                    <div className="bg-black/[0.02] rounded-2xl p-4">
-                      <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
                         기록 수
                       </p>
                       <p className="text-sm font-bold text-black/80">{userDetail.recordCount}건</p>
-                    </div>
-                    <div className="bg-black/[0.02] rounded-2xl p-4">
-                      <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
-                        결제 횟수
-                      </p>
-                      <p className="text-sm font-bold text-black/80">
-                        {userDetail.paymentCount || 0}회
-                      </p>
-                    </div>
-                    <div className="bg-black/[0.02] rounded-2xl p-4">
-                      <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
-                        총 결제 금액
-                      </p>
-                      <p className="text-sm font-bold text-black/80">
-                        {userDetail.totalPaymentAmount?.toLocaleString() || 0}원
-                      </p>
-                    </div>
-                    <div className="bg-black/[0.02] rounded-2xl p-4">
-                      <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">
-                        구독 플랜
-                      </p>
-                      <div>{getPlanBadge(userDetail.plan)}</div>
                     </div>
                     <div className="bg-black/[0.02] rounded-2xl p-4">
                       <p className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">

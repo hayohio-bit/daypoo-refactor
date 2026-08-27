@@ -119,9 +119,6 @@ public-data:
 ai-service:
   url: ${AI_SERVICE_URL}
 
-toss:
-  secret-key: ${TOSS_SECRET_KEY}
-
 opensearch:
   url: ${OPENSEARCH_URL:http://localhost:9200}
 

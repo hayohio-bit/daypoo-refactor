@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useInView } from 'framer-motion';
-import { Activity, Calendar, Crown, Lock, LogOut, Package, Trash2, Trophy } from 'lucide-react';
+import { Activity, Calendar, Lock, LogOut, Package, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/apiClient';
@@ -25,12 +25,9 @@ export interface SettingsTabProps {
 export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTabProps) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
-  const [modalType, setModalType] = useState<
-    'nickname' | 'password' | 'withdraw' | 'cancelSubscription' | null
-  >(null);
+  const [modalType, setModalType] = useState<'nickname' | 'password' | 'withdraw' | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -87,39 +84,6 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
     }
   };
 
-  const loadSubscriptionInfo = async () => {
-    try {
-      const data = await api.get('/subscriptions/me');
-      setSubscriptionInfo(data);
-    } catch (err: any) {
-      console.error('구독 정보 조회 실패:', err);
-      alert('구독 정보를 불러올 수 없습니다.');
-    }
-  };
-
-  const handleCancelSubscription = async () => {
-    if (
-      !confirm(
-        '정말로 구독을 해지하시겠습니까?\n\n해지 후에도 만료일까지는 서비스를 이용하실 수 있습니다.',
-      )
-    )
-      return;
-
-    setIsSubmitting(true);
-    try {
-      await api.post('/subscriptions/cancel');
-      alert('구독이 해지되었습니다. 만료일까지 서비스를 이용하실 수 있습니다.');
-      setModalType(null);
-      await refreshUser();
-      await loadSubscriptionInfo();
-    } catch (err: any) {
-      console.error('구독 해지 에러:', err);
-      alert(err.message || '구독 해지에 실패했습니다.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const sections = [
     {
       title: '기본 정보',
@@ -153,31 +117,8 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
       ],
     },
     {
-      title: '멤버십 및 계정',
+      title: '계정',
       items: [
-        {
-          label: '멤버십 등급',
-          value: (() => {
-            if (!user) return 'FREE 일반 회원';
-            if (user.isPro && user.subscription) {
-              const plan = user.subscription.plan;
-              if (plan === 'PRO') return 'PRO 멤버십';
-              if (plan === 'PREMIUM') return 'PREMIUM 멤버십';
-              return `${plan} 멤버십`;
-            }
-            return 'FREE 일반 회원';
-          })(),
-          icon: <Trophy size={18} />,
-          action: '관리',
-          onClick: async () => {
-            if (!user?.isPro || !user?.subscription) {
-              navigate('/premium');
-            } else {
-              await loadSubscriptionInfo();
-              setModalType('cancelSubscription');
-            }
-          },
-        },
         {
           label: '계정 생성일',
           value: user?.createdAt ? (user.createdAt as string).split('T')[0] : '-',
@@ -285,104 +226,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               className="relative w-full max-w-sm bg-white rounded-[40px] p-10 shadow-3xl border border-white"
             >
-              {modalType === 'cancelSubscription' ? (
-                <>
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-amber-50 text-amber-600">
-                    <Crown size={28} />
-                  </div>
-                  <h3 className="text-2xl font-black text-[#1A2B27] mb-2">멤버십 구독 관리</h3>
-
-                  {subscriptionInfo ? (
-                    <div className="space-y-6 mb-8 text-left">
-                      <div className="bg-gray-50 rounded-2xl p-6 space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-gray-400">구독 플랜</span>
-                          <span
-                            className={`font-black text-lg ${
-                              subscriptionInfo.plan === 'PREMIUM'
-                                ? 'text-[#1B4332]'
-                                : 'text-[#E8A838]'
-                            }`}
-                          >
-                            {subscriptionInfo.plan} 멤버십
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-gray-400">구독 상태</span>
-                          <span
-                            className={`font-black text-sm ${
-                              subscriptionInfo.status === 'ACTIVE'
-                                ? 'text-emerald-600'
-                                : 'text-gray-400'
-                            }`}
-                          >
-                            {subscriptionInfo.status === 'ACTIVE'
-                              ? '활성'
-                              : subscriptionInfo.status === 'CANCELLED'
-                                ? '해지됨'
-                                : '만료'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-gray-400">만료일</span>
-                          <span className="font-black text-sm text-[#1A2B27]">
-                            {subscriptionInfo.endDate
-                              ? new Date(subscriptionInfo.endDate).toLocaleDateString('ko-KR')
-                              : '-'}
-                          </span>
-                        </div>
-                        {subscriptionInfo.daysRemaining !== null && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-gray-400">남은 기간</span>
-                            <span className="font-black text-sm text-emerald-600">
-                              {subscriptionInfo.daysRemaining}일
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-gray-400">자동 갱신</span>
-                          <span
-                            className={`font-black text-sm ${
-                              subscriptionInfo.isAutoRenewal ? 'text-emerald-600' : 'text-gray-400'
-                            }`}
-                          >
-                            {subscriptionInfo.isAutoRenewal ? 'ON' : 'OFF'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {subscriptionInfo.status === 'ACTIVE' && (
-                        <p className="text-xs font-medium text-gray-400 leading-relaxed">
-                          구독을 해지하시면 만료일까지 서비스를 이용하실 수 있습니다.
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <p className="text-sm text-gray-400">구독 정보를 불러오는 중...</p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setModalType(null)}
-                      className="flex-1 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-colors"
-                    >
-                      닫기
-                    </button>
-                    {subscriptionInfo?.status === 'ACTIVE' && (
-                      <button
-                        onClick={handleCancelSubscription}
-                        disabled={isSubmitting}
-                        className="flex-1 py-4 bg-red-500 text-white font-black rounded-[20px] shadow-xl shadow-red-900/20 disabled:opacity-50 hover:bg-red-600 transition-colors"
-                      >
-                        {isSubmitting ? '처리 중...' : '구독 해지'}
-                      </button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
+              <>
                   <div
                     className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto ${
                       modalType === 'withdraw'
@@ -449,7 +293,6 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
                     </button>
                   </div>
                 </>
-              )}
             </motion.div>
           </div>
         )}

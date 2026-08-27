@@ -2,11 +2,8 @@ import { AnimatePresence, motion, useInView } from 'framer-motion';
 import {
   Activity,
   AlertCircle,
-  ArrowRight,
   Brain,
-  Crown,
   Droplets,
-  Lock,
   Minus,
   Plus,
   RefreshCw,
@@ -14,12 +11,9 @@ import {
   TrendingDown,
   TrendingUp,
   Trophy,
-  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import WaveButtonComponent from '../../components/WaveButton';
-import { KnockoutWobble } from '../../components/common/KnockoutWobble';
 import { api } from '../../services/apiClient';
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
@@ -33,54 +27,36 @@ const fadeUp = (delay = 0) => ({
 });
 
 export interface ReportTabProps {
-  isPro: boolean;
-  membershipName: string;
   onAddRecord?: () => void;
 }
 
-export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps) => {
-  const navigate = useNavigate();
+export const ReportTab = ({ onAddRecord }: ReportTabProps) => {
   const [activeSubTab, setActiveSubTab] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [reportData, setReportData] = useState<any>(null);
   const [isFetchLoading, setIsFetchLoading] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const reportCacheRef = useRef<Record<string, any>>({});
   const hasData = reportData != null;
 
-  const fetchReport = useCallback(
-    async (type: string) => {
-      setReportData(null);
+  const fetchReport = useCallback(async (type: string) => {
+    setReportData(null);
 
-      // 일반회원은 weekly/monthly AI 분석 호출 차단
-      if (!isPro && type !== 'daily') {
-        setIsFetchLoading(false);
-        return;
-      }
+    if (type !== 'daily' && reportCacheRef.current[type]) {
+      setReportData(reportCacheRef.current[type]);
+      return;
+    }
 
-      if (type !== 'daily' && reportCacheRef.current[type]) {
-        setReportData(reportCacheRef.current[type]);
-        return;
-      }
-
-      setIsFetchLoading(true);
-      try {
-        const res = await api.get(`/reports/${type.toUpperCase()}`);
-        reportCacheRef.current[type] = res;
-        setReportData(res);
-      } catch (err: any) {
-        console.error('리포트 조회 실패:', err);
-        if (err.message?.includes('포인트')) {
-          alert('포인트가 부족하여 리포트를 생성할 수 없습니다. 포인트를 충전해주세요!');
-          setActiveSubTab('daily');
-        }
-      } finally {
-        setIsFetchLoading(false);
-      }
-    },
-    [isPro],
-  );
+    setIsFetchLoading(true);
+    try {
+      const res = await api.get(`/reports/${type.toUpperCase()}`);
+      reportCacheRef.current[type] = res;
+      setReportData(res);
+    } catch (err: any) {
+      console.error('리포트 조회 실패:', err);
+    } finally {
+      setIsFetchLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchReport(activeSubTab);
@@ -114,9 +90,9 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
       {/* 서브 탭 */}
       <div className="flex p-1.5 sm:p-2 bg-gray-100 rounded-[16px] sm:rounded-[24px] w-full sm:w-fit mx-auto mb-4 mt-3 border border-gray-200 shadow-inner overflow-x-auto scrollbar-hide">
         {[
-          { key: 'daily', label: '오늘 가이드', free: true },
-          { key: 'weekly', label: '7일 리포트', free: false },
-          { key: 'monthly', label: '30일 트렌드', free: false },
+          { key: 'daily', label: '오늘 가이드' },
+          { key: 'weekly', label: '7일 리포트' },
+          { key: 'monthly', label: '30일 트렌드' },
         ].map((t) => (
           <button
             key={t.key}
@@ -128,12 +104,6 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
             }`}
           >
             {t.label}
-            {!t.free && (
-              <Crown
-                size={14}
-                className={activeSubTab === t.key ? 'text-amber-500' : 'text-gray-300'}
-              />
-            )}
           </button>
         ))}
       </div>
@@ -147,31 +117,6 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
             exit={{ opacity: 0, y: -15 }}
             className="space-y-6"
           >
-            {!isPro && (
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                onClick={() => navigate('/premium')}
-                className="rounded-[32px] p-6 cursor-pointer overflow-hidden relative"
-                style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)' }}
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-900/30">
-                      <Sparkles className="text-emerald-950" size={24} />
-                    </div>
-                    <div>
-                      <p className="text-white font-black text-base">7일 정밀 분석 리포트 해제</p>
-                      <p className="text-emerald-200/60 text-xs font-bold">
-                        {membershipName} 멤버십으로 모든 통계를 한눈에 확인하세요
-                      </p>
-                    </div>
-                  </div>
-                  <Crown className="text-emerald-300" size={20} />
-                </div>
-              </motion.div>
-            )}
-
             <div className="rounded-[24px] sm:rounded-[40px] p-5 sm:p-12 bg-white border border-gray-100 shadow-sm">
               <div className="flex items-center gap-3 sm:gap-5 mb-6 sm:mb-10">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[16px] sm:rounded-[24px] bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner flex-shrink-0">
@@ -237,14 +182,6 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                         💡 {reportData.solution}
                       </p>
                     )}
-                    {reportData?.premiumSolution && (
-                      <button
-                        onClick={() => setShowPremiumModal(true)}
-                        className="mt-4 sm:mt-6 w-full py-3 sm:py-4 bg-amber-400 text-emerald-950 font-black rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 hover:bg-amber-300 transition-all uppercase tracking-widest text-xs sm:text-sm"
-                      >
-                        <Crown size={18} /> 프리미엄 정밀 분석 보기
-                      </button>
-                    )}
                   </div>
                 </>
               )}
@@ -258,12 +195,8 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
             exit={{ opacity: 0, y: -15 }}
             className="relative min-h-[600px] sm:min-h-[800px]"
           >
-            <div
-              className={`space-y-6 ${
-                !isPro ? 'blur-[8px] opacity-40 pointer-events-none select-none' : ''
-              }`}
-            >
-              {isPro && isFetchLoading ? (
+            <div className="space-y-6">
+              {isFetchLoading ? (
                 <div className="rounded-[24px] sm:rounded-[40px] p-6 sm:p-12 bg-white border border-gray-100 shadow-sm flex items-center justify-center py-20 sm:py-32">
                   <RefreshCw size={44} className="animate-spin text-amber-500 opacity-40" />
                 </div>
@@ -275,12 +208,6 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                         ? '7일 정밀 분석 리포트'
                         : '30일 컨디션 트렌드 리포트'}
                     </h3>
-                    <div className="px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 flex items-center gap-2 shadow-sm">
-                      <Crown size={14} className="text-amber-500" />
-                      <span className="text-xs font-black text-amber-600">
-                        {membershipName} MEMBERSHIP
-                      </span>
-                    </div>
                   </div>
 
                   <div className="flex justify-center mb-8 sm:mb-12">
@@ -406,7 +333,7 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                     </div>
                   </div>
 
-                  {(activeSubTab === 'monthly' || !isPro) && (
+                  {activeSubTab === 'monthly' && (
                     <div className="mt-5 sm:mt-8 p-4 sm:p-8 rounded-[20px] sm:rounded-[40px] bg-gray-50 border border-gray-100 shadow-inner">
                       <div className="flex items-center justify-between mb-5 sm:mb-8">
                         <h4 className="text-base sm:text-lg font-black text-[#1A2B27]">
@@ -510,201 +437,10 @@ export const ReportTab = ({ isPro, membershipName, onAddRecord }: ReportTabProps
                 </div>
               )}
             </div>
-
-            {/* 잠금 오버레이 */}
-            {!isPro && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center p-3 sm:p-8">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="w-full max-w-md bg-white/95 backdrop-blur-xl p-5 sm:p-14 rounded-[32px] sm:rounded-[56px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-white text-center"
-                >
-                  <motion.div
-                    className="w-12 h-12 sm:w-20 sm:h-20 bg-amber-100 rounded-[20px] sm:rounded-[32px] flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-inner"
-                    animate={{ rotate: [0, -15, 15, -10, 10, -5, 5, 0] }}
-                    transition={{
-                      duration: 0.8,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatDelay: 2,
-                      ease: 'easeInOut',
-                    }}
-                  >
-                    <Lock size={24} className="text-amber-500 sm:w-9 sm:h-9" />
-                  </motion.div>
-                  <h3 className="text-lg sm:text-2xl font-black text-[#1A2B27] mb-1 sm:mb-3 tracking-tight">
-                    정밀 분석 리포트 잠금
-                  </h3>
-                  <p className="text-gray-500 font-bold text-xs sm:text-base mb-5 sm:mb-10 leading-relaxed">
-                    {activeSubTab === 'weekly' ? '7일간의' : '30일간의'} 누적 기록을 바탕으로
-                    산출되는 <br />
-                    <span className="text-emerald-700">장 컨디션 점수</span>와{' '}
-                    <span className="text-emerald-700">AI 푸의 맞춤 가이드</span>는<br />
-                    <span className="text-[#1B4332] font-black">
-                      {activeSubTab === 'weekly' ? 'PRO' : 'PREMIUM'} 멤버십
-                    </span>{' '}
-                    회원에게만 제공됩니다.
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => navigate('/premium')}
-                    className="w-full py-3.5 sm:py-6 bg-[#1B4332] text-white font-black rounded-[18px] sm:rounded-[28px] shadow-xl shadow-emerald-900/30 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-lg"
-                  >
-                    {activeSubTab === 'weekly' ? 'PRO' : 'PREMIUM'} 멤버십 가입하고 확인하기{' '}
-                    <ArrowRight size={18} />
-                  </motion.button>
-                </motion.div>
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {reportOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setReportOpen(false)}
-              className="fixed inset-0 z-[200]"
-              style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)' }}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="fixed z-[201] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-y-auto"
-              style={{
-                width: 'min(520px, calc(100vw - 32px))',
-                maxHeight: 'calc(100dvh - 48px)',
-                background: '#ffffff',
-                borderRadius: '28px',
-                border: '1px solid rgba(26,43,39,0.08)',
-                boxShadow: '0 32px 80px rgba(0,0,0,0.25)',
-              }}
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-widest block mb-1"
-                      style={{ color: 'rgba(26,43,39,0.3)' }}
-                    >
-                      주간 진단서
-                    </span>
-                    <KnockoutWobble
-                      text="데이푸의 주간 리포트"
-                      gradient="linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #E8A838 100%)"
-                      fontSize="18px"
-                      fontWeight={900}
-                      wobbleDuration={400}
-                    />
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => setReportOpen(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ml-3"
-                    style={{ background: 'rgba(26,43,39,0.06)', color: 'rgba(26,43,39,0.4)' }}
-                  >
-                    <X size={15} />
-                  </motion.button>
-                </div>
-                {!isPro ? (
-                  <div className="text-center py-10">
-                    <Lock size={40} className="mx-auto text-amber-500 mb-4" />
-                    <p className="font-black text-[#1A2B27] mb-2">PRO 전용 정밀 리포트입니다</p>
-                    <p className="text-sm text-gray-500 mb-6">
-                      멤버십을 구독하고 전체 내용을 확인하세요.
-                    </p>
-                    <button
-                      onClick={() => navigate('/premium')}
-                      className="px-6 py-3 bg-[#1B4332] text-white rounded-xl font-bold"
-                    >
-                      PRO 가입하기
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex justify-center mb-6">
-                      <div className="relative">
-                        <svg width="120" height="120" viewBox="0 0 120 120">
-                          <circle
-                            cx="60"
-                            cy="60"
-                            r="50"
-                            fill="none"
-                            stroke="rgba(26,43,39,0.06)"
-                            strokeWidth="8"
-                          />
-                          <motion.circle
-                            cx="60"
-                            cy="60"
-                            r="50"
-                            fill="none"
-                            stroke="#E8A838"
-                            strokeWidth="8"
-                            strokeLinecap="round"
-                            strokeDasharray={`${2 * Math.PI * 50}`}
-                            initial={{ strokeDashoffset: 2 * Math.PI * 50 }}
-                            animate={{ strokeDashoffset: 2 * Math.PI * 50 * 0.15 }}
-                            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                            transform="rotate(-90 60 60)"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span
-                            className="font-black text-3xl"
-                            style={{ color: '#E8A838', letterSpacing: '-0.04em' }}
-                          >
-                            85
-                          </span>
-                          <span className="text-[10px]" style={{ color: 'rgba(26,43,39,0.4)' }}>
-                            쾌변 점수
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="rounded-2xl p-4 mb-4"
-                      style={{
-                        background: 'rgba(27,67,50,0.05)',
-                        border: '1px solid rgba(82,183,136,0.18)',
-                      }}
-                    >
-                      <p className="text-xs font-bold mb-3" style={{ color: '#2D6A4F' }}>
-                        🤖 AI 인사이트
-                      </p>
-                      <p
-                        className="text-sm leading-relaxed mb-3"
-                        style={{ color: 'rgba(26,43,39,0.7)' }}
-                      >
-                        성격이 급하신가요? 배변 데이터가 조금 불규칙해요. 다음 주는 조금 더 여유를
-                        가져보세요.
-                      </p>
-                    </div>
-                  </>
-                )}
-                <div className="flex gap-2.5">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => setReportOpen(false)}
-                    className="flex-1 py-4 rounded-2xl font-black text-sm"
-                    style={{ background: '#1B4332', color: '#fff' }}
-                  >
-                    닫기
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };

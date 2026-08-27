@@ -52,7 +52,7 @@ public class MorningRoutineScenario implements BotScenario {
 
     recordRepository.save(record);
 
-    user.addExpAndPoints(10, 5);
+    user.addExp(10);
 
     log.debug("Bot {} executed MorningRoutine at toilet {}", user.getEmail(), toiletId);
   }

@@ -1,4 +1,3 @@
-import type { SubscriptionResponse } from './subscription';
 
 /**
  * API 공통 응답 구조
@@ -30,11 +29,8 @@ export interface UserResponse {
   role: string;
   level: number;
   exp: number;
-  points: number;
   equippedTitleId?: number | null;
   equippedTitleName?: string | null;
-  isPro?: boolean;
-  subscription?: SubscriptionResponse | null;
   birthDate?: string | null;
   homeRegion?: string | null;
   createdAt?: string;
@@ -79,7 +75,6 @@ export interface PooRecordResponse {
   conditionTags: string[];
   dietTags: string[];
   createdAt: string;
-  pointsAwarded?: number;
 }
 
 /**

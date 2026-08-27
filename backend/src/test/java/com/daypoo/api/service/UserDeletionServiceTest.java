@@ -13,9 +13,7 @@ import com.daypoo.api.repository.HealthReportSnapshotRepository;
 import com.daypoo.api.repository.InquiryRepository;
 import com.daypoo.api.repository.InventoryRepository;
 import com.daypoo.api.repository.NotificationRepository;
-import com.daypoo.api.repository.PaymentRepository;
 import com.daypoo.api.repository.PooRecordRepository;
-import com.daypoo.api.repository.SubscriptionRepository;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.ToiletReviewRepository;
 import com.daypoo.api.repository.UserRepository;
@@ -42,13 +40,12 @@ class UserDeletionServiceTest {
   @Mock private NotificationRepository notificationRepository;
   @Mock private InventoryRepository inventoryRepository;
   @Mock private UserTitleRepository userTitleRepository;
-  @Mock private SubscriptionRepository subscriptionRepository;
-  @Mock private PaymentRepository paymentRepository;
   @Mock private InquiryRepository inquiryRepository;
   @Mock private ToiletReviewRepository toiletReviewRepository;
   @Mock private ToiletRepository toiletRepository;
   @Mock private FavoriteRepository favoriteRepository;
   @Mock private HealthReportSnapshotRepository healthReportSnapshotRepository;
+  @Mock private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
   @Test
   @DisplayName("연관 데이터를 FK 의존 순서대로 모두 삭제한 뒤 마지막에 회원을 삭제한다")
@@ -73,15 +70,14 @@ class UserDeletionServiceTest {
     visitBeforeRecord.verify(visitLogRepository).deleteAllByUser(user);
     visitBeforeRecord.verify(pooRecordRepository).deleteAllByUser(user);
 
-    // Subscription이 Payment를 참조하므로 먼저 삭제되어야 한다
-    InOrder subBeforePayment = inOrder(subscriptionRepository, paymentRepository);
-    subBeforePayment.verify(subscriptionRepository).deleteAllByUser(user);
-    subBeforePayment.verify(paymentRepository).deleteAllByUser(user);
+    // 잔여 결제·구독 행은 subscriptions(payments 참조) → payments 순서로 삭제되어야 한다
+    InOrder subBeforePayment = inOrder(jdbcTemplate);
+    subBeforePayment.verify(jdbcTemplate).update("DELETE FROM subscriptions WHERE user_id = ?", 1L);
+    subBeforePayment.verify(jdbcTemplate).update("DELETE FROM payments WHERE user_id = ?", 1L);
 
     // 회원 본체는 모든 하위 데이터 삭제 후 마지막에 삭제되어야 한다
-    InOrder userLast = inOrder(paymentRepository, pooRecordRepository, userRepository);
+    InOrder userLast = inOrder(pooRecordRepository, userRepository);
     userLast.verify(pooRecordRepository).deleteAllByUser(user);
-    userLast.verify(paymentRepository).deleteAllByUser(user);
     userLast.verify(userRepository).delete(user);
   }
 

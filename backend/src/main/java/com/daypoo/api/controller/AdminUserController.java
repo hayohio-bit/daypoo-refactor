@@ -4,7 +4,6 @@ import com.daypoo.api.dto.AdminRoleUpdateRequest;
 import com.daypoo.api.dto.AdminUserDetailResponse;
 import com.daypoo.api.dto.AdminUserListResponse;
 import com.daypoo.api.entity.enums.Role;
-import com.daypoo.api.entity.enums.SubscriptionPlan;
 import com.daypoo.api.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,16 +24,13 @@ public class AdminUserController {
 
   private final AdminUserService adminUserService;
 
-  @Operation(
-      summary = "유저 목록 조회 및 검색",
-      description = "이메일/닉네임 검색 및 역할/구독 플랜 필터링이 가능한 유저 목록을 조회합니다.")
+  @Operation(summary = "유저 목록 조회 및 검색", description = "이메일/닉네임 검색 및 역할 필터링이 가능한 유저 목록을 조회합니다.")
   @GetMapping
   public ResponseEntity<Page<AdminUserListResponse>> getUsers(
       @RequestParam(required = false) String search,
       @RequestParam(required = false) Role role,
-      @RequestParam(required = false) SubscriptionPlan plan,
       @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(adminUserService.getUsers(search, role, plan, pageable));
+    return ResponseEntity.ok(adminUserService.getUsers(search, role, pageable));
   }
 
   @Operation(

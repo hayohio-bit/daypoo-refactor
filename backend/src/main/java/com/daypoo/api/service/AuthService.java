@@ -186,13 +186,7 @@ public class AuthService {
             .orElse(null);
 
     return UserResponse.from(
-        user,
-        titleName,
-        user.getActiveSubscription(),
-        totalAuthCount,
-        totalVisitCount,
-        consecutiveDays,
-        equippedAvatarUrl);
+        user, titleName, totalAuthCount, totalVisitCount, consecutiveDays, equippedAvatarUrl);
   }
 
   // Redis-only 작업이므로 @Transactional 불필요 (DB 커넥션 점유 방지)

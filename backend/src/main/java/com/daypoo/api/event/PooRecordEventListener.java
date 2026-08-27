@@ -28,8 +28,8 @@ public class PooRecordEventListener {
 
     User user = userService.getByEmail(event.email());
 
-    // 경험치 및 포인트 추가
-    user.addExpAndPoints(event.rewardExp(), event.rewardPoints());
+    // 경험치 추가
+    user.addExp(event.rewardExp());
     userRepository.save(user);
 
     log.info("Finished async post-save effects for user: {}", event.email());

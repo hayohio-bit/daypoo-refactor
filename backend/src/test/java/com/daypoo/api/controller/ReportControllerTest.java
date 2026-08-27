@@ -1,14 +1,10 @@
 package com.daypoo.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.daypoo.api.entity.User;
-import com.daypoo.api.global.exception.BusinessException;
-import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.service.ReportService;
 import com.daypoo.api.service.UserService;
 import java.util.List;
@@ -30,56 +26,43 @@ class ReportControllerTest {
 
   private static final String EMAIL = "user@daypoo.com";
 
-  private User givenUser(boolean isPro) {
+  private User givenUser() {
     User user = mock(User.class);
-    given(user.isPro()).willReturn(isPro);
     given(userService.getByEmail(EMAIL)).willReturn(user);
     return user;
   }
 
   @Test
-  @DisplayName("PRO가 아닌 사용자의 히스토리 조회는 403(B002) BusinessException을 던진다")
-  void getReportHistory_notPro_throwsForbidden() {
-    givenUser(false);
-
-    assertThatThrownBy(() -> reportController.getReportHistory(EMAIL))
-        .isInstanceOf(BusinessException.class)
-        .extracting(e -> ((BusinessException) e).getErrorCode())
-        .isEqualTo(ErrorCode.PRO_MEMBERSHIP_REQUIRED);
-    verifyNoInteractions(reportService);
-  }
-
-  @Test
-  @DisplayName("PRO가 아닌 사용자의 트렌드 조회는 403(B002) BusinessException을 던진다")
-  void getHealthTrend_notPro_throwsForbidden() {
-    givenUser(false);
-
-    assertThatThrownBy(() -> reportController.getHealthTrend(EMAIL))
-        .isInstanceOf(BusinessException.class)
-        .extracting(e -> ((BusinessException) e).getErrorCode())
-        .isEqualTo(ErrorCode.PRO_MEMBERSHIP_REQUIRED);
-    verifyNoInteractions(reportService);
-  }
-
-  @Test
-  @DisplayName("PRO가 아닌 사용자의 방문 패턴 조회는 403(B002) BusinessException을 던진다")
-  void getVisitPatterns_notPro_throwsForbidden() {
-    givenUser(false);
-
-    assertThatThrownBy(() -> reportController.getVisitPatterns(EMAIL))
-        .isInstanceOf(BusinessException.class)
-        .extracting(e -> ((BusinessException) e).getErrorCode())
-        .isEqualTo(ErrorCode.PRO_MEMBERSHIP_REQUIRED);
-    verifyNoInteractions(reportService);
-  }
-
-  @Test
-  @DisplayName("PRO 사용자의 히스토리 조회는 서비스에 위임한다")
-  void getReportHistory_pro_delegates() {
-    User user = givenUser(true);
+  @DisplayName("히스토리 조회는 서비스에 위임한다")
+  void getReportHistory_delegates() {
+    User user = givenUser();
     given(reportService.getReportHistory(user)).willReturn(List.of());
 
     var response = reportController.getReportHistory(EMAIL);
+
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+    assertThat(response.getBody()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("트렌드 조회는 서비스에 위임한다")
+  void getHealthTrend_delegates() {
+    User user = givenUser();
+    given(reportService.getHealthTrend(user)).willReturn(List.of(80, 70));
+
+    var response = reportController.getHealthTrend(EMAIL);
+
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+    assertThat(response.getBody()).containsExactly(80, 70);
+  }
+
+  @Test
+  @DisplayName("방문 패턴 조회는 서비스에 위임한다")
+  void getVisitPatterns_delegates() {
+    User user = givenUser();
+    given(reportService.getVisitPatterns(user)).willReturn(List.of());
+
+    var response = reportController.getVisitPatterns(EMAIL);
 
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
     assertThat(response.getBody()).isEmpty();

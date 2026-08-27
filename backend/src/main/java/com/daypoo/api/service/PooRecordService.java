@@ -17,7 +17,6 @@ import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.VisitCountProjection;
 import com.daypoo.api.repository.VisitLogRepository;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -48,10 +47,8 @@ public class PooRecordService {
   private final VisitLogRepository visitLogRepository;
   private final com.daypoo.api.repository.UserRepository userRepository;
 
-  // 보상 설정 (방문 1회당 경험치 5, 포인트 10 / 같은 화장실 하루 3회 상한)
+  // 보상 설정 (방문 1회당 경험치 5)
   private static final int REWARD_EXP = 5;
-  private static final int REWARD_POINTS = 10;
-  private static final int DAILY_POINT_LIMIT_PER_TOILET = 3;
 
   /** 화장실 도착 체크인 담당 */
   @Transactional
@@ -152,8 +149,8 @@ public class PooRecordService {
                 .regionName(regionName)
                 .build());
 
-    // 보상 처리 (방문 인증 시에만 포인트 지급 검토)
-    processRewards(user, toilet, regionName);
+    // 보상 처리 (경험치 지급 이벤트 발행)
+    processRewards(user, regionName);
 
     // Visit Log 기록 (방문 인증 시에만)
     if (isVisitAuth) {
@@ -174,19 +171,8 @@ public class PooRecordService {
     return "기타";
   }
 
-  private void processRewards(User user, Toilet toilet, String regionName) {
-    int rewardPoints = 0;
-    if (toilet != null) {
-      LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-      LocalDateTime todayEnd = todayStart.plusDays(1);
-      long todayCount =
-          visitLogRepository.countByUserAndToiletAndEventTypeAndCreatedAtBetween(
-              user, toilet, VisitEventType.RECORD_CREATED, todayStart, todayEnd);
-      rewardPoints = todayCount < DAILY_POINT_LIMIT_PER_TOILET ? REWARD_POINTS : 0;
-    }
-
-    eventPublisher.publishEvent(
-        new PooRecordCreatedEvent(user.getEmail(), regionName, REWARD_EXP, rewardPoints));
+  private void processRewards(User user, String regionName) {
+    eventPublisher.publishEvent(new PooRecordCreatedEvent(user.getEmail(), regionName, REWARD_EXP));
   }
 
   private void logVisitOnSuccess(

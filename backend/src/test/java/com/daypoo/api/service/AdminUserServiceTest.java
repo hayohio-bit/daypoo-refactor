@@ -10,7 +10,6 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
-import com.daypoo.api.repository.PaymentRepository;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.UserRepository;
 import java.util.Optional;
@@ -28,7 +27,6 @@ class AdminUserServiceTest {
   @InjectMocks private AdminUserService adminUserService;
 
   @Mock private UserRepository userRepository;
-  @Mock private PaymentRepository paymentRepository;
   @Mock private PooRecordRepository pooRecordRepository;
   @Mock private UserDeletionService userDeletionService;
 

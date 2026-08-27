@@ -9,10 +9,8 @@ import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.NotificationType;
 import com.daypoo.api.entity.enums.ReportType;
-import com.daypoo.api.entity.enums.SubscriptionPlan;
 import com.daypoo.api.repository.HealthReportSnapshotRepository;
 import com.daypoo.api.repository.PooRecordRepository;
-import com.daypoo.api.repository.UserRepository;
 import com.daypoo.api.repository.VisitLogRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,26 +38,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportService {
 
   private final PooRecordRepository recordRepository;
-  private final UserRepository userRepository;
   private final StringRedisTemplate redisTemplate;
   private final ObjectMapper objectMapper;
   private final NotificationService notificationService;
   private final HealthReportSnapshotRepository snapshotRepository;
   private final VisitLogRepository visitLogRepository;
 
-  private static final String REPORT_CACHE_KEY_PREFIX = "daypoo:reports:v18:";
+  private static final String REPORT_CACHE_KEY_PREFIX = "daypoo:reports:v19:";
 
   /** AI 컨디션 리포트 생성 및 조회 */
   public HealthReportResponse generateReport(User user, ReportType type) {
-    boolean isPremium = user.hasPlan(SubscriptionPlan.PREMIUM);
-
     String cacheKey =
         REPORT_CACHE_KEY_PREFIX
             + type.name()
             + ":"
             + user.getId()
-            + ":"
-            + (isPremium ? "PREM" : "BASIC")
             + ":"
             + LocalDateTime.now().toLocalDate();
 
@@ -78,15 +71,11 @@ public class ReportService {
             objectMapper.readValue(cachedReport, HealthReportResponse.class);
         LocalDateTime analyzedAt = LocalDateTime.parse(response.analyzedAt());
 
-        if (!shouldRegenerateReport(
-            type, isPremium, analyzedAt, latestRecordTime, response.premiumSolution())) {
+        if (!shouldRegenerateReport(type, analyzedAt, latestRecordTime)) {
           log.info("Returning cached {} report for user {}.", type, user.getId());
-          return applyPremiumMasking(response, isPremium);
+          return response;
         }
-        log.info(
-            "Force re-generation for user {} [{}] due to outdated cache or missing premium.",
-            user.getId(),
-            type);
+        log.info("Force re-generation for user {} [{}] due to outdated cache.", user.getId(), type);
       } catch (Exception e) {
         log.warn(
             "Failed to parse cached report or date for user {}: {}", user.getId(), e.getMessage());
@@ -106,8 +95,7 @@ public class ReportService {
     if (snapshot.isPresent()) {
       HealthReportSnapshot s = snapshot.get();
 
-      if (shouldRegenerateReport(
-          type, isPremium, s.getCreatedAt(), latestRecordTime, s.getPremiumSolution())) {
+      if (shouldRegenerateReport(type, s.getCreatedAt(), latestRecordTime)) {
         log.info(
             "Snapshot for {} is outdated or legacy, forcing re-generation for user {}",
             type,
@@ -157,7 +145,7 @@ public class ReportService {
                 .avgDailyRecordCount(s.getAvgDailyRecordCount())
                 .build();
 
-        return applyPremiumMasking(snapshotResponse, isPremium);
+        return snapshotResponse;
       } else {
         log.info(
             "Old snapshot found for user {}, forcing re-generation to include new metrics",
@@ -165,13 +153,7 @@ public class ReportService {
       }
     }
 
-    // 3. 포인트 차감 (데일리 무료 제외, PRO/PREMIUM 회원 면제)
-    if (type.getPrice() > 0 && !user.isPro()) {
-      user.deductPoints(type.getPrice());
-      userRepository.save(user);
-    }
-
-    // 4. 기록 조회
+    // 3. 기록 조회
     List<PooRecord> records =
         recordRepository.findAllByUserAndCreatedAtAfterOrderByCreatedAtDesc(user, startTime);
 
@@ -179,9 +161,7 @@ public class ReportService {
       throw new IllegalStateException("분석할 배변 기록이 없습니다. 먼저 배변 활동을 기록해 주세요.");
     }
 
-    log.info("User {} - isPremium: {}", user.getId(), isPremium);
-
-    // 6. 로컬 통계 기반 리포트 생성 (AI 제거됨)
+    // 4. 로컬 통계 기반 리포트 생성 (AI 제거됨)
     log.info("로컬 통계 기반 리포트 생성 for user {} [{}]", user.getId(), type);
     List<Integer> weeklyHealthScores = null;
     String improvementTrend = null;
@@ -287,38 +267,10 @@ public class ReportService {
         "AI가 분석한 당신의 최신 장 컨디션 체크 결과를 지금 바로 확인해보세요.",
         "/mypage?tab=report");
 
-    return applyPremiumMasking(response, isPremium);
+    return response;
   }
 
-  /** 무료 회원의 리포트 요청 시, 프리미엄 전용 필드를 숨깁니다. */
-  private HealthReportResponse applyPremiumMasking(
-      HealthReportResponse response, boolean isPremium) {
-    if (isPremium) {
-      return response;
-    }
-    return HealthReportResponse.builder()
-        .reportType(response.reportType())
-        .healthScore(response.healthScore())
-        .summary(response.summary())
-        .solution(response.solution())
-        .premiumSolution(null) // 프리미엄 솔루션 제거 (보안 마스킹)
-        .insights(null) // 인사이트 통계 제거 (프리미엄 전용)
-        .recordCount(response.recordCount())
-        .periodStart(response.periodStart())
-        .periodEnd(response.periodEnd())
-        .analyzedAt(response.analyzedAt())
-        .mostFrequentBristol(response.mostFrequentBristol())
-        .mostFrequentCondition(response.mostFrequentCondition())
-        .mostFrequentDiet(response.mostFrequentDiet())
-        .healthyRatio(response.healthyRatio())
-        .weeklyHealthScores(response.weeklyHealthScores())
-        .improvementTrend(response.improvementTrend())
-        .bristolDistribution(response.bristolDistribution())
-        .avgDailyRecordCount(response.avgDailyRecordCount())
-        .build();
-  }
-
-  /** 리포트 히스토리 조회 (PRO/PREMIUM 전용) */
+  /** 리포트 히스토리 조회 */
   @Transactional(readOnly = true)
   public List<HealthReportHistoryResponse> getReportHistory(User user) {
     return snapshotRepository.findByUserOrderByCreatedAtDesc(user).stream()
@@ -326,7 +278,7 @@ public class ReportService {
         .collect(Collectors.toList());
   }
 
-  /** 컨디션 점수 트렌드 조회 (PRO/PREMIUM 전용) */
+  /** 컨디션 점수 트렌드 조회 */
   @Transactional(readOnly = true)
   public List<Integer> getHealthTrend(User user) {
     return snapshotRepository.findByUserOrderByCreatedAtDesc(user).stream()
@@ -335,7 +287,7 @@ public class ReportService {
         .collect(Collectors.toList());
   }
 
-  /** 방문 패턴 데이터 조회 (PRO/PREMIUM 전용) */
+  /** 방문 패턴 데이터 조회 */
   @Transactional(readOnly = true)
   public List<VisitLogResponse> getVisitPatterns(User user) {
     return visitLogRepository.findByUserOrderByCreatedAtDesc(user).stream()
@@ -523,30 +475,10 @@ public class ReportService {
   }
 
   private boolean shouldRegenerateReport(
-      ReportType type,
-      boolean isPremium,
-      LocalDateTime generatedAt,
-      LocalDateTime latestRecordTime,
-      String premiumSolution) {
+      ReportType type, LocalDateTime generatedAt, LocalDateTime latestRecordTime) {
     if (type == ReportType.DAILY) {
-      if (generatedAt.isBefore(latestRecordTime)) {
-        return true;
-      }
-    } else {
-      if (generatedAt.toLocalDate().isBefore(LocalDateTime.now().toLocalDate())) {
-        return true;
-      }
+      return generatedAt.isBefore(latestRecordTime);
     }
-
-    if (type == ReportType.DAILY && isPremium) {
-      if (premiumSolution == null
-          || (!premiumSolution.contains("핀포인트")
-              && !premiumSolution.contains("전략")
-              && !premiumSolution.contains("정밀")
-              && !premiumSolution.contains("진단"))) {
-        return true;
-      }
-    }
-    return false;
+    return generatedAt.toLocalDate().isBefore(LocalDateTime.now().toLocalDate());
   }
 }

@@ -34,12 +34,10 @@ public class ApiApplication {
       EmailService emailService,
       @Value("${spring.mail.username:NOT_FOUND}") String mailUser,
       @Value("${spring.mail.password:NOT_FOUND}") String mailPass,
-      @Value("${toss.secret-key:NOT_FOUND}") String tossKey,
       @Value("${app.self-check.mail-enabled:false}") boolean mailEnabled) {
     return args -> {
       log.info("🔍 [Env-Check] MAIL_USERNAME: {}", mask(mailUser));
       log.info("🔍 [Env-Check] MAIL_PASSWORD: {}", mask(mailPass));
-      log.info("🔍 [Env-Check] TOSS_SECRET_KEY: {}", mask(tossKey));
 
       if (!mailEnabled) {
         log.info("ℹ️ [Self-Check] Mail self-check disabled (app.self-check.mail-enabled=false).");

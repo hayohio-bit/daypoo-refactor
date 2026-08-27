@@ -25,7 +25,6 @@ public enum ErrorCode {
   EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "U006", "이미 존재하는 이메일입니다."),
 
   // Shop
-  INSUFFICIENT_POINTS(HttpStatus.BAD_REQUEST, "S001", "포인트가 부족합니다."),
   ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "S002", "아이템을 찾을 수 없습니다."),
   ALREADY_OWNED_ITEM(HttpStatus.BAD_REQUEST, "S003", "이미 보유 중인 아이템입니다."),
   NOT_OWNED_TITLE(HttpStatus.BAD_REQUEST, "S004", "보유하지 않은 칭호입니다."),
@@ -50,10 +49,6 @@ public enum ErrorCode {
   // Toilet
   TOILET_NOT_FOUND(HttpStatus.NOT_FOUND, "T001", "화장실을 찾을 수 없습니다."),
   ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "T002", "이미 이 화장실에 대한 리뷰를 작성하셨습니다."),
-
-  // Subscription
-  SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "B001", "구독 정보를 찾을 수 없습니다."),
-  PRO_MEMBERSHIP_REQUIRED(HttpStatus.FORBIDDEN, "B002", "PRO 멤버십 전용 기능입니다."),
 
   // Global Settings
   SIGNUP_DISABLED(HttpStatus.FORBIDDEN, "G001", "현재 신규 회원가입이 제한된 상태입니다."),

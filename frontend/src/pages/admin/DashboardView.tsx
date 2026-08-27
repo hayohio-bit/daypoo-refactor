@@ -6,11 +6,9 @@ import {
   LayoutDashboard,
   MapPin,
   MessageSquare,
-  PieChart as PieChartIcon,
   Plus,
   RefreshCw,
   Shield,
-  ShoppingBag,
   TrendingUp,
   Zap,
 } from 'lucide-react';
@@ -18,12 +16,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
-  Bar,
   CartesianGrid,
-  Cell,
   ComposedChart,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -218,7 +212,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
       stats?.weeklyTrend.map((d) => ({
         name: d.date,
         users: d.users,
-        sales: d.sales,
       })) || [];
 
     if (chartRange === '30D') {
@@ -230,7 +223,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
         extended.push({
           name: `${date.getMonth() + 1}/${date.getDate()}`,
           users: Math.floor(Math.random() * 5) + 3,
-          sales: Math.floor(Math.random() * 40000) + 15000,
         });
       }
       return [...extended, ...baseData];
@@ -238,7 +230,7 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
     return baseData;
   }, [stats, chartRange]);
 
-  const getTrend = (type: 'users' | 'sales' | 'inquiries') => {
+  const getTrend = (type: 'users' | 'inquiries') => {
     if (!stats?.weeklyTrend || stats.weeklyTrend.length < 2) return { val: '0%', up: true };
     const today = stats.weeklyTrend[stats.weeklyTrend.length - 1];
     const yesterday = stats.weeklyTrend[stats.weeklyTrend.length - 2];
@@ -246,8 +238,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
     let tVal = 0;
     if (type === 'users')
       tVal = yesterday.users > 0 ? ((today.users - yesterday.users) / yesterday.users) * 100 : 0;
-    if (type === 'sales')
-      tVal = yesterday.sales > 0 ? ((today.sales - yesterday.sales) / yesterday.sales) * 100 : 0;
     if (type === 'inquiries')
       tVal =
         yesterday.inquiries > 0
@@ -261,16 +251,7 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
   };
 
   const userTrend = getTrend('users');
-  const salesTrend = getTrend('sales');
-
-  const pieData =
-    stats?.userDistribution && stats.totalUsers > 0
-      ? [
-          { name: '프리미엄 (PRO)', value: stats.userDistribution.pro, color: COLORS.primary },
-          { name: '베이직', value: stats.userDistribution.basic, color: '#52b788' },
-          { name: '무료', value: stats.userDistribution.free, color: COLORS.accent },
-        ]
-      : [{ name: '대기 중', value: 1, color: '#eee' }];
+  const inquiryTrend = getTrend('inquiries');
 
   if (loading)
     return (
@@ -310,11 +291,11 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
           badge={stats?.todayNewUsers || undefined}
         />
         <StatWidget
-          title="오늘 결제 금액"
-          value={stats?.todaySales || 0}
-          trend={salesTrend.val}
-          isUp={salesTrend.up}
-          icon={ShoppingBag}
+          title="오늘 신규 문의"
+          value={stats?.todayInquiries || 0}
+          trend={inquiryTrend.val}
+          isUp={inquiryTrend.up}
+          icon={MessageSquare}
           color={COLORS.accent}
           progress={65}
         />
@@ -453,16 +434,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                   />
                   <YAxis hide />
                   <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
-                  <Bar
-                    dataKey="sales"
-                    name="유료 결제"
-                    fill="url(#barGradient)"
-                    radius={[6, 6, 0, 0]}
-                    barSize={chartRange === '30D' ? 12 : 24}
-                    animationDuration={600}
-                    animationBegin={0}
-                    style={{ filter: chartRange === '30D' ? 'none' : 'url(#barShadow)' }}
-                  />
                   <Area
                     type="monotone"
                     dataKey="users"
@@ -486,12 +457,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
                     Active Traffic
                   </span>
                 </div>
-                <div className="flex items-center gap-4 group/leg">
-                  <div className="w-4 h-1.5 rounded-full bg-[#E8A838] group-hover:w-8 transition-all duration-500" />
-                  <span className="text-[12px] font-black text-black/40 uppercase tracking-[0.2em]">
-                    Revenue Flow
-                  </span>
-                </div>
               </div>
 
               <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-black/5">
@@ -506,101 +471,6 @@ export const DashboardView = ({ stats, logs, loading, setActiveTab }: DashboardV
 
         {/* Membership Segment & Service Health */}
         <div className="lg:col-span-4 space-y-6">
-          <GlassCard className="h-fit group relative overflow-hidden">
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#1B4332]/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-black/5">
-                  <PieChartIcon size={20} className="text-black/60" />
-                </div>
-                <div>
-                  <h3 className="text-[17px] font-black text-black">사용자 분포</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] font-black text-black/30 uppercase tracking-widest">
-                      Real-time Map
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-[240px] w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      innerRadius={75}
-                      outerRadius={95}
-                      paddingAngle={8}
-                      dataKey="value"
-                      stroke="none"
-                      animationBegin={200}
-                      animationDuration={2000}
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell
-                          key={index}
-                          fill={entry.color}
-                          style={{ filter: `drop-shadow(0 4px 8px ${entry.color}30)` }}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[11px] font-black text-black/20 uppercase tracking-[0.2em] mb-1">
-                    Total Hub
-                  </span>
-                  <span className="text-3xl font-black text-black tracking-tight scale-110">
-                    {totalUsersCount.toLocaleString()}
-                  </span>
-                  <div className="mt-1 flex items-center gap-1 text-emerald-600">
-                    <TrendingUp size={10} />
-                    <span className="text-[9px] font-black">+2.4%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 space-y-2">
-                {pieData.map((item, idx) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + idx * 0.1 }}
-                    className="flex items-center justify-between p-3.5 rounded-[20px] bg-black/[0.03] border border-transparent hover:border-black/5 hover:bg-white transition-all shadow-sm group/item"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-3.5 h-3.5 rounded-full shadow-lg"
-                        style={{ background: item.color }}
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-[13px] font-black text-black/80">{item.name}</span>
-                        <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">
-                          Active Segment
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[14px] font-black text-black">
-                        {totalUsersCount > 0
-                          ? ((item.value / totalUsersCount) * 100).toFixed(1)
-                          : 0}
-                        %
-                      </div>
-                      <div className="text-[9px] font-bold text-black/20">
-                        {item.value.toLocaleString()} Users
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </GlassCard>
-
           <GlassCard className="bg-white border border-black/5 relative overflow-hidden group">
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">

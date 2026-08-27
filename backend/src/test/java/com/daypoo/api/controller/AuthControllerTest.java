@@ -64,8 +64,6 @@ class AuthControllerTest {
             .role("ROLE_USER")
             .level(1)
             .exp(20)
-            .points(100L)
-            .isPro(false)
             .build();
 
     given(authService.getCurrentUserInfo()).willReturn(userResponse);

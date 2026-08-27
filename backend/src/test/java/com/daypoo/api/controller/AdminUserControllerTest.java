@@ -11,7 +11,6 @@ import com.daypoo.api.dto.AdminRoleUpdateRequest;
 import com.daypoo.api.dto.AdminUserDetailResponse;
 import com.daypoo.api.dto.AdminUserListResponse;
 import com.daypoo.api.entity.enums.Role;
-import com.daypoo.api.entity.enums.SubscriptionPlan;
 import com.daypoo.api.service.AdminUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -69,14 +68,12 @@ class AdminUserControllerTest {
             .email("test@example.com")
             .nickname("PoopKing")
             .role(Role.ROLE_USER)
-            .plan(SubscriptionPlan.BASIC)
             .level(1)
-            .points(100L)
             .recordCount(5)
             .createdAt(LocalDateTime.now())
             .build();
 
-    given(adminUserService.getUsers(any(), any(), any(), any(Pageable.class)))
+    given(adminUserService.getUsers(any(), any(), any(Pageable.class)))
         .willReturn(
             new PageImpl<>(
                 new ArrayList<>(Collections.singletonList(userResponse)),
@@ -89,7 +86,6 @@ class AdminUserControllerTest {
             get("/api/v1/admin/users")
                 .param("search", "test")
                 .param("role", "ROLE_USER")
-                .param("plan", "BASIC")
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].email").value("test@example.com"))
@@ -106,9 +102,7 @@ class AdminUserControllerTest {
             .email("test@example.com")
             .nickname("PoopKing")
             .role(Role.ROLE_USER)
-            .plan(SubscriptionPlan.BASIC)
             .level(1)
-            .points(100L)
             .createdAt(LocalDateTime.now())
             .build();
 

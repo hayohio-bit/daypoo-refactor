@@ -64,4 +64,3 @@ jobs:
           KAKAO_CLIENT_SECRET: dummy
           GOOGLE_CLIENT_ID: dummy
           GOOGLE_CLIENT_SECRET: dummy
-          TOSS_SECRET_KEY: dummy

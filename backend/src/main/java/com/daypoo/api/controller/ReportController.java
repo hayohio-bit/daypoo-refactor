@@ -5,8 +5,6 @@ import com.daypoo.api.dto.HealthReportResponse;
 import com.daypoo.api.dto.VisitLogResponse;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.ReportType;
-import com.daypoo.api.global.exception.BusinessException;
-import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.service.ReportService;
 import com.daypoo.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,38 +35,29 @@ public class ReportController {
     return ResponseEntity.ok(reportService.generateReport(user, type));
   }
 
-  /** 리포트 히스토리 조회 (PRO/PREMIUM 전용) */
+  /** 리포트 히스토리 조회 */
   @Operation(summary = "리포트 히스토리 조회", description = "사용자의 과거 AI 컨디션 리포트 내역을 조회합니다.")
   @GetMapping("/history")
   public ResponseEntity<List<HealthReportHistoryResponse>> getReportHistory(
       @AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);
-    requirePro(user);
     return ResponseEntity.ok(reportService.getReportHistory(user));
   }
 
-  /** 컨디션 점수 트렌드 조회 (PRO/PREMIUM 전용) */
+  /** 컨디션 점수 트렌드 조회 */
   @Operation(summary = "컨디션 점수 트렌드 조회", description = "최근 생성된 리포트들의 컨디션 점수 추이를 조회합니다.")
   @GetMapping("/trend")
   public ResponseEntity<List<Integer>> getHealthTrend(@AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);
-    requirePro(user);
     return ResponseEntity.ok(reportService.getHealthTrend(user));
   }
 
-  /** 방문 패턴 데이터 조회 (PRO/PREMIUM 전용) */
+  /** 방문 패턴 데이터 조회 */
   @Operation(summary = "방문 패턴 데이터 조회", description = "사용자의 화장실 방문 및 인증 로그 히스토리를 조회합니다.")
   @GetMapping("/patterns")
   public ResponseEntity<List<VisitLogResponse>> getVisitPatterns(
       @AuthenticationPrincipal String email) {
     User user = userService.getByEmail(email);
-    requirePro(user);
     return ResponseEntity.ok(reportService.getVisitPatterns(user));
-  }
-
-  private static void requirePro(User user) {
-    if (!user.isPro()) {
-      throw new BusinessException(ErrorCode.PRO_MEMBERSHIP_REQUIRED);
-    }
   }
 }
