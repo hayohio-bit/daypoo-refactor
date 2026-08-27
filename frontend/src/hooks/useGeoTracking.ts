@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api, getAccessToken } from '../services/apiClient';
 import type { ToiletData } from '../types/toilet';
-import { getDistance } from '../utils/geoUtils';
+import { calculateDistance } from '../utils/distance';
 
 interface GeoPosition {
   lat: number;
@@ -62,7 +62,7 @@ export function useGeoTracking(
           if (!isLogged) return;
 
           toiletsRef.current.forEach((toilet) => {
-            const dist = getDistance(newPos.lat, newPos.lng, toilet.lat, toilet.lng);
+            const dist = calculateDistance(newPos.lat, newPos.lng, toilet.lat, toilet.lng);
             if (dist <= 150) {
               const now = Date.now();
               const lastTime = lastCheckInRef.current.get(toilet.id) || 0;
