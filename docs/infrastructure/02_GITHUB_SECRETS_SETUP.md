@@ -80,14 +80,11 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ---
 
-## 🌐 External APIs (5개)
+## 🌐 External APIs (2개)
 
 | Secret Name | 현재 .env 값 | 설명 |
 |-------------|-------------|------|
-| `OPENAI_API_KEY` | `sk-proj-...` | AI 분석용 OpenAI API 키 |
 | `PUBLIC_DATA_API_KEY` | `cbb85b...` | 공공데이터포털 API 키 |
-| `TOSS_SECRET_KEY` | `test_sk_...` | 토스 결제 서버 키 (배포 시 live 키로 변경) |
-| `VITE_TOSS_CLIENT_KEY` | `test_ck_...` | 토스 결제 클라이언트 키 |
 | `VITE_KAKAO_MAP_KEY` | `09664c...` | 카카오맵 JavaScript 키 |
 
 ---
@@ -106,14 +103,14 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ---
 
-## 📊 총 시크릿 개수: 22개
+## 📊 총 시크릿 개수: 19개
 
 ### 체크리스트:
 - [ ] Docker Hub (2개): `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
 - [ ] AWS (5개): `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `EC2_SSH_PRIVATE_KEY`, `EC2_HOST`
 - [ ] Database (5개): `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DB_HOST`, `DB_PORT`
 - [ ] Auth (5개): `JWT_SECRET_KEY`, `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-- [ ] External APIs (5개): `OPENAI_API_KEY`, `PUBLIC_DATA_API_KEY`, `TOSS_SECRET_KEY`, `VITE_TOSS_CLIENT_KEY`, `VITE_KAKAO_MAP_KEY`
+- [ ] External APIs (2개): `PUBLIC_DATA_API_KEY`, `VITE_KAKAO_MAP_KEY`
 - [ ] Email (2개): `MAIL_USERNAME`, `MAIL_PASSWORD`
 
 ---
@@ -126,7 +123,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    - [ ] EC2 인스턴스 생성 및 키페어 다운로드
 
 2. **GitHub Secrets 등록**:
-   - [ ] 위 22개 시크릿을 GitHub Actions Secrets에 등록
+   - [ ] 위 19개 시크릿을 GitHub Actions Secrets에 등록
 
 3. **배포 실행**:
    - [ ] `main` 브랜치에 Push 또는 Actions 탭에서 수동 실행
@@ -148,7 +145,6 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 2. **배포 시 변경 권장**:
    - `POSTGRES_PASSWORD`: 강력한 랜덤 비밀번호
    - `JWT_SECRET_KEY`: 새로 생성한 256bit 키
-   - `TOSS_SECRET_KEY`, `TOSS_CLIENT_KEY`: 테스트 키 → 라이브 키
 
 3. **주기적 교체**:
    - JWT 시크릿 키 (6개월마다)

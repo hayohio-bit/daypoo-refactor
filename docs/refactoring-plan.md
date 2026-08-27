@@ -36,7 +36,7 @@
 - [x] **제거된 엔드포인트를 호출하는 admin 화면 정리** — `061d822`가 shop·title 백엔드 모듈을 제거해 고아가 된 화면 5종을 사용자 결정에 따라 삭제했다 (`16094c4`). StoreView·AddItemView·EditItemView는 import하는 곳이 없어 도달 불가능한 죽은 파일이었고, TitleManagementView·AddTitleView는 AdminPage의 칭호 탭에 마운트되어 있었으나 삭제된 `/admin/titles` 호출로 항상 404가 나던 화면이었다. 칭호 탭 배선, 대시보드의 아이템 등록 퀵 액션, AdminTab의 사어 항목, 미참조 아이템·칭호 타입 8종도 함께 정리했다.
 - [x] **RestTemplateBuilder deprecated API 교체** — `setConnectTimeout`/`setReadTimeout`을 Spring Boot 3.4의 `connectTimeout`/`readTimeout`으로 교체해 removal 경고를 제거했다 (`1b1a85b`).
 - [x] **수익화 기능 제거 (MVP 범위 결정)** — 사용자 결정(2026-08-28 "결제 제거, 적립 삭제, 수익화 미포함")에 따라 Toss 결제·구독 스택과 포인트 경제를 전부 제거했다 (`0d00895`). 기록 보상은 경험치만 남기고, PRO/PREMIUM 게이트·포인트 차감이 걸려 있던 리포트는 전면 공개로 전환했다(마스킹 제거, 캐시 v19). 관리자 통계에서 매출·플랜 분포를 제거하고 주간 트렌드는 일별 신규 가입자로 재정의했다. **스키마는 무변경**: payments·subscriptions 테이블과 users.points 컬럼은 남기고, 회원 삭제 시 잔여 행은 JDBC로 정리한다. 선행으로 AI 모듈 제거 후 404가 나던 관리자 "AI 요약 일괄 생성" 버튼도 정리했다 (`aa083c5`).
-- [ ] **수익화 잔재 콘텐츠·배포 설정 정리** — 코드 밖에 남은 잔재: FAQ의 '결제/아바타' 카테고리와 환불 안내(DB `faqs` 시드 + SupportPage FALLBACK), `InquiryType`의 '결제/아이템 문의' 라벨, `deploy-oci.yml`과 `docs/infrastructure/*`의 TOSS·OPENAI 시크릿 참조. FAQ·문의 유형은 DB 데이터 변경이고 배포 워크플로는 운영 설정이라 별도 확인 후 진행한다.
+- [x] **수익화 잔재 콘텐츠·배포 설정 정리** — 사용자 확인 후 코드 밖 잔재를 정리했다 (`7d09846`). `InquiryType.PAYMENT_ITEM`을 삭제하고 기존 DB 행은 V33 마이그레이션으로 OTHERS에 이관했다. FAQ는 결제·환불 안내를 삭제하고 '결제/아바타' 카테고리의 나머지 항목을 '이용방법'으로 이동했다(DB 데이터는 V33, 프론트는 SupportPage FALLBACK·카테고리 목록). 문의 테스트 데이터 생성기의 결제·포인트·아이템 문구도 교체했다. 배포 쪽은 `deploy-oci.yml`·`docker-compose.prod.yml`·`frontend/Dockerfile`·`docs/infrastructure/*`·README에서 TOSS_SECRET_KEY·VITE_TOSS_CLIENT_KEY·OPENAI_API_KEY 참조를 제거했다. terraform 시뮬레이션 봇 Lambda의 OPENAI_API_KEY는 리뷰 문구 생성용 별도 인프라(키 없이도 동작)라 유지했다.
 
 ## 완료
 

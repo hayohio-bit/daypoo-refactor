@@ -134,7 +134,7 @@ graph TB
 
 ```bash
 cp .env.example .env
-# DB_HOST, JWT_SECRET_KEY, OPENAI_API_KEY 등 필수값 기입
+# DB_HOST, JWT_SECRET_KEY 등 필수값 기입
 ```
 
 ### 2단계: 로컬 개발 실행

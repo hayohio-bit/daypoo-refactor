@@ -31,14 +31,14 @@
 ### 2. 배포 문서 작성
 
 #### 📘 [02_GITHUB_SECRETS_SETUP.md](./02_GITHUB_SECRETS_SETUP.md)
-**GitHub Actions Secrets 설정 가이드 (22개)**
+**GitHub Actions Secrets 설정 가이드 (19개)**
 
 분류별 시크릿:
 - Docker Hub (2개): DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
 - AWS (5개): AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, EC2_SSH_PRIVATE_KEY, EC2_HOST
 - Database (5개): POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, DB_HOST, DB_PORT
 - Auth (5개): JWT_SECRET_KEY, KAKAO_CLIENT_ID/SECRET, GOOGLE_CLIENT_ID/SECRET
-- External APIs (5개): OPENAI_API_KEY, PUBLIC_DATA_API_KEY, TOSS keys, KAKAO_MAP_KEY
+- External APIs (2개): PUBLIC_DATA_API_KEY, KAKAO_MAP_KEY
 - Email (2개): MAIL_USERNAME, MAIL_PASSWORD
 
 각 시크릿의 설명, 현재 값, 배포 시 권장 값, 생성 방법 포함
@@ -176,8 +176,6 @@ curl http://localhost:8000/health
    ```bash
    # 예: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
-
-3. **TOSS_SECRET_KEY**: 테스트 키 → 라이브 키로 변경
 
 ### Git 커밋 금지:
 - ❌ `.env` 파일

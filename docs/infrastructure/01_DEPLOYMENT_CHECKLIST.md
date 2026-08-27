@@ -138,18 +138,15 @@ cd /opt/daypoo
 - [ ] `GOOGLE_CLIENT_ID`
 - [ ] `GOOGLE_CLIENT_SECRET`
 
-#### External APIs (5개)
-- [ ] `OPENAI_API_KEY`
+#### External APIs (2개)
 - [ ] `PUBLIC_DATA_API_KEY`
-- [ ] `TOSS_SECRET_KEY`
-- [ ] `VITE_TOSS_CLIENT_KEY`
 - [ ] `VITE_KAKAO_MAP_KEY`
 
 #### Email (2개)
 - [ ] `MAIL_USERNAME`
 - [ ] `MAIL_PASSWORD`
 
-**총 24개 시크릿 등록 완료 여부**: ⬜
+**총 21개 시크릿 등록 완료 여부**: ⬜
 
 ---
 
@@ -219,12 +216,7 @@ curl http://localhost:8000/health
   - `http://<EC2_PUBLIC_IP>/oauth/google/callback`
   - (CloudFront 설정 후) `https://<CLOUDFRONT_DOMAIN>/oauth/google/callback`
 
-### 4.2 토스 결제 설정
-- [ ] [토스페이먼츠 개발자센터](https://developers.tosspayments.com) 접속
-- [ ] 실제 결제를 받으려면 라이브 키로 변경
-  - GitHub Secrets에서 `TOSS_SECRET_KEY`, `VITE_TOSS_CLIENT_KEY` 업데이트
-
-### 4.3 도메인 연결 (선택사항)
+### 4.2 도메인 연결 (선택사항)
 - [ ] Route 53 또는 외부 DNS에서 도메인 구매
 - [ ] A 레코드 추가: `daypoo.com` → EC2 Public IP
 - [ ] SSL 인증서 적용 (Let's Encrypt + Nginx)

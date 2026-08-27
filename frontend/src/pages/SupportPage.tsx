@@ -32,9 +32,9 @@ import { api, getAccessToken } from '../services/apiClient';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type SupportTab = 'faq' | 'inquiry' | 'myinquiry';
-type FaqCategory = '전체' | '배변 패턴/AI분석' | '이용방법' | '결제/아바타' | '계정/보안';
+type FaqCategory = '전체' | '배변 패턴/AI분석' | '이용방법' | '계정/보안';
 type InquiryStatus = '답변 대기' | '답변 완료';
-type InquiryCategory = '결제/아이템 문의' | '배변 패턴 분석 오류' | '기타';
+type InquiryCategory = '배변 패턴 분석 오류' | '기타';
 
 interface FaqItem {
   id: string;
@@ -87,26 +87,13 @@ const FALLBACK_FAQ: FaqItem[] = [
   {
     id: 'f5',
     num: '05',
-    category: '결제/아바타',
+    category: '이용방법',
     q: '획득한 칭호는 어디서 확인하나요?',
     a: "마이페이지의 '컬렉션' 탭에서 칭호를 관리하고 장착할 수 있습니다.",
   },
-  {
-    id: 'f6',
-    num: '06',
-    category: '결제/아바타',
-    q: '환불 정책이 궁금해요.',
-    a: '디지털 아이템은 사용 전 7일 이내 환불 가능하며, 시스템 오류로 인한 미지급은 1:1 문의로 해결해 드립니다.',
-  },
 ];
 
-const CATEGORIES: FaqCategory[] = [
-  '전체',
-  '배변 패턴/AI분석',
-  '이용방법',
-  '결제/아바타',
-  '계정/보안',
-];
+const CATEGORIES: FaqCategory[] = ['전체', '배변 패턴/AI분석', '이용방법', '계정/보안'];
 
 // ── 애니메이션 베리언츠 ───────────────────────────────────────
 const cardVariants = {
@@ -270,7 +257,7 @@ function ModernInquiryForm({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
-  const CATEGORY_OPTIONS: InquiryCategory[] = ['결제/아이템 문의', '배변 패턴 분석 오류', '기타'];
+  const CATEGORY_OPTIONS: InquiryCategory[] = ['배변 패턴 분석 오류', '기타'];
 
   return (
     <motion.div
@@ -565,7 +552,7 @@ function EditInquiryForm({
     }
   };
 
-  const CATEGORY_OPTIONS: InquiryCategory[] = ['결제/아이템 문의', '배변 패턴 분석 오류', '기타'];
+  const CATEGORY_OPTIONS: InquiryCategory[] = ['배변 패턴 분석 오류', '기타'];
 
   return (
     <form onSubmit={submit} className="space-y-8">

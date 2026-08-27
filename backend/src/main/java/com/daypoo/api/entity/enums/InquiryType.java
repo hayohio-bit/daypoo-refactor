@@ -1,7 +1,6 @@
 package com.daypoo.api.entity.enums;
 
 public enum InquiryType {
-  PAYMENT_ITEM("결제/아이템 문의"),
   HEALTH_ANALYSIS("건강 분석 오류"),
   OTHERS("기타");
 
