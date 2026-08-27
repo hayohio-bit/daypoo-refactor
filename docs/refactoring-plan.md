@@ -34,7 +34,7 @@
 - [ ] **정책값 설정 외부화** — 체크인 허용 반경(`LocationVerificationService.java:19`), 보상 정책(`PooRecordService.java:52-54`), Toss URL(`PaymentService.java:55`), 동기화 튜닝값(`PublicDataSyncService.java:45-46`) 등을 `@ConfigurationProperties`로 이동한다.
 - [ ] **공통 에러 UX** — 프론트 catch/alert 블록이 파일별로 산재한다(StoreView 18회, SettingsTab 15회, MapPage 14회). 공통 에러 토스트/바운더리를 도입한다.
 - [ ] **제거된 엔드포인트를 호출하는 admin 화면 정리** — `061d822`가 shop·title 백엔드 모듈을 제거했지만 프론트엔드 `admin/StoreView.tsx`·`AddItemView.tsx`·`EditItemView.tsx`·`TitleManagementView.tsx`·`AddTitleView.tsx`는 여전히 `/admin/shop/items`·`/admin/titles`를 호출해 404가 난다. 화면을 함께 제거하거나 엔드포인트를 복원해야 한다 (2026-08-27 AdminManagementService 분할 작업 중 발견).
-- [ ] **RestTemplateBuilder deprecated API 교체** — `global/RestTemplateConfig.java:20-21`의 `setConnectTimeout`/`setReadTimeout`(Duration)이 removal 예정으로 표시되어 컴파일 경고가 발생한다. 신규 API로 교체한다.
+- [x] **RestTemplateBuilder deprecated API 교체** — `setConnectTimeout`/`setReadTimeout`을 Spring Boot 3.4의 `connectTimeout`/`readTimeout`으로 교체해 removal 경고를 제거했다 (`1b1a85b`).
 
 ## 완료
 
