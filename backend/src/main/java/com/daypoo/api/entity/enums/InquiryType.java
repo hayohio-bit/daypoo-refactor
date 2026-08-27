@@ -1,7 +1,7 @@
 package com.daypoo.api.entity.enums;
 
 public enum InquiryType {
-  HEALTH_ANALYSIS("건강 분석 오류"),
+  HEALTH_ANALYSIS("배변 패턴 분석 오류"),
   OTHERS("기타");
 
   private final String label;
