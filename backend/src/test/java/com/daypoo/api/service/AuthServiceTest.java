@@ -40,6 +40,7 @@ class AuthServiceTest {
   @InjectMocks private AuthService authService;
 
   @Mock private UserRepository userRepository;
+  @Mock private UserService userService;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private JwtProvider jwtProvider;
   @Mock private EmailService emailService;

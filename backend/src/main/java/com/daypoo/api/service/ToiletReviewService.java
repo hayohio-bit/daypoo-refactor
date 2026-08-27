@@ -9,7 +9,6 @@ import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.ToiletReviewRepository;
-import com.daypoo.api.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -28,16 +27,13 @@ public class ToiletReviewService {
 
   private final ToiletReviewRepository toiletReviewRepository;
   private final ToiletRepository toiletRepository;
-  private final UserRepository userRepository;
+  private final UserService userService;
   private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public ToiletReviewResponse createReview(
       String email, Long toiletId, ToiletReviewCreateRequest request) {
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
     Toilet toilet =
         toiletRepository
             .findById(toiletId)

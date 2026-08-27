@@ -26,7 +26,7 @@
 ## P3 — 구조 개선
 
 - [ ] **AdminManagementService 분할** — 587줄, 유저/화장실/문의/아이템/칭호 5개 도메인 혼재, Repository 9개 주입. 도메인별 서비스로 나누고, `AdminService`(185줄)와의 역할 중복(테스트 데이터 생성이 양쪽에 존재: `AdminService.java:122`, `AdminManagementService.java:533`)을 해소한다.
-- [ ] **사용자 조회 중복 제거** — `findByEmail(...).orElseThrow(USER_NOT_FOUND)` 패턴이 AuthService에만 8회, 전역 36곳이다. 이미 존재하는 `UserService.getByEmail()`로 통일한다.
+- [x] **사용자 조회 중복 제거** — 착수 시 재조사 결과 실제 패턴은 main 소스 기준 10곳이었다(최초 조사의 36곳은 과대 집계). AuthService 6곳·FavoriteService 2곳·ToiletReviewService 1곳·PooRecordEventListener 1곳을 `UserService.getByEmail()`로 통일하고 UserServiceTest를 신설했다 (`58c0035`). 제외: `AuthService.login`(실패 시 디버그 로그가 있는 조회), `AdminManagementService:539`(테스트 데이터용 이중 이메일 조회 — 서비스 분할 항목에서 처리), `OAuth2SuccessHandler`·`DataInitializer`(예외를 던지지 않는 Optional 분기).
 - [ ] **프론트엔드 도메인 서비스 모듈 추출** — 서비스 계층이 `apiClient.ts` + `reviewService.ts` 2개뿐이고, 10개 이상의 페이지가 `api.get/post`를 직접 호출한다. 도메인별(toilet, admin, auth 등) 서비스 모듈로 추출한다. `apiClient.request()`(110줄 단일 함수)도 헤더 구성/리프레시/폴백/에러 매핑으로 분리한다.
 - [ ] **프론트엔드 토큰 조회 공용화** — `localStorage.getItem('accessToken') || sessionStorage...` 패턴이 5개 파일에 복붙되어 있다. `apiClient.ts`의 `getToken()`을 export해 재사용한다.
 - [ ] **죽은 추상화 정리** — `hooks/useAsyncState.ts` + `components/common/AsyncStateView.tsx`는 어느 페이지도 쓰지 않고, admin 뷰 4곳이 loading 상태를 수동 관리한다. 채택하거나 삭제한다. `utils/geoUtils.ts`(deprecated 위임 껍데기 9줄)는 호출부 정리 후 삭제한다.

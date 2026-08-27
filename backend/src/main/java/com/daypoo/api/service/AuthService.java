@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
   private final UserRepository userRepository;
+  private final UserService userService;
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
   private final EmailService emailService;
@@ -128,10 +129,7 @@ public class AuthService {
   @Transactional(readOnly = true)
   public UserResponse getCurrentUserInfo() {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
 
     String titleName = null;
     Long equippedTitleId = user.getEquippedTitleId();
@@ -346,10 +344,7 @@ public class AuthService {
 
   @Transactional
   public void resetPassword(String email) {
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
 
     // 1. 임시 비밀번호 생성 (8자리)
     String tempPassword = UUID.randomUUID().toString().substring(0, 8);
@@ -372,10 +367,7 @@ public class AuthService {
 
   @Transactional
   public void updateProfile(String email, ProfileUpdateRequest request) {
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
 
     // 닉네임이 현재와 다를 경우만 중복 체크
     if (!user.getNickname().equals(request.nickname())) {
@@ -386,10 +378,7 @@ public class AuthService {
 
   @Transactional
   public void changePassword(String email, PasswordChangeRequest request) {
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
 
     if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
       throw new BusinessException(ErrorCode.INVALID_PASSWORD);
@@ -414,10 +403,7 @@ public class AuthService {
       throw new BusinessException(ErrorCode.INVALID_TOKEN);
     }
 
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
 
     Role targetRole = determineRole(user.getEmail());
     String responseRole =
@@ -445,10 +431,7 @@ public class AuthService {
 
   @Transactional
   public void withdraw(String email, String password) {
-    User user =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    User user = userService.getByEmail(email);
 
     if (user.getPassword() != null
         && password != null

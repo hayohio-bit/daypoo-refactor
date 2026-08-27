@@ -7,7 +7,6 @@ import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.FavoriteRepository;
 import com.daypoo.api.repository.ToiletRepository;
-import com.daypoo.api.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class FavoriteService {
 
   private final FavoriteRepository favoriteRepository;
-  private final UserRepository userRepository;
+  private final UserService userService;
   private final ToiletRepository toiletRepository;
 
   /** 즐겨찾기 토글 (추가/삭제) */
   @Transactional
   public boolean toggleFavorite(String email, Long toiletId) {
-    User user = getUserByEmail(email);
+    User user = userService.getByEmail(email);
     Toilet toilet = getToiletById(toiletId);
 
     return favoriteRepository
@@ -49,14 +48,8 @@ public class FavoriteService {
   /** 내 즐겨찾기 화장실 ID 목록 조회 */
   @Transactional(readOnly = true)
   public List<Long> getFavoriteToiletIds(String email) {
-    User user = getUserByEmail(email);
+    User user = userService.getByEmail(email);
     return favoriteRepository.findToiletIdsByUser(user);
-  }
-
-  private User getUserByEmail(String email) {
-    return userRepository
-        .findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
   }
 
   private Toilet getToiletById(Long toiletId) {
