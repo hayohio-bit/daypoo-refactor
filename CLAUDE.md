@@ -69,3 +69,7 @@ npm run build                        # tsc 없이 vite build
 ## API 문서
 
 백엔드 기동 후 Swagger UI: `http://localhost:8080/api/docs` (OpenAPI JSON: `/api/v3/api-docs`). 헬스체크: `/actuator/health`.
+
+## 진행 중인 작업
+
+리팩토링 백로그의 단일 출처는 `docs/refactoring-plan.md`다. 우선순위(P0~P3)와 각 항목의 파일:라인 근거, 완료 항목의 커밋 해시가 기록되어 있다. 백로그 항목을 완료하면 그 문서의 체크박스와 커밋 해시를 갱신한다. 문서 전체 색인은 `docs/README.md`.
