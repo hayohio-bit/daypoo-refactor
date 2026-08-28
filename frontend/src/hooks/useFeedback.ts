@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useNotification } from '../context/NotificationContext';
+import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../utils/errorMessage';
 
 const DEFAULT_ERROR_TITLE = '문제가 발생했어요';
@@ -13,7 +13,7 @@ const DEFAULT_INFO_TITLE = '확인해주세요';
  * 실패 원인을 알리는 용도로는 적절하지 않아 토스트로 대체했다.
  */
 export function useFeedback() {
-  const { showToast } = useNotification();
+  const { showToast } = useToast();
 
   /**
    * 잡힌 예외를 오류 토스트로 알린다.

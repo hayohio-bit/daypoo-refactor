@@ -2,6 +2,7 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useToast } from '../context/ToastContext';
 import { getAccessToken } from '../services/apiClient';
 import { issueSseToken } from '../services/notificationService';
 
@@ -11,7 +12,8 @@ const MAX_RETRY_DELAY = 30000; // F4: 최대 재시도 지연 (30초)
 
 export const NotificationSubscriber: React.FC = () => {
   const { user, refreshUser } = useAuth();
-  const { showToast, fetchNotifications } = useNotification();
+  const { fetchNotifications } = useNotification();
+  const { showToast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const eventSourceRef = useRef<EventSource | null>(null);
   const timeoutRef = useRef<any>(null);

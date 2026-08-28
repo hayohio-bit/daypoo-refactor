@@ -3,6 +3,7 @@ import { Bell, CheckCheck, Info, MessageSquare, Sparkles, Trash2, Trophy, X } fr
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
+import { useToast } from '../context/ToastContext';
 
 type FilterType = 'all' | 'unread';
 
@@ -13,10 +14,10 @@ export function NotificationPanel({ isOpen, onClose }: { isOpen: boolean; onClos
     markAllAsRead,
     markAsRead,
     deleteNotification,
-    showToast,
     setNotifications,
     unreadCount,
   } = useNotification();
+  const { showToast } = useToast();
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [showDevTools, setShowDevTools] = useState(import.meta.env.DEV);

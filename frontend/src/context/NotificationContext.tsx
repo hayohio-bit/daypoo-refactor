@@ -1,4 +1,3 @@
-import { AnimatePresence } from 'framer-motion';
 import type React from 'react';
 import {
   type ReactNode,
@@ -9,7 +8,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { NotificationToast, type ToastType } from '../components/NotificationToast';
 import {
   deleteNotification as deleteNotificationRequest,
   getNotifications,
@@ -17,14 +15,7 @@ import {
   markNotificationRead,
 } from '../services/notificationService';
 import { useAuth } from './AuthContext';
-
-interface Toast {
-  id: string;
-  type: ToastType;
-  title: string;
-  message: string;
-  icon?: string;
-}
+import { ToastProvider } from './ToastContext';
 
 export interface Notification {
   id: number;
@@ -39,7 +30,6 @@ export interface Notification {
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
-  showToast: (title: string, message: string, type?: ToastType, icon?: string) => void;
   fetchNotifications: () => Promise<void>;
   markAllAsRead: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
@@ -49,9 +39,14 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+/**
+ * 알림 목록 상태를 제공하고, 그 아래에 토스트 프로바이더를 둔다.
+ *
+ * 토스트는 `ToastContext` 가 따로 관리한다. 토스트가 뜨고 사라지는 것과 알림 목록이 바뀌는 것은
+ * 서로 다른 사건인데 한 컨텍스트에 있으면 한쪽 변화가 다른 쪽 구독자까지 다시 렌더링시킨다.
+ */
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [toasts, setToasts] = useState<Toast[]>([]);
   const auth = useAuth();
 
   // 로그아웃 시 알림 상태 초기화
@@ -64,19 +59,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const unreadCount = useMemo(
     () => (Array.isArray(notifications) ? notifications.filter((n) => !n.isRead).length : 0),
     [notifications],
-  );
-
-  const showToast = useCallback(
-    (title: string, message: string, type: ToastType = 'info', icon?: string) => {
-      const id = Math.random().toString(36).substring(2, 9);
-      setToasts((prev) => [...prev, { id, title, message, type, icon }]);
-
-      // 5초 후에 자동 삭제
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 5000);
-    },
-    [],
   );
 
   const fetchNotifications = useCallback(async () => {
@@ -127,31 +109,22 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const value = useMemo(
+    () => ({
+      notifications,
+      unreadCount,
+      fetchNotifications,
+      markAllAsRead,
+      markAsRead,
+      deleteNotification,
+      setNotifications,
+    }),
+    [notifications, unreadCount, fetchNotifications, markAllAsRead, markAsRead, deleteNotification],
+  );
+
   return (
-    <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        showToast,
-        fetchNotifications,
-        markAllAsRead,
-        markAsRead,
-        deleteNotification,
-        setNotifications,
-      }}
-    >
-      {children}
-      <div className="fixed bottom-6 left-6 z-[3000] flex flex-col gap-3 pointer-events-none">
-        <AnimatePresence>
-          {toasts.map((toast) => (
-            <NotificationToast
-              key={toast.id}
-              {...toast}
-              onClose={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
+    <NotificationContext.Provider value={value}>
+      <ToastProvider>{children}</ToastProvider>
     </NotificationContext.Provider>
   );
 }
