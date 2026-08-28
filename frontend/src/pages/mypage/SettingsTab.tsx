@@ -52,7 +52,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
       refreshUser();
       setModalType(null);
     } catch (err) {
-      notifyError(err, '닉네임 변경에 실패했습니다.', '닉네임 변경 실패');
+      notifyError(err, '닉네임 변경 실패');
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +66,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
       notifySuccess('비밀번호가 변경되었습니다.');
       setModalType(null);
     } catch (err) {
-      notifyError(err, '비밀번호 변경에 실패했습니다.', '비밀번호 변경 실패');
+      notifyError(err, '비밀번호 변경 실패');
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +79,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
       notifySuccess('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
       setModalType(null);
     } catch (err) {
-      notifyError(err, '회원 탈퇴 처리에 실패했습니다.', '회원 탈퇴 실패');
+      notifyError(err, '회원 탈퇴 실패');
     } finally {
       setIsSubmitting(false);
     }

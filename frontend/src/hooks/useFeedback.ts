@@ -15,10 +15,17 @@ const DEFAULT_INFO_TITLE = '확인해주세요';
 export function useFeedback() {
   const { showToast } = useNotification();
 
+  /**
+   * 잡힌 예외를 오류 토스트로 알린다.
+   *
+   * 표시 문구는 `getErrorMessage` 가 결정한다. `apiClient` 가 서버 메시지와 전송 계층
+   * 코드별 문구를 이미 채워 두므로, 호출부가 기본 문구를 넘길 필요는 없다.
+   * 예외를 잡지 않고 상황만 알리는 경우에는 `error` 자리에 문구를 직접 넘긴다.
+   */
   const notifyError = useCallback(
-    (error: unknown, fallback: string, title: string = DEFAULT_ERROR_TITLE) => {
+    (error: unknown, title: string = DEFAULT_ERROR_TITLE) => {
       console.error(`${title}:`, error);
-      showToast(title, getErrorMessage(error, fallback), 'error');
+      showToast(title, getErrorMessage(error), 'error');
     },
     [showToast],
   );

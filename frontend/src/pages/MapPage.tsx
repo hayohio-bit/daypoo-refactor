@@ -130,7 +130,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           }
           return prev;
         });
-        notifyError(e, '즐겨찾기 처리에 실패했습니다.', '즐겨찾기 실패');
+        notifyError(e, '즐겨찾기 실패');
       }
     },
     [favoriteIds, openAuth, isAuthenticated, notifyError],
@@ -335,7 +335,6 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       // 1. 위치 정보(pos) 방어 로직 추가
       if (!pos) {
         notifyError(
-          undefined,
           '현재 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도해주세요.',
           '위치 확인 실패',
         );
@@ -376,11 +375,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
             notifyInfo('화장실 근처에서만 인증할 수 있습니다.', '인증 범위 밖');
             break;
           default:
-            notifyError(
-              e,
-              '인증에 실패했습니다. 문제가 지속되면 고객센터로 문의해주세요.',
-              '인증 실패',
-            );
+            notifyError(e, '인증 실패');
         }
       }
     },

@@ -133,8 +133,9 @@ function OAuthErrorNotifier() {
   useEffect(() => {
     const error = new URLSearchParams(window.location.search).get('error');
     if (!error) return;
+    // 쿼리 파라미터에 담긴 값은 OAuth2 규격의 에러 코드라 사용자에게 그대로 보여주지 않는다.
+    console.error('소셜 로그인 실패 코드:', error);
     notifyError(
-      error,
       '소셜 로그인 처리 중 문제가 발생했습니다. 서버 관리자에게 문의해주세요.',
       '소셜 로그인 실패',
     );

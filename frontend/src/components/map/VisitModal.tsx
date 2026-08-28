@@ -84,7 +84,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
       await onComplete(buildResult());
       onClose();
     } catch (e) {
-      notifyError(e, '서버 오류로 인증하지 못했습니다.', '인증 실패');
+      notifyError(e, '인증 실패');
     }
   };
 

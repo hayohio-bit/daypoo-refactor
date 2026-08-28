@@ -49,7 +49,7 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
       onSuccess();
       onClose();
     } catch (error) {
-      notifyError(error, '후기 등록에 실패했습니다. 다시 시도해주세요.', '후기 등록 실패');
+      notifyError(error, '후기 등록 실패');
     } finally {
       setIsSubmitting(false);
     }

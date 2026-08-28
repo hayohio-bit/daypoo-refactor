@@ -55,7 +55,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
     } catch (error) {
       setInquiries([]);
       setTotalPages(0);
-      notifyError(error, '서버 오류가 발생했습니다.', '문의 목록 조회 실패');
+      notifyError(error, '문의 목록 조회 실패');
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
       fetchInquiries();
       onStatsRefresh();
     } catch (error) {
-      notifyError(error, '데이터 생성 중 오류가 발생했습니다.', '테스트 데이터 생성 실패');
+      notifyError(error, '테스트 데이터 생성 실패');
     } finally {
       setGeneratingData(false);
     }
@@ -106,7 +106,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
         setAnswerText(detail.answer);
       }
     } catch (error) {
-      notifyError(error, '문의 정보를 불러오지 못했습니다.', '문의 상세 조회 실패');
+      notifyError(error, '문의 상세 조회 실패');
     } finally {
       setLoadingDetail(false);
     }
@@ -126,7 +126,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
       fetchInquiries();
       onStatsRefresh();
     } catch (error) {
-      notifyError(error, '답변 등록에 실패했습니다.', '답변 등록 실패');
+      notifyError(error, '답변 등록 실패');
     } finally {
       setSubmittingAnswer(false);
     }

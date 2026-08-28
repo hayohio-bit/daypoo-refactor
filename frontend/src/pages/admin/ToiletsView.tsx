@@ -165,13 +165,13 @@ export const ToiletsView = () => {
           if (pollingRef.current) clearInterval(pollingRef.current);
           pollingRef.current = null;
           setSyncing(false);
-          notifyError(status.errorMessage, '동기화가 실패했습니다.', '동기화 실패');
+          notifyError(status.errorMessage, '동기화 실패');
         }
       } catch {
         if (pollingRef.current) clearInterval(pollingRef.current);
         pollingRef.current = null;
         setSyncing(false);
-        notifyError(undefined, '동기화 상태를 조회하지 못했습니다.', '동기화 상태 조회 실패');
+        notifyError('동기화 상태를 조회하지 못했습니다.', '동기화 상태 조회 실패');
       }
     }, 3000);
   };
@@ -195,7 +195,7 @@ export const ToiletsView = () => {
       startPolling();
     } catch (error) {
       setSyncing(false);
-      notifyError(error, '오류가 발생했습니다.', '동기화 시작 실패');
+      notifyError(error, '동기화 시작 실패');
     }
   };
 

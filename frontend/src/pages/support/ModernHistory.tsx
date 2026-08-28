@@ -47,7 +47,7 @@ export function ModernHistory() {
       await deleteInquiry(id);
       setInquiries((prev) => prev.filter((inq) => inq.id !== id));
     } catch (err) {
-      notifyError(err, '삭제 중 오류가 발생했습니다.', '문의 삭제 실패');
+      notifyError(err, '문의 삭제 실패');
     }
   };
 

@@ -47,7 +47,7 @@ export const UsersView = () => {
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
     } catch (error) {
-      notifyError(error, '네트워크 오류가 발생했습니다.', '유저 목록 조회 실패');
+      notifyError(error, '유저 목록 조회 실패');
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ export const UsersView = () => {
       const detail = await getAdminUserDetail(user.id);
       setUserDetail(detail);
     } catch (error) {
-      notifyError(error, '알 수 없는 오류가 발생했습니다.', '유저 상세 조회 실패');
+      notifyError(error, '유저 상세 조회 실패');
       setShowUserModal(false);
     } finally {
       setLoadingDetail(false);
@@ -87,7 +87,7 @@ export const UsersView = () => {
       setShowUserModal(false);
       fetchUsers();
     } catch (error) {
-      notifyError(error, '역할 변경에 실패했습니다.', '역할 변경 실패');
+      notifyError(error, '역할 변경 실패');
     }
   };
 
@@ -106,11 +106,7 @@ export const UsersView = () => {
       setShowUserModal(false);
       fetchUsers();
     } catch (error) {
-      notifyError(
-        error,
-        '탈퇴 처리 중 오류가 발생했습니다. 권한 또는 데이터 제약 조건을 확인해주세요.',
-        '사용자 탈퇴 실패',
-      );
+      notifyError(error, '사용자 탈퇴 실패');
     }
   };
 
