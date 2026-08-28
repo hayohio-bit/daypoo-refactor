@@ -18,30 +18,18 @@ public enum ErrorCode {
 
   // User
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
-  USERNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "U002", "이미 존재하는 아이디입니다."),
   NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "U003", "이미 존재하는 닉네임입니다."),
   INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U004", "비밀번호가 일치하지 않습니다."),
   INVALID_TOKEN(HttpStatus.BAD_REQUEST, "U005", "유효하지 않거나 만료된 토큰입니다."),
   EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "U006", "이미 존재하는 이메일입니다."),
 
-  // Shop
-  ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "S002", "아이템을 찾을 수 없습니다."),
-  ALREADY_OWNED_ITEM(HttpStatus.BAD_REQUEST, "S003", "이미 보유 중인 아이템입니다."),
-  NOT_OWNED_TITLE(HttpStatus.BAD_REQUEST, "S004", "보유하지 않은 칭호입니다."),
-
   // PooRecord
-  LOCATION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "R001", "화장실 반경 밖에서는 인증할 수 없습니다."),
-  COOLDOWN_ACTIVE(HttpStatus.BAD_REQUEST, "R002", "이미 최근 인증을 완료한 화장실입니다."),
-  AI_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "R003", "AI 분석 서비스 호출에 실패했습니다."),
-  NO_RECORDS_FOR_REPORT(HttpStatus.BAD_REQUEST, "R004", "분석할 배변 기록이 없습니다."),
   STAY_TIME_NOT_MET(HttpStatus.BAD_REQUEST, "R005", "화장실 내 체류 시간이 충분하지 않습니다. (최소 60초)"),
   OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "R006", "화장실 반경 밖에서는 인증할 수 없습니다."),
-  NOT_POOP_IMAGE(HttpStatus.BAD_REQUEST, "R007", "똥 사진이 아닌 것 같아요! 변기 안의 변을 촬영해주세요."),
 
   // Admin
   ADMIN_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "사용자를 찾을 수 없습니다."),
   ADMIN_INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND, "A002", "문의를 찾을 수 없습니다."),
-  ADMIN_TOILET_NOT_FOUND(HttpStatus.NOT_FOUND, "A003", "화장실을 찾을 수 없습니다."),
   ADMIN_INQUIRY_ALREADY_ANSWERED(HttpStatus.BAD_REQUEST, "A005", "이미 답변 완료된 문의입니다."),
   ADMIN_CANNOT_CHANGE_OWN_ROLE(HttpStatus.BAD_REQUEST, "A006", "자신의 역할은 변경할 수 없습니다."),
   ADMIN_CANNOT_DELETE_SELF(HttpStatus.BAD_REQUEST, "A008", "자신의 계정은 삭제할 수 없습니다."),

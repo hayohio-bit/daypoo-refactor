@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { useFeedback } from '../hooks/useFeedback';
 import { useGeoTracking } from '../hooks/useGeoTracking';
 import { useToilets } from '../hooks/useToilets';
-import { getAccessToken } from '../services/apiClient';
+import { type ApiError, getAccessToken } from '../services/apiClient';
 import { getFavoriteIds, toggleFavorite } from '../services/favoriteService';
 import { checkIn, createRecord, getMyVisitCounts } from '../services/recordService';
 import { toToiletData } from '../services/toiletMapper';
@@ -339,8 +339,8 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           [String(result.toiletId)]: (prev[String(result.toiletId)] || 0) + 1,
         }));
         // 방문 인증 완료 후 모달 닫기
-      } catch (e: any) {
-        const code = e.code || 'UNKNOWN';
+      } catch (e) {
+        const code = e instanceof Error ? ((e as ApiError).code ?? 'UNKNOWN') : 'UNKNOWN';
 
         switch (code) {
           case 'R005': // STAY_TIME_NOT_MET
@@ -349,7 +349,6 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
               '체류 시간 부족',
             );
             break;
-          case 'R001': // LOCATION_OUT_OF_RANGE
           case 'R006': // OUT_OF_RANGE
             notifyInfo('화장실 근처에서만 인증할 수 있습니다.', '인증 범위 밖');
             break;
