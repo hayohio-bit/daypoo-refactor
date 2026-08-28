@@ -5,6 +5,8 @@ import {
   Database,
   Eye,
   Lock,
+  MapPin,
+  MessageSquare,
   RefreshCw,
   Settings,
   UserPlus,
