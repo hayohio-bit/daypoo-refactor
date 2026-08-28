@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { STAY_LOGGED_IN_DURATION_MS, getAccessToken, removeTokens } from '../services/apiClient';
 import {
-  api,
-  getAccessToken,
-  removeTokens,
-  STAY_LOGGED_IN_DURATION_MS,
-} from '../services/apiClient';
+  deleteMe as deleteMeRequest,
+  getMe,
+  logout as logoutRequest,
+} from '../services/authService';
 import type { UserResponse } from '../types/api';
 
 interface AuthContextType {
@@ -34,8 +34,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const userData = await api.get<any>('/auth/me');
-      setUser(userData as UserResponse);
+      const userData = await getMe();
+      setUser(userData);
     } catch (err: any) {
       console.error('[AuthContext] Failed to fetch user info');
       removeTokens();
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(async () => {
     try {
       // 서버 로그아웃 API 호출 (토큰 블랙리스트 처리 등)
-      await api.post('/auth/logout').catch((err) => {
+      await logoutRequest().catch((err) => {
         console.warn('Backend logout failed or not implemented:', err);
       });
     } finally {
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteMe = useCallback(async () => {
     try {
-      await api.delete('/auth/me');
+      await deleteMeRequest();
       await logout();
     } catch (err: any) {
       console.error('Failed to delete account', err);

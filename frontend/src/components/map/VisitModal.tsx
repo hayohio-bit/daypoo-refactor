@@ -202,7 +202,6 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
             </WaveButtonComponent>
           </div>
         )}
-
       </m.div>
 
       {/* 닫기 확인 모달 */}

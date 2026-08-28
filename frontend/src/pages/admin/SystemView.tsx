@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
-import type { AdminStatsResponse } from '../../types/admin';
+import type { AdminStatsResponse, SystemLog } from '../../types/admin';
 import { type AdminTab, COLORS } from './adminCommons';
 
 export interface SystemSettings {
@@ -21,14 +21,6 @@ export interface SystemSettings {
   maintenanceMode: boolean;
   signupEnabled: boolean;
   aiReportEnabled: boolean;
-}
-
-export interface SystemLog {
-  id: number;
-  timestamp: string;
-  level: 'INFO' | 'WARN' | 'ERROR';
-  source: string;
-  message: string;
 }
 
 export interface SystemViewProps {

@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { Activity, Calendar, Lock, LogOut, Package, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../services/apiClient';
+import { updateNickname, updatePassword } from '../../services/authService';
 import type { UserResponse } from '../../types/api';
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
@@ -45,7 +45,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
     if (!inputValue.trim()) return;
     setIsSubmitting(true);
     try {
-      await api.patch('/auth/profile', { nickname: inputValue });
+      await updateNickname(inputValue);
       alert('닉네임이 변경되었습니다.');
       refreshUser();
       setModalType(null);
@@ -60,7 +60,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
     if (!inputValue.trim()) return;
     setIsSubmitting(true);
     try {
-      await api.patch('/auth/password', { password: inputValue });
+      await updatePassword(inputValue);
       alert('비밀번호가 변경되었습니다.');
       setModalType(null);
     } catch (err: any) {

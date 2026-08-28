@@ -2,7 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Settings, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AdminCard } from '../../components/admin/AdminCard';
-import { api } from '../../services/apiClient';
+import {
+  deleteAdminUser,
+  getAdminUserDetail,
+  getAdminUsers,
+  updateAdminUserRole,
+} from '../../services/adminService';
 import type {
   AdminUserDetailResponse,
   AdminUserListResponse,
@@ -35,7 +40,7 @@ export const UsersView = () => {
       if (search) params.append('search', search);
       if (roleFilter && roleFilter !== 'ALL') params.append('role', roleFilter);
 
-      const response = await api.get<PageResponse<AdminUserListResponse>>(`/admin/users?${params}`);
+      const response = await getAdminUsers(params);
       setUsers(response.content);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
@@ -64,7 +69,7 @@ export const UsersView = () => {
     setShowUserModal(true);
     setLoadingDetail(true);
     try {
-      const detail = await api.get<AdminUserDetailResponse>(`/admin/users/${user.id}`);
+      const detail = await getAdminUserDetail(user.id);
       setUserDetail(detail);
     } catch (error: any) {
       console.error('유저 상세 조회 실패:', error);
@@ -78,7 +83,7 @@ export const UsersView = () => {
 
   const handleUpdateUserRole = async (userId: number, newRole: Role) => {
     try {
-      await api.patch(`/admin/users/${userId}/role`, { role: newRole });
+      await updateAdminUserRole(userId, newRole);
       alert('역할이 변경되었습니다.');
       setShowUserModal(false);
       fetchUsers();
@@ -98,7 +103,7 @@ export const UsersView = () => {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/admin/users/${userId}`);
+      await deleteAdminUser(userId);
       alert('사용자가 성공적으로 탈퇴되었습니다.');
       setShowUserModal(false);
       fetchUsers();
@@ -161,7 +166,6 @@ export const UsersView = () => {
               <ChevronRight size={14} className="rotate-90" />
             </div>
           </div>
-
         </div>
       </div>
 

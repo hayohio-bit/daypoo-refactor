@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { AdminCard } from '../../components/admin/AdminCard';
 import { useToilets } from '../../hooks/useToilets';
-import { api } from '../../services/apiClient';
-import type { ToiletReviewSummaryResponse } from '../../services/reviewService';
+import { getAdminToilets, getToiletSyncStatus, startToiletSync } from '../../services/adminService';
+import { type ToiletReviewSummaryResponse, getReviewSummary } from '../../services/reviewService';
 import type { AdminToiletListResponse, PageResponse, SyncStatusResponse } from '../../types/admin';
 import type { ToiletData } from '../../types/toilet';
 import { COLORS } from './adminCommons';
@@ -20,9 +20,7 @@ const RecentToiletsPanel = () => {
   useEffect(() => {
     const fetchRecentToilets = async () => {
       try {
-        const response = await api.get<PageResponse<AdminToiletListResponse>>(
-          '/admin/toilets?page=0&size=5&sort=id,desc',
-        );
+        const response = await getAdminToilets('page=0&size=5&sort=id,desc');
         setRecentToilets(response?.content || []);
         setTotalCount(response?.totalElements || 0);
       } catch (error) {
@@ -124,9 +122,8 @@ export const ToiletsView = () => {
   useEffect(() => {
     if (!selectedToilet) return;
     setLoadingDetail(true);
-    api
-      .get(`/toilets/${selectedToilet.id}/reviews/summary`)
-      .then((res: any) => {
+    getReviewSummary(Number(selectedToilet.id))
+      .then((res) => {
         setReviewSummary(res);
         setToiletReviews(Array.isArray(res?.recentReviews) ? res.recentReviews : []);
       })
@@ -153,7 +150,7 @@ export const ToiletsView = () => {
   const startPolling = () => {
     pollingRef.current = setInterval(async () => {
       try {
-        const status = await api.get<SyncStatusResponse>('/admin/sync-toilets/status');
+        const status = await getToiletSyncStatus();
         if (status.status === 'COMPLETED') {
           if (pollingRef.current) clearInterval(pollingRef.current);
           pollingRef.current = null;
@@ -192,7 +189,7 @@ export const ToiletsView = () => {
     setSyncing(true);
     setSyncResult(null);
     try {
-      await api.post('/admin/sync-toilets?startPage=1&endPage=550');
+      await startToiletSync();
       startPolling();
     } catch (error: any) {
       setSyncing(false);

@@ -3,7 +3,12 @@ import { ChevronLeft, ChevronRight, MessageSquare, Plus, RefreshCw, X } from 'lu
 import { useEffect, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { GlassCard } from '../../components/common/GlassCard';
-import { api } from '../../services/apiClient';
+import {
+  answerAdminInquiry,
+  generateInquiryTestData,
+  getAdminInquiries,
+  getAdminInquiryDetail,
+} from '../../services/adminService';
 import type {
   AdminInquiryDetailResponse,
   AdminInquiryListResponse,
@@ -42,9 +47,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
       if (filter !== 'ALL') params.append('status', filter);
 
       console.log(`[AdminInquiry] Fetching inquiries with params: ${params.toString()}`);
-      const response = await api.get<PageResponse<AdminInquiryListResponse>>(
-        `/admin/inquiries?${params}`,
-      );
+      const response = await getAdminInquiries(params);
       setInquiries(response.content || []);
       setTotalPages(response.totalPages || 0);
     } catch (error: any) {
@@ -65,7 +68,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
     if (generatingData) return;
     setGeneratingData(true);
     try {
-      await api.post('/admin/inquiries/generate-test-data');
+      await generateInquiryTestData();
       alert('30개의 테스트 문의 데이터가 생성되었습니다.');
       fetchInquiries();
       onStatsRefresh();
@@ -102,7 +105,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
     setLoadingDetail(true);
     setAnswerText('');
     try {
-      const detail = await api.get<AdminInquiryDetailResponse>(`/admin/inquiries/${inquiry.id}`);
+      const detail = await getAdminInquiryDetail(inquiry.id);
       setInquiryDetail(detail);
       if (detail.answer) {
         setAnswerText(detail.answer);
@@ -123,7 +126,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
 
     setSubmittingAnswer(true);
     try {
-      await api.post(`/admin/inquiries/${inquiryDetail.id}/answer`, { answer: answerText });
+      await answerAdminInquiry(inquiryDetail.id, answerText);
       alert('답변이 등록되었습니다.');
       setShowInquiryModal(false);
       fetchInquiries();

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
-import { api } from '../../services/apiClient';
+import { getReport } from '../../services/reportService';
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const fadeUp = (delay = 0) => ({
@@ -48,7 +48,7 @@ export const ReportTab = ({ onAddRecord }: ReportTabProps) => {
 
     setIsFetchLoading(true);
     try {
-      const res = await api.get(`/reports/${type.toUpperCase()}`);
+      const res = await getReport(type);
       reportCacheRef.current[type] = res;
       setReportData(res);
     } catch (err: any) {
@@ -440,7 +440,6 @@ export const ReportTab = ({ onAddRecord }: ReportTabProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-
     </motion.div>
   );
 };

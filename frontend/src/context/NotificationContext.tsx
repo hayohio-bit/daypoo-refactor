@@ -10,7 +10,12 @@ import {
   useState,
 } from 'react';
 import { NotificationToast, type ToastType } from '../components/NotificationToast';
-import { api } from '../services/apiClient';
+import {
+  deleteNotification as deleteNotificationRequest,
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from '../services/notificationService';
 import { useAuth } from './AuthContext';
 
 interface Toast {
@@ -76,7 +81,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const data = await api.get('/notifications');
+      const data = await getNotifications();
       setNotifications(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('알림 목록 가져오기 실패:', err);
@@ -85,7 +90,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await api.post('/notifications/mark-all-read', {});
+      await markAllNotificationsRead();
       setNotifications((prev) =>
         Array.isArray(prev) ? prev.map((n) => ({ ...n, isRead: true })) : [],
       );
@@ -99,7 +104,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = useCallback(async (id: number) => {
     try {
-      await api.patch(`/notifications/${id}/read`, {});
+      await markNotificationRead(id);
       setNotifications((prev) =>
         Array.isArray(prev) ? prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)) : [],
       );
@@ -114,7 +119,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const deleteNotification = useCallback(async (id: number) => {
     try {
-      await api.delete(`/notifications/${id}`);
+      await deleteNotificationRequest(id);
       setNotifications((prev) => (Array.isArray(prev) ? prev.filter((n) => n.id !== id) : []));
     } catch (err) {
       console.error('알림 삭제 실패:', err);

@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { CountUp } from '../components/common/CountUp';
 import { KnockoutWobble } from '../components/common/KnockoutWobble';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../services/apiClient';
+import { getMyRecords } from '../services/recordService';
 import type { UserResponse } from '../types/api';
 import { generateProfileAvatar, isEmoji, parseDicebearUrl } from '../utils/avatar';
 
@@ -391,7 +391,7 @@ export function MyPage() {
     const loadAll = async () => {
       setLoadingData(true);
       try {
-        await api.get<any[]>('/records/me').then(setRecords);
+        setRecords(await getMyRecords());
       } catch (err) {
         console.error('마이페이지 데이터 조회 실패:', err);
       } finally {

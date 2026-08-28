@@ -4,7 +4,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/apiClient';
+import { login } from '../../services/authService';
 import { InputField } from './InputField';
 import { SocialLoginButtons } from './SocialLoginButtons';
 
@@ -52,7 +52,7 @@ export function LoginForm({ onSwitch, onSuccess, onClose }: LoginFormProps) {
     }
     setLoading(true);
     try {
-      const res: any = await api.post('/auth/login', { email, password });
+      const res = await login(email, password);
       if (res && res.accessToken) {
         // 아이디 기억하기
         if (rememberEmail) {

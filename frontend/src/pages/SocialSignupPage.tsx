@@ -3,7 +3,7 @@ import { AlertCircle, ArrowRight, CheckCircle2, Sparkles, User } from 'lucide-re
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../services/apiClient';
+import { checkNicknameAvailable, socialSignup } from '../services/authService';
 
 export function SocialSignupPage() {
   const [searchParams] = useSearchParams();
@@ -39,7 +39,7 @@ export function SocialSignupPage() {
     }
     setStatus('checking');
     try {
-      await api.get(`/auth/check-nickname?nickname=${encodeURIComponent(name)}`);
+      await checkNicknameAvailable(name);
       setStatus('available');
     } catch (err: any) {
       setStatus('unavailable');
@@ -60,17 +60,14 @@ export function SocialSignupPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await api.post<any>('/auth/social/signup', {
-        registrationToken: registrationToken, // camelCase로 수정
-        nickname: nickname,
-      });
+      const response = await socialSignup(registrationToken, nickname);
 
       // 성공 시 토큰 저장 및 메인 이동
       if (response.accessToken) {
         navigatedRef.current = true;
 
         // login 함수를 통해 토큰 저장 및 유저 정보 갱신 수행
-        await login(response.accessToken, response.refreshToken);
+        await login(response.accessToken, response.refreshToken || '');
 
         const returnUrl = localStorage.getItem('returnUrl') || '/main';
         localStorage.removeItem('returnUrl');
