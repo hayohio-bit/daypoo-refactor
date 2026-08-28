@@ -28,6 +28,7 @@ import { Navbar } from '../components/Navbar';
 import WaveButtonComponent from '../components/WaveButton';
 import { WaveDivider } from '../components/WaveDivider';
 import { BaseModal } from '../components/common/BaseModal';
+import { useFeedback } from '../hooks/useFeedback';
 import { getAccessToken } from '../services/apiClient';
 import {
   createInquiry,
@@ -370,6 +371,7 @@ const formatInquiryDate = (dateStr: string) => {
 
 // ── 내 문의 내역 섹션 ─────────────────────────────────────────────────
 function ModernHistory() {
+  const { notifyError } = useFeedback();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingInquiry, setEditingInquiry] = useState<Inquiry | null>(null);
@@ -395,7 +397,7 @@ function ModernHistory() {
       await deleteInquiry(id);
       setInquiries((prev) => prev.filter((inq) => inq.id !== id));
     } catch (err) {
-      alert('삭제 중 오류가 발생했습니다.');
+      notifyError(err, '삭제 중 오류가 발생했습니다.', '문의 삭제 실패');
     }
   };
 

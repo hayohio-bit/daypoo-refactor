@@ -9,6 +9,7 @@ import { ToiletSearchBar } from '../components/map/ToiletSearchBar';
 import { VisitModal, type VisitModalResult } from '../components/map/VisitModal';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useFeedback } from '../hooks/useFeedback';
 import { useGeoTracking } from '../hooks/useGeoTracking';
 import { useToilets } from '../hooks/useToilets';
 import { getAccessToken } from '../services/apiClient';
@@ -47,6 +48,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
 
   const { refreshUser, isAuthenticated } = useAuth();
   const { showToast } = useNotification();
+  const { notifyError, notifyInfo } = useFeedback();
 
   // ── 비즈니스 로직 ──────────────────────────────────────────
 
@@ -130,11 +132,10 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           }
           return prev;
         });
-        console.error('즐겨찾기 처리 실패:', e);
-        alert('즐겨찾기 처리에 실패했습니다.');
+        notifyError(e, '즐겨찾기 처리에 실패했습니다.', '즐겨찾기 실패');
       }
     },
-    [favoriteIds, openAuth, isAuthenticated],
+    [favoriteIds, openAuth, isAuthenticated, notifyError],
   );
 
   // 데이터 훅
@@ -335,8 +336,11 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     async (result: VisitModalResult) => {
       // 1. 위치 정보(pos) 방어 로직 추가
       if (!pos) {
-        console.error('인증 실패: 사용자 위치 정보를 찾을 수 없습니다.');
-        alert('📍 현재 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도해주세요.');
+        notifyError(
+          undefined,
+          '현재 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도해주세요.',
+          '위치 확인 실패',
+        );
         return;
       }
 
@@ -359,31 +363,35 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           [String(result.toiletId)]: (prev[String(result.toiletId)] || 0) + 1,
         }));
         // 방문 인증 완료 후 모달 닫기
-        // alert('방문 인증이 완료되었습니다! 💩✨');
       } catch (e: any) {
         const code = e.code || 'UNKNOWN';
-        const errorMsg = e.message || (typeof e === 'string' ? e : JSON.stringify(e));
 
         switch (code) {
           case 'R007':
             throw e; // VisitModal에서 카메라 복귀 처리
           case 'R005': // STAY_TIME_NOT_MET
-            alert('⏳ 아직 1분이 지나지 않았습니다. 잠시 후 다시 시도해주세요!');
+            notifyInfo(
+              '아직 1분이 지나지 않았습니다. 잠시 후 다시 시도해주세요.',
+              '체류 시간 부족',
+            );
             break;
           case 'R001': // LOCATION_OUT_OF_RANGE
           case 'R006': // OUT_OF_RANGE
-            alert('📍 화장실 근처(150m 이내)에서만 인증이 가능합니다.');
+            notifyInfo('화장실 근처에서만 인증할 수 있습니다.', '인증 범위 밖');
             break;
           case 'R003': // AI_SERVICE_ERROR
-            alert('🤖 AI 분석 서비스에 일시적 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            notifyError(e, '분석 서비스에 일시적인 문제가 발생했습니다.', '인증 실패');
             break;
           default:
-            console.error('인증 실패:', e);
-            alert(`인증 오류: ${errorMsg}\n\n(문제가 지속되면 고객센터로 문의해주세요.)`);
+            notifyError(
+              e,
+              '인증에 실패했습니다. 문제가 지속되면 고객센터로 문의해주세요.',
+              '인증 실패',
+            );
         }
       }
     },
-    [markVisited, pos.lat, pos.lng, refreshUser],
+    [markVisited, pos.lat, pos.lng, refreshUser, notifyError, notifyInfo],
   );
 
   // 검색어가 있으면 ES 결과 사용, 없으면 지도 반경 내 화장실에 필터만 적용

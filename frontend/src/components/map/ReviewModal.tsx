@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Loader2, Send, Star, X } from 'lucide-react';
 import { useState } from 'react';
+import { useFeedback } from '../../hooks/useFeedback';
 import { type ToiletReviewCreateRequest, createReview } from '../../services/reviewService';
 import { EMOJI_TAG_MAP, type ToiletData } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
@@ -18,6 +19,7 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { notifyError, notifySuccess, notifyInfo } = useFeedback();
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags((prev) =>
@@ -27,11 +29,11 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      alert('별점을 선택해주세요!');
+      notifyInfo('별점을 선택해주세요.');
       return;
     }
     if (!comment.trim()) {
-      alert('후기 내용을 입력해주세요!');
+      notifyInfo('후기 내용을 입력해주세요.');
       return;
     }
 
@@ -43,12 +45,11 @@ export function ReviewModal({ toilet, onClose, onSuccess }: ReviewModalProps) {
         comment: comment.trim(),
       };
       await createReview(Number(toilet.id), request);
-      alert('후기가 등록되었습니다! 감사합니다 💚');
+      notifySuccess('후기가 등록되었습니다. 감사합니다 💚');
       onSuccess();
       onClose();
-    } catch (error: any) {
-      console.error('리뷰 작성 실패:', error);
-      alert(error.message || '후기 등록에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      notifyError(error, '후기 등록에 실패했습니다. 다시 시도해주세요.', '후기 등록 실패');
     } finally {
       setIsSubmitting(false);
     }

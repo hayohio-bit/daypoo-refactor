@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
+import { useFeedback } from '../../hooks/useFeedback';
 import type { AdminStatsResponse, SystemLog } from '../../types/admin';
 import { type AdminTab, COLORS } from './adminCommons';
 
@@ -39,6 +40,7 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
     signupEnabled: true,
     aiReportEnabled: true,
   });
+  const { notifySuccess } = useFeedback();
   const [saving, setSaving] = useState(false);
   const [editingNotice, setEditingNotice] = useState(false);
   const [tempNoticeMessage, setTempNoticeMessage] = useState('');
@@ -54,7 +56,7 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
     try {
       const updated = { ...settings, ...newSettings };
       setSettings(updated);
-      alert('설정이 로컬에 반영되었습니다.\n(서버 연동은 추후 지원 예정)');
+      notifySuccess('설정이 로컬에 반영되었습니다. 서버 연동은 추후 지원 예정입니다.');
     } catch (error: any) {
       console.error('설정 저장 실패:', error);
     } finally {

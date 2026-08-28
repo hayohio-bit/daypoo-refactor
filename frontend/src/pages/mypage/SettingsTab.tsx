@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { Activity, Calendar, Lock, LogOut, Package, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFeedback } from '../../hooks/useFeedback';
 import { updateNickname, updatePassword } from '../../services/authService';
 import type { UserResponse } from '../../types/api';
 
@@ -26,6 +27,7 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   const [modalType, setModalType] = useState<'nickname' | 'password' | 'withdraw' | null>(null);
+  const { notifyError, notifySuccess } = useFeedback();
   const [inputValue, setInputValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -46,11 +48,11 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
     setIsSubmitting(true);
     try {
       await updateNickname(inputValue);
-      alert('닉네임이 변경되었습니다.');
+      notifySuccess('닉네임이 변경되었습니다.');
       refreshUser();
       setModalType(null);
-    } catch (err: any) {
-      alert(err.message || '변경에 실패했습니다.');
+    } catch (err) {
+      notifyError(err, '닉네임 변경에 실패했습니다.', '닉네임 변경 실패');
     } finally {
       setIsSubmitting(false);
     }
@@ -61,10 +63,10 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
     setIsSubmitting(true);
     try {
       await updatePassword(inputValue);
-      alert('비밀번호가 변경되었습니다.');
+      notifySuccess('비밀번호가 변경되었습니다.');
       setModalType(null);
-    } catch (err: any) {
-      alert(err.message || '변경에 실패했습니다.');
+    } catch (err) {
+      notifyError(err, '비밀번호 변경에 실패했습니다.', '비밀번호 변경 실패');
     } finally {
       setIsSubmitting(false);
     }
@@ -74,11 +76,10 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
     setIsSubmitting(true);
     try {
       await deleteMe();
-      alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
+      notifySuccess('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
       setModalType(null);
-    } catch (err: any) {
-      console.error('회원 탈퇴 에러:', err);
-      alert(err.message || '회원 탈퇴 처리에 실패했습니다.');
+    } catch (err) {
+      notifyError(err, '회원 탈퇴 처리에 실패했습니다.', '회원 탈퇴 실패');
     } finally {
       setIsSubmitting(false);
     }
@@ -227,72 +228,72 @@ export const SettingsTab = ({ user, refreshUser, logout, deleteMe }: SettingsTab
               className="relative w-full max-w-sm bg-white rounded-[40px] p-10 shadow-3xl border border-white"
             >
               <>
-                  <div
-                    className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto ${
+                <div
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto ${
+                    modalType === 'withdraw'
+                      ? 'bg-red-50 text-red-500'
+                      : 'bg-emerald-50 text-emerald-600'
+                  }`}
+                >
+                  {modalType === 'nickname' ? (
+                    <Activity size={28} />
+                  ) : modalType === 'password' ? (
+                    <Lock size={28} />
+                  ) : (
+                    <Trash2 size={28} />
+                  )}
+                </div>
+                <h3 className="text-2xl font-black text-[#1A2B27] mb-2 text-center">
+                  {modalType === 'nickname'
+                    ? '새로운 닉네임'
+                    : modalType === 'password'
+                      ? '비밀번호 재설정'
+                      : '계정 삭제'}
+                </h3>
+                <p className="text-xs font-medium text-gray-400 mb-8 leading-relaxed text-center">
+                  {modalType === 'nickname'
+                    ? '부르고 싶은 멋진 닉네임을 입력해주세요.'
+                    : modalType === 'password'
+                      ? '보안을 위해 강력한 비밀번호를 설정하세요.'
+                      : '탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.'}
+                </p>
+
+                {modalType !== 'withdraw' && (
+                  <input
+                    type={modalType === 'nickname' ? 'text' : 'password'}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder={modalType === 'nickname' ? '닉네임 입력' : '비밀번호 입력'}
+                    className="w-full p-5 bg-gray-50 border border-gray-100 rounded-[20px] mb-8 outline-none focus:border-emerald-500/30 font-black text-lg text-[#1A2B27] placeholder:text-gray-400"
+                  />
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setModalType(null)}
+                    className="flex-1 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-colors"
+                  >
+                    닫기
+                  </button>
+                  <button
+                    onClick={
+                      modalType === 'nickname'
+                        ? handleNicknameChange
+                        : modalType === 'password'
+                          ? handlePasswordChange
+                          : handleWithdraw
+                    }
+                    disabled={isSubmitting}
+                    className={`flex-1 py-4 text-white font-black rounded-[20px] shadow-xl disabled:opacity-50 transition-colors ${
                       modalType === 'withdraw'
-                        ? 'bg-red-50 text-red-500'
-                        : 'bg-emerald-50 text-emerald-600'
+                        ? 'bg-red-500 hover:bg-red-600 shadow-red-900/20'
+                        : 'bg-[#1B4332] hover:bg-[#2D6A4F] shadow-green-900/20'
                     }`}
                   >
-                    {modalType === 'nickname' ? (
-                      <Activity size={28} />
-                    ) : modalType === 'password' ? (
-                      <Lock size={28} />
-                    ) : (
-                      <Trash2 size={28} />
-                    )}
-                  </div>
-                  <h3 className="text-2xl font-black text-[#1A2B27] mb-2 text-center">
-                    {modalType === 'nickname'
-                      ? '새로운 닉네임'
-                      : modalType === 'password'
-                        ? '비밀번호 재설정'
-                        : '계정 삭제'}
-                  </h3>
-                  <p className="text-xs font-medium text-gray-400 mb-8 leading-relaxed text-center">
-                    {modalType === 'nickname'
-                      ? '부르고 싶은 멋진 닉네임을 입력해주세요.'
-                      : modalType === 'password'
-                        ? '보안을 위해 강력한 비밀번호를 설정하세요.'
-                        : '탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.'}
-                  </p>
-
-                  {modalType !== 'withdraw' && (
-                    <input
-                      type={modalType === 'nickname' ? 'text' : 'password'}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder={modalType === 'nickname' ? '닉네임 입력' : '비밀번호 입력'}
-                      className="w-full p-5 bg-gray-50 border border-gray-100 rounded-[20px] mb-8 outline-none focus:border-emerald-500/30 font-black text-lg text-[#1A2B27] placeholder:text-gray-400"
-                    />
-                  )}
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setModalType(null)}
-                      className="flex-1 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-colors"
-                    >
-                      닫기
-                    </button>
-                    <button
-                      onClick={
-                        modalType === 'nickname'
-                          ? handleNicknameChange
-                          : modalType === 'password'
-                            ? handlePasswordChange
-                            : handleWithdraw
-                      }
-                      disabled={isSubmitting}
-                      className={`flex-1 py-4 text-white font-black rounded-[20px] shadow-xl disabled:opacity-50 transition-colors ${
-                        modalType === 'withdraw'
-                          ? 'bg-red-500 hover:bg-red-600 shadow-red-900/20'
-                          : 'bg-[#1B4332] hover:bg-[#2D6A4F] shadow-green-900/20'
-                      }`}
-                    >
-                      {isSubmitting ? '처리 중...' : '확인'}
-                    </button>
-                  </div>
-                </>
+                    {isSubmitting ? '처리 중...' : '확인'}
+                  </button>
+                </div>
+              </>
             </motion.div>
           </div>
         )}

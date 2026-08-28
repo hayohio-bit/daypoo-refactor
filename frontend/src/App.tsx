@@ -45,6 +45,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ToiletProvider } from './context/ToiletContext';
 import { TransitionProvider } from './context/TransitionContext';
+import { useFeedback } from './hooks/useFeedback';
 
 // 동적 로드될 Framer Motion 기능들
 const loadFeatures = () => import('./utils/framerFeatures').then((res) => res.default);
@@ -120,21 +121,37 @@ function NavigationHelper({ authOpen }: { authOpen: boolean }) {
   return null;
 }
 
+/**
+ * OAuth2 로그인 실패(`?error=...`)를 토스트로 알린다.
+ *
+ * `useFeedback` 이 `NotificationProvider` 안에서만 동작하므로, App 본문이 아니라
+ * 프로바이더 하위 컴포넌트로 분리해 두었다.
+ */
+function OAuthErrorNotifier() {
+  const { notifyError } = useFeedback();
+
+  useEffect(() => {
+    const error = new URLSearchParams(window.location.search).get('error');
+    if (!error) return;
+    notifyError(
+      error,
+      '소셜 로그인 처리 중 문제가 발생했습니다. 서버 관리자에게 문의해주세요.',
+      '소셜 로그인 실패',
+    );
+  }, [notifyError]);
+
+  return null;
+}
+
 function App() {
   const [onAuthSuccess, setOnAuthSuccess] = useState<(() => void) | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
-  // URL에 ?login=open 이나 error 가 있을 경우 처리
+  // URL에 ?login=open 이 있으면 로그인 모달을 연다. (?error 처리는 OAuthErrorNotifier 담당)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('error')) {
-      // OAuth2 인증 실패(예: KAKAO_CLIENT_ID 없음 등) 시
-      console.error('OAuth Error:', params.get('error'));
-      alert(
-        '소셜 로그인 처리 중 문제가 발생했습니다. (설정/비밀키 누락 등)\n서버 관리자에게 문의하세요.',
-      );
-    } else if (params.get('login') === 'open') {
+    if (params.get('login') === 'open') {
       setAuthMode('login');
       setAuthOpen(true);
     }
@@ -155,6 +172,7 @@ function App() {
               <TransitionProvider>
                 <NotificationProvider>
                   <NavigationHelper authOpen={authOpen} />
+                  <OAuthErrorNotifier />
                   <NotificationSubscriber />
                   <LocationConsentBanner />
                   <Suspense fallback={<LoadingPage />}>

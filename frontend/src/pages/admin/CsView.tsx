@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, MessageSquare, Plus, RefreshCw, X } from 'lu
 import { useEffect, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { GlassCard } from '../../components/common/GlassCard';
+import { useFeedback } from '../../hooks/useFeedback';
 import {
   answerAdminInquiry,
   generateInquiryTestData,
@@ -25,6 +26,7 @@ export interface CsViewProps {
 
 export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
   const [inquiries, setInquiries] = useState<AdminInquiryListResponse[]>([]);
+  const { notifyError, notifySuccess, notifyInfo } = useFeedback();
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<InquiryStatus | 'ALL'>('ALL');
   const [page, setPage] = useState(0);
@@ -50,15 +52,10 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
       const response = await getAdminInquiries(params);
       setInquiries(response.content || []);
       setTotalPages(response.totalPages || 0);
-    } catch (error: any) {
-      console.error('문의 목록 조회 실패:', error);
+    } catch (error) {
       setInquiries([]);
       setTotalPages(0);
-
-      if (error.status && error.status >= 500) {
-        const errorMessage = error.message || '서버 오류가 발생했습니다.';
-        alert(`문의 목록 조회 실패: ${errorMessage}\n\n개발자 도구 콘솔을 확인해주세요.`);
-      }
+      notifyError(error, '서버 오류가 발생했습니다.', '문의 목록 조회 실패');
     } finally {
       setLoading(false);
     }
@@ -69,13 +66,11 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
     setGeneratingData(true);
     try {
       await generateInquiryTestData();
-      alert('30개의 테스트 문의 데이터가 생성되었습니다.');
+      notifySuccess('30개의 테스트 문의 데이터가 생성되었습니다.');
       fetchInquiries();
       onStatsRefresh();
-    } catch (error: any) {
-      console.error('테스트 데이터 생성 실패:', error);
-      const errorMessage = error.message || '데이터 생성 중 오류가 발생했습니다.';
-      alert(`테스트 데이터 생성 실패: ${errorMessage}\n\n개발자 도구 콘솔을 확인해주세요.`);
+    } catch (error) {
+      notifyError(error, '데이터 생성 중 오류가 발생했습니다.', '테스트 데이터 생성 실패');
     } finally {
       setGeneratingData(false);
     }
@@ -111,8 +106,7 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
         setAnswerText(detail.answer);
       }
     } catch (error) {
-      console.error('문의 상세 조회 실패:', error);
-      alert('문의 정보를 불러오는데 실패했습니다.');
+      notifyError(error, '문의 정보를 불러오지 못했습니다.', '문의 상세 조회 실패');
     } finally {
       setLoadingDetail(false);
     }
@@ -120,20 +114,19 @@ export const CsView = ({ stats, onStatsRefresh }: CsViewProps) => {
 
   const handleSubmitAnswer = async () => {
     if (!inquiryDetail || !answerText.trim()) {
-      alert('답변 내용을 입력해주세요.');
+      notifyInfo('답변 내용을 입력해주세요.');
       return;
     }
 
     setSubmittingAnswer(true);
     try {
       await answerAdminInquiry(inquiryDetail.id, answerText);
-      alert('답변이 등록되었습니다.');
+      notifySuccess('답변이 등록되었습니다.');
       setShowInquiryModal(false);
       fetchInquiries();
       onStatsRefresh();
     } catch (error) {
-      console.error('답변 등록 실패:', error);
-      alert('답변 등록에 실패했습니다.');
+      notifyError(error, '답변 등록에 실패했습니다.', '답변 등록 실패');
     } finally {
       setSubmittingAnswer(false);
     }

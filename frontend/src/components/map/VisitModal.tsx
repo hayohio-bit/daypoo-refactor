@@ -1,6 +1,7 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { AlertTriangle, Check, Clock, Loader2, Sparkles, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useFeedback } from '../../hooks/useFeedback';
 import type { ConditionTag, FoodTag, PoopColor, ToiletData } from '../../types/toilet';
 import WaveButtonComponent from '../WaveButton';
 import { BaseModal } from '../common/BaseModal';
@@ -25,6 +26,7 @@ interface VisitModalProps {
 
 export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitModalProps) {
   // 방문 인증 완료 여부
+  const { notifyError, notifyInfo } = useFeedback();
   const [visitDone, setVisitDone] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   // 인증 완료 시각 (onComplete 호출 시 사용)
@@ -65,7 +67,7 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
   // 방문 인증 완료 (API 호출 없음)
   const handleComplete = () => {
     if (!canComplete) {
-      alert(`⌛ 최소 ${remainingSeconds}초 더 체류가 필요합니다.`);
+      notifyInfo(`최소 ${remainingSeconds}초 더 체류해야 인증할 수 있습니다.`, '체류 시간 부족');
       return;
     }
 
@@ -78,8 +80,8 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
     try {
       await onComplete(buildResult());
       onClose();
-    } catch (e: any) {
-      alert(`인증 실패: ${e.message || '서버 오류'}`);
+    } catch (e) {
+      notifyError(e, '서버 오류로 인증하지 못했습니다.', '인증 실패');
     }
   };
 

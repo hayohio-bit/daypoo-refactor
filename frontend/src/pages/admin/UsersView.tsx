@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Settings, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AdminCard } from '../../components/admin/AdminCard';
+import { useFeedback } from '../../hooks/useFeedback';
 import {
   deleteAdminUser,
   getAdminUserDetail,
@@ -18,6 +19,7 @@ import { COLORS } from './adminCommons';
 
 export const UsersView = () => {
   const [users, setUsers] = useState<AdminUserListResponse[]>([]);
+  const { notifyError, notifySuccess } = useFeedback();
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -44,9 +46,8 @@ export const UsersView = () => {
       setUsers(response.content);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
-    } catch (error: any) {
-      console.error('유저 목록 조회 실패:', error);
-      alert('유저 목록을 불러오는데 실패했습니다. (' + (error.message || '네트워크 오류') + ')');
+    } catch (error) {
+      notifyError(error, '네트워크 오류가 발생했습니다.', '유저 목록 조회 실패');
     } finally {
       setLoading(false);
     }
@@ -71,10 +72,8 @@ export const UsersView = () => {
     try {
       const detail = await getAdminUserDetail(user.id);
       setUserDetail(detail);
-    } catch (error: any) {
-      console.error('유저 상세 조회 실패:', error);
-      const errorMsg = error.response?.data?.message || error.message || '알 수 없는 오류';
-      alert(`유저 정보를 불러오는데 실패했습니다.\n상세: ${errorMsg}`);
+    } catch (error) {
+      notifyError(error, '알 수 없는 오류가 발생했습니다.', '유저 상세 조회 실패');
       setShowUserModal(false);
     } finally {
       setLoadingDetail(false);
@@ -84,12 +83,11 @@ export const UsersView = () => {
   const handleUpdateUserRole = async (userId: number, newRole: Role) => {
     try {
       await updateAdminUserRole(userId, newRole);
-      alert('역할이 변경되었습니다.');
+      notifySuccess('역할이 변경되었습니다.');
       setShowUserModal(false);
       fetchUsers();
-    } catch (error: any) {
-      console.error('역할 변경 실패:', error);
-      alert('역할 변경에 실패했습니다.');
+    } catch (error) {
+      notifyError(error, '역할 변경에 실패했습니다.', '역할 변경 실패');
     }
   };
 
@@ -104,12 +102,15 @@ export const UsersView = () => {
 
     try {
       await deleteAdminUser(userId);
-      alert('사용자가 성공적으로 탈퇴되었습니다.');
+      notifySuccess('사용자가 탈퇴 처리되었습니다.');
       setShowUserModal(false);
       fetchUsers();
-    } catch (error: any) {
-      console.error('사용자 삭제 실패:', error);
-      alert('탈퇴 처리 중 오류가 발생했습니다. (권한 또는 데이터 제약 조건 확인 필요)');
+    } catch (error) {
+      notifyError(
+        error,
+        '탈퇴 처리 중 오류가 발생했습니다. 권한 또는 데이터 제약 조건을 확인해주세요.',
+        '사용자 탈퇴 실패',
+      );
     }
   };
 

@@ -3,6 +3,7 @@ import { Activity, Database, Navigation, Plus, RefreshCw, Star, X } from 'lucide
 import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { AdminCard } from '../../components/admin/AdminCard';
+import { useFeedback } from '../../hooks/useFeedback';
 import { useToilets } from '../../hooks/useToilets';
 import { getAdminToilets, getToiletSyncStatus, startToiletSync } from '../../services/adminService';
 import { type ToiletReviewSummaryResponse, getReviewSummary } from '../../services/reviewService';
@@ -115,6 +116,7 @@ export const ToiletsView = () => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [mapScale, setMapScale] = useState(3);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5172, lng: 127.0473 });
+  const { notifyError } = useFeedback();
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
 
@@ -163,13 +165,13 @@ export const ToiletsView = () => {
           if (pollingRef.current) clearInterval(pollingRef.current);
           pollingRef.current = null;
           setSyncing(false);
-          alert('동기화 실패: ' + status.errorMessage);
+          notifyError(status.errorMessage, '동기화가 실패했습니다.', '동기화 실패');
         }
       } catch {
         if (pollingRef.current) clearInterval(pollingRef.current);
         pollingRef.current = null;
         setSyncing(false);
-        alert('동기화 상태 조회 실패');
+        notifyError(undefined, '동기화 상태를 조회하지 못했습니다.', '동기화 상태 조회 실패');
       }
     }, 3000);
   };
@@ -191,10 +193,9 @@ export const ToiletsView = () => {
     try {
       await startToiletSync();
       startPolling();
-    } catch (error: any) {
+    } catch (error) {
       setSyncing(false);
-      console.error('동기화 시작 실패:', error);
-      alert('동기화 시작 실패: ' + (error.message || '오류가 발생했습니다.'));
+      notifyError(error, '오류가 발생했습니다.', '동기화 시작 실패');
     }
   };
 
