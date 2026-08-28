@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { findEmailByNickname, requestPasswordReset } from '../services/authService';
+import { getErrorMessage } from '../utils/errorMessage';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type ForgotMode = 'password' | 'email';
@@ -263,8 +264,8 @@ function PasswordForgot({ onBack }: { onBack: () => void }) {
       // POST /api/v1/auth/password/reset?email=xxx
       await requestPasswordReset(email);
       setStep('done');
-    } catch (err: any) {
-      setErrors({ email: err.response?.data?.message || '비밀번호 재설정 요청에 실패했습니다.' });
+    } catch (err) {
+      setErrors({ email: getErrorMessage(err) });
     } finally {
       setLoading(false);
     }
@@ -407,8 +408,8 @@ function EmailForgot() {
       const res = await findEmailByNickname(nickname);
       setFoundEmail((res as any)?.data || (res as any)); // 서버에 따라 res.data 혹은 res 자체가 문자열일 수 있음
       setStep('done');
-    } catch (err: any) {
-      setErrors({ nickname: err.response?.data?.message || '등록된 정보를 찾을 수 없습니다.' });
+    } catch (err) {
+      setErrors({ nickname: getErrorMessage(err) });
     } finally {
       setLoading(false);
     }

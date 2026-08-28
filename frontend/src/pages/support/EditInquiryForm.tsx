@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type React from 'react';
 import { updateInquiry } from '../../services/supportService';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { INQUIRY_CATEGORY_OPTIONS, type Inquiry } from './supportTypes';
 
 // ── 문의 수정 폼 ───────────────────────────────────────────────────
@@ -28,8 +29,8 @@ export function EditInquiryForm({
     try {
       await updateInquiry(inq.id, formData);
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || '수정 중 오류가 발생했습니다.');
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

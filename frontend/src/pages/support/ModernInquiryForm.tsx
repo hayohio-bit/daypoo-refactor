@@ -3,6 +3,7 @@ import { Plus, Send } from 'lucide-react';
 import { useState } from 'react';
 import type React from 'react';
 import { createInquiry } from '../../services/supportService';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { cardVariants } from './supportAnimations';
 import { INQUIRY_CATEGORY_OPTIONS, type InquiryCategory } from './supportTypes';
 
@@ -23,8 +24,8 @@ export function ModernInquiryForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       await createInquiry(formData);
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || '등록 중 오류가 발생했습니다.');
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

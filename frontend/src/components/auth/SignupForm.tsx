@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { checkEmailAvailable, checkNicknameAvailable, signup } from '../../services/authService';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { InputField } from './InputField';
 import { SocialLoginButtons } from './SocialLoginButtons';
 import { TermsCheck } from './TermsCheck';
@@ -215,8 +216,8 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
       setLoading(true);
       try {
         await checkEmailAvailable(email);
-      } catch (err: any) {
-        setErrors({ email: err.message || '이미 사용 중인 이메일입니다.' });
+      } catch (err) {
+        setErrors({ email: getErrorMessage(err) });
         setShake(true);
         return;
       } finally {
@@ -226,8 +227,8 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
       setLoading(true);
       try {
         await checkNicknameAvailable(nickname);
-      } catch (err: any) {
-        setErrors({ nickname: err.message || '이미 사용 중인 닉네임입니다.' });
+      } catch (err) {
+        setErrors({ nickname: getErrorMessage(err) });
         setShake(true);
         return;
       } finally {
@@ -249,8 +250,8 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
         authLogin(res.accessToken, res.refreshToken || '');
         onSuccess?.();
       }
-    } catch (err: any) {
-      setErrors({ terms: err.message || '회원가입에 실패했습니다.' });
+    } catch (err) {
+      setErrors({ terms: getErrorMessage(err) });
     } finally {
       setLoading(false);
     }

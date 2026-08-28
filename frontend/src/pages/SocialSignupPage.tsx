@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { checkNicknameAvailable, socialSignup } from '../services/authService';
+import { getErrorMessage } from '../utils/errorMessage';
 
 export function SocialSignupPage() {
   const [searchParams] = useSearchParams();
@@ -41,9 +42,9 @@ export function SocialSignupPage() {
     try {
       await checkNicknameAvailable(name);
       setStatus('available');
-    } catch (err: any) {
+    } catch (err) {
       setStatus('unavailable');
-      setErrorMessage(err.message || '이미 사용 중인 닉네임입니다.');
+      setErrorMessage(getErrorMessage(err));
     }
   };
 
@@ -73,9 +74,9 @@ export function SocialSignupPage() {
         localStorage.removeItem('returnUrl');
         navigate(returnUrl, { replace: true });
       }
-    } catch (err: any) {
+    } catch (err) {
       setStatus('error');
-      setErrorMessage(err.message || '가입 처리 중 오류가 발생했습니다.');
+      setErrorMessage(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
