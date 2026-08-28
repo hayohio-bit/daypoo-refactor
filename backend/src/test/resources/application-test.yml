@@ -25,9 +25,6 @@ public-data:
   api-key: dummy_public_data_key
   url: https://apis.data.go.kr/1741000/public_restroom_info/info
 
-ai-service:
-  url: http://localhost:19999
-
 opensearch:
   url: http://localhost:9200
 

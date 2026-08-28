@@ -116,9 +116,6 @@ public-data:
   api-key: ${PUBLIC_DATA_API_KEY}
   url: ${PUBLIC_DATA_URL:https://apis.data.go.kr/1741000/public_restroom_info/info}
 
-ai-service:
-  url: ${AI_SERVICE_URL}
-
 opensearch:
   url: ${OPENSEARCH_URL:http://localhost:9200}
 
