@@ -10,7 +10,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${DB_PORT}:5432"
+      # 로컬 고정 포트. .env 의 DB_PORT 가 있으면 그 값이 우선한다.
+      - "${DB_PORT:-15432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -24,7 +25,8 @@ services:
     image: redis:7-alpine
     container_name: daypoo_redis
     ports:
-      - "6379:6379"
+      # 로컬 고정 포트. .env 의 REDIS_PORT 가 있으면 그 값이 우선한다.
+      - "${REDIS_PORT:-16379}:6379"
     restart: unless-stopped
     volumes:
       - redis_data:/data

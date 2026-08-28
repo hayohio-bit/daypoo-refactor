@@ -9,8 +9,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// 로컬에서 8080을 다른 앱이 쓸 때 BACKEND_URL 환경 변수로 프록시 대상을 바꿀 수 있다.
-const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
+// 로컬 백엔드 고정 포트. 다른 포트로 띄웠다면 BACKEND_URL 환경 변수로 프록시 대상을 바꾼다.
+const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:18080';
 
 const copyWellKnownPlugin = (): Plugin => ({
   name: 'copy-well-known',
@@ -208,6 +208,10 @@ export default defineConfig({
   ],
   envDir: '../',
   server: {
+    // 카카오맵 SDK는 등록 도메인인 http://localhost:5173 에서만 로드된다.
+    // strictPort 로 다른 포트로 밀려나는 대신 즉시 실패하게 한다.
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/api': { target: backendUrl, changeOrigin: true },
       '/oauth2': { target: backendUrl, changeOrigin: true },

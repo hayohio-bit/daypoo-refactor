@@ -13,14 +13,15 @@ DayPoo — 전국 화장실 위치 검색·배변 기록 분석 서비스. 팀 �
 실행 순서: DB → 백엔드 → 프론트엔드. 루트 `.env` 하나를 세 곳(docker-compose, 백엔드, 프론트엔드)이 공유한다.
 
 ```bash
-docker compose up -d                 # PostgreSQL(PostGIS) 5432, Redis 6379
-cd backend && ./gradlew bootRun      # :8080 (SERVER_PORT 환경 변수로 변경 가능)
-cd frontend && npm run dev           # :5173
+docker compose up -d                 # PostgreSQL(PostGIS) 15432, Redis 16379
+cd backend && ./gradlew bootRun      # :18080 (SERVER_PORT 환경 변수로 변경 가능)
+cd frontend && npm run dev           # :5173 (strictPort — 점유되어 있으면 실행 실패)
 ```
 
 - 백엔드는 `spring.config.import: optional:file:../.env`로 루트 `.env`를 읽는다. DB 미기동 시 Flyway 때문에 부팅이 실패한다.
 - Vite는 `envDir: '../'`로 루트 `.env`의 `VITE_*` 변수를 읽는다. `index.html`의 `%VITE_KAKAO_MAP_KEY%`가 카카오맵 SDK 키로 치환된다.
-- **카카오맵은 `http://localhost:5173` 출처에서만 로드된다** (카카오 개발자 콘솔 등록 도메인). 프론트엔드가 다른 포트로 밀려나면 지도가 빈 화면이 되므로 5173을 확보해야 한다.
+- **로컬 포트는 다른 프로젝트와 겹치지 않도록 고정되어 있다**: 프론트엔드 5173, 백엔드 18080(`build.gradle` 의 `bootRun` 이 `SERVER_PORT` 주입), PostgreSQL 15432, Redis 16379(`docker-compose.yml` 기본값과 루트 환경 변수 파일의 `DB_PORT`·`REDIS_PORT`). 자세한 근거는 `docs/local-run-guide.md`.
+- **카카오맵은 `http://localhost:5173` 출처에서만 로드된다** (카카오 개발자 콘솔 등록 도메인). 그래서 프론트엔드만 포트를 바꿀 수 없고, `vite.config.ts` 에 `strictPort: true` 를 두어 5173 을 확보하지 못하면 즉시 실패하게 했다.
 - 백엔드 포트를 옮긴 경우 `BACKEND_URL=http://localhost:8081 npm run dev`로 Vite 프록시 대상을 바꿀 수 있다.
 - Windows에서 Docker Desktop 없이 WSL2 내부 Docker Engine으로 compose를 실행할 수 있다. 이때 WSL VM이 유휴 종료되면 컨테이너도 함께 내려간다.
 
@@ -68,7 +69,7 @@ npm run build                        # tsc 없이 vite build
 
 ## API 문서
 
-백엔드 기동 후 Swagger UI: `http://localhost:8080/api/docs` (OpenAPI JSON: `/api/v3/api-docs`). 헬스체크: `/actuator/health`.
+백엔드 기동 후 Swagger UI: `http://localhost:18080/api/docs` (OpenAPI JSON: `/api/v3/api-docs`). 헬스체크: `/actuator/health`.
 
 ## 진행 중인 작업
 

@@ -152,12 +152,12 @@ cp .env.example .env
 ### 2단계: 로컬 개발 실행
 
 - **Docker** (DB/인프라): `docker-compose up -d`
-- **Backend**: `cd backend && ./gradlew bootRun` (URL: `http://localhost:8080`)
+- **Backend**: `cd backend && ./gradlew bootRun` (URL: `http://localhost:18080`)
 - **Frontend**: `cd frontend && npm install && npm run dev` (URL: `http://localhost:5173`)
 
 > 순서대로 실행 권장 — Docker(DB) → Backend → Frontend
 
-기동 확인은 헬스체크(`http://localhost:8080/actuator/health`)와 Swagger UI(`http://localhost:8080/api/docs`)에서 합니다. 포트 충돌 등 자주 겪는 문제와 해결 방법은 [로컬 실행 및 화면 가이드](./docs/local-run-guide.md)를 참고해 주세요.
+기동 확인은 헬스체크(`http://localhost:18080/actuator/health`)와 Swagger UI(`http://localhost:18080/api/docs`)에서 합니다. 로컬 포트는 프론트엔드 5173, 백엔드 18080, PostgreSQL 15432, Redis 16379 로 고정되어 있습니다. 포트 충돌 등 자주 겪는 문제와 해결 방법은 [로컬 실행 및 화면 가이드](./docs/local-run-guide.md)를 참고해 주세요.
 
 ---
 
