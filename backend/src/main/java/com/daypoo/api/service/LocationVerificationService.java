@@ -37,16 +37,6 @@ public class LocationVerificationService {
     return new DistanceCheck(distance, distance <= checkInProperties.getAllowedRadiusMeters());
   }
 
-  /** 유저의 위치가 화장실 좌표에서 허용 반경 안에 있는지 확인한다. */
-  public boolean isWithinAllowedDistance(Long toiletId, double currentLat, double currentLon) {
-    return checkDistance(toiletId, currentLat, currentLon).withinAllowedRadius();
-  }
-
-  /** 실제 화장실까지의 거리를 미터 단위로 반환 (로그 기록용) */
-  public Double getDistanceToToilet(Long toiletId, double currentLat, double currentLon) {
-    return toiletRepository.getDistanceToToilet(toiletId, currentLat, currentLon);
-  }
-
   /** 화장실 도착 시간 기록 및 최초 시간 반환 (Fast Check-in 용) */
   public long getOrSetArrivalTime(Long userId, Long toiletId, Long enteredAt) {
     String key = "daypoo:record:arrival:user:" + userId + ":toilet:" + toiletId;

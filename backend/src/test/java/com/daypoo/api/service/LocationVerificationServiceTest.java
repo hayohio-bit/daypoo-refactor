@@ -34,7 +34,8 @@ class LocationVerificationServiceTest {
   void 허용_반경_경계값은_통과한다() {
     given(toiletRepository.getDistanceToToilet(TOILET_ID, LAT, LON)).willReturn(150.0);
 
-    assertThat(serviceWithRadius(150.0).isWithinAllowedDistance(TOILET_ID, LAT, LON)).isTrue();
+    assertThat(serviceWithRadius(150.0).checkDistance(TOILET_ID, LAT, LON).withinAllowedRadius())
+        .isTrue();
   }
 
   @Test
@@ -42,7 +43,8 @@ class LocationVerificationServiceTest {
   void 허용_반경을_넘으면_실패한다() {
     given(toiletRepository.getDistanceToToilet(TOILET_ID, LAT, LON)).willReturn(150.1);
 
-    assertThat(serviceWithRadius(150.0).isWithinAllowedDistance(TOILET_ID, LAT, LON)).isFalse();
+    assertThat(serviceWithRadius(150.0).checkDistance(TOILET_ID, LAT, LON).withinAllowedRadius())
+        .isFalse();
   }
 
   @Test
@@ -50,7 +52,8 @@ class LocationVerificationServiceTest {
   void 설정값이_판정에_반영된다() {
     given(toiletRepository.getDistanceToToilet(TOILET_ID, LAT, LON)).willReturn(300.0);
 
-    assertThat(serviceWithRadius(500.0).isWithinAllowedDistance(TOILET_ID, LAT, LON)).isTrue();
+    assertThat(serviceWithRadius(500.0).checkDistance(TOILET_ID, LAT, LON).withinAllowedRadius())
+        .isTrue();
   }
 
   @Test
@@ -70,6 +73,7 @@ class LocationVerificationServiceTest {
   void 거리를_구하지_못하면_실패한다() {
     given(toiletRepository.getDistanceToToilet(TOILET_ID, LAT, LON)).willReturn(null);
 
-    assertThat(serviceWithRadius(150.0).isWithinAllowedDistance(TOILET_ID, LAT, LON)).isFalse();
+    assertThat(serviceWithRadius(150.0).checkDistance(TOILET_ID, LAT, LON).withinAllowedRadius())
+        .isFalse();
   }
 }
