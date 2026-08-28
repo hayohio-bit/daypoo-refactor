@@ -12,6 +12,4 @@ public record PooRecordCreateRequest(
     List<String> conditionTags,
     List<String> dietTags,
     Double latitude,
-    Double longitude,
-    String imageBase64 // AI 분석용 (Optional)
-    ) {}
+    Double longitude) {}

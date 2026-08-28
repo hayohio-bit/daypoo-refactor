@@ -69,8 +69,7 @@ class PooRecordServiceTest {
             Collections.singletonList("Good"),
             Collections.singletonList("Meal"),
             37.123,
-            127.123,
-            null);
+            127.123);
   }
 
   @Test
@@ -112,54 +111,6 @@ class PooRecordServiceTest {
     verify(recordRepository, times(1)).save(any(PooRecord.class));
   }
 
-  @Test
-  @DisplayName("성공: 이미지 포함 배변 기록 생성")
-  void createRecord_success_withImage() {
-    // given
-    PooRecordCreateRequest imageRequest =
-        new PooRecordCreateRequest(
-            100L,
-            5,
-            "Golden",
-            Collections.singletonList("Good"),
-            Collections.singletonList("Meal"),
-            37.123,
-            127.123,
-            "base64image");
-
-    given(userService.getByEmail("test@test.com")).willReturn(testUser);
-    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
-    given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
-    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
-        .willReturn(System.currentTimeMillis());
-    given(geocodingService.reverseGeocode(anyDouble(), anyDouble())).willReturn("역삼1동");
-
-    PooRecord savedRecord =
-        PooRecord.builder()
-            .user(testUser)
-            .toilet(testToilet)
-            .bristolScale(5)
-            .color("Golden")
-            .build();
-    ReflectionTestUtils.setField(savedRecord, "id", 502L);
-    given(recordRepository.save(any(PooRecord.class))).willReturn(savedRecord);
-    given(userRepository.save(any(User.class))).willReturn(testUser);
-
-    PooRecordResponse mockResponseAi =
-        PooRecordResponse.builder().bristolScale(5).color("Golden").build();
-    given(recordMapper.toResponse(any(PooRecord.class))).willReturn(mockResponseAi);
-
-    // when
-    PooRecordResponse response = pooRecordService.createRecord("test@test.com", imageRequest);
-
-    // then
-    assertThat(response.bristolScale()).isEqualTo(5);
-    assertThat(response.color()).isEqualTo("Golden");
-  }
-
-  @Test
   @org.junit.jupiter.api.Disabled("개발 모드로 인해 예외 발생 비활성화됨")
   @DisplayName("실패: 화장실 반경 밖에서 인증 시도")
   void createRecord_fail_distance() {

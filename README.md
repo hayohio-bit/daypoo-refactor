@@ -63,7 +63,6 @@ DayPoo는 고성능 데이터 처리를 위해 **서비스 지향 아키텍처(S
 graph TB
     subgraph Client["🖥️ 프론트엔드 (React + Vite + TailwindCSS)"]
         UI[React SPA]
-        WebRTC[무음 Canvas 촬영]
         KakaoMap[카카오맵 SDK]
     end
 
@@ -91,7 +90,7 @@ graph TB
 
 | 파트           | 기술                        | 설명                                                      |
 | :------------- | :-------------------------- | :-------------------------------------------------------- |
-| **Frontend**   | React 19.2, TypeScript, Vite | WebRTC 기반 무음 캡처 및 고성능 지도 UI 구현 (Port: 5173) |
+| **Frontend**   | React 19.2, TypeScript, Vite | 고성능 지도 UI 구현 (Port: 5173) |
 | **Backend**    | Spring Boot 3.4.3 (Java 21) | **가상 스레드(Virtual Threads)** 기반 고성능 병렬 처리    |
 |                | QueryDSL 5.0 / Flyway       | 타입 세이프한 쿼리 작성 및 DB 형상 관리 자동화            |
 | **Data Layer** | PostgreSQL 16 + PostGIS     | 5만 건 공간 데이터 처리 및 공간 인덱싱(GIST)              |

@@ -391,8 +391,6 @@ components:
         longitude:
           type: number
           format: double
-        imageBase64:
-          type: string
     PooCheckInRequest:
       type: object
       required:

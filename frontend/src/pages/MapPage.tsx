@@ -353,10 +353,8 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           dietTags: result.foodTags,
           latitude: pos.lat,
           longitude: pos.lng,
-          // Fast-Track: bristolType / color가 null이면 AI 자동 분석
           ...(result.bristolType !== null && { bristolScale: result.bristolType }),
           ...(result.color !== null && { color: result.color }),
-          ...(result.imageBase64 && { imageBase64: result.imageBase64 }),
         };
 
         await api.post('/records', payload);
