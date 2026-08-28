@@ -49,7 +49,7 @@ function createToiletMarker(
   contentEl.style.cursor = 'pointer';
   contentEl.style.width = '36px';
   contentEl.style.height = '44px';
-  contentEl.style.webkitFontSmoothing = 'antialiased';
+  contentEl.style.setProperty('-webkit-font-smoothing', 'antialiased');
 
   contentEl.innerHTML = `
       <div style="
@@ -255,6 +255,8 @@ export const MapView = memo(
 
       useEffect(() => {
         if (!mapRef.current || !clustererRef.current) return;
+        // forEach 콜백 안에서는 ref 의 좁혀진 타입이 유지되지 않으므로 지역 변수로 붙잡는다.
+        const clusterer = clustererRef.current;
 
         // H8: ID로 화장실을 선택하는 안전한 전역 함수 등록
         window.setSelectedToiletByIdGlobal = (id: string) => {
@@ -276,7 +278,7 @@ export const MapView = memo(
         });
 
         if (toRemoveMarkers.length > 0) {
-          clustererRef.current.removeMarkers(toRemoveMarkers);
+          clusterer.removeMarkers(toRemoveMarkers);
         }
 
         // 추가 또는 갱신할 마커 식별
@@ -288,16 +290,14 @@ export const MapView = memo(
 
           if (existing) {
             // 마커 내용물(이모지)이 현재 상태와 맞는지 확인 (💩 포함 여부 기준)
-            const contentStr =
-              typeof existing.overlay.getContent() === 'string'
-                ? existing.overlay.getContent()
-                : '';
+            const content = existing.overlay.getContent();
+            const contentStr = typeof content === 'string' ? content : '';
             const wasVisited = contentStr.includes('💩');
 
             if (wasVisited !== toilet.isVisited) {
               // 상태가 변했다면 삭제 후 재생성 대상
               existing.overlay.setMap(null);
-              clustererRef.current.removeMarker(existing.marker);
+              clusterer.removeMarker(existing.marker);
               markersRef.current.delete(toilet.id);
             } else {
               // 변경사항 없으면 스킵
@@ -314,9 +314,9 @@ export const MapView = memo(
         });
 
         if (newMarkers.length > 0) {
-          clustererRef.current.addMarkers(newMarkers);
+          clusterer.addMarkers(newMarkers);
         }
-        clustererRef.current.redraw();
+        clusterer.redraw();
       }, [toilets, onSelectToilet]);
 
       return (

@@ -11,7 +11,7 @@ vi.mock('../services/apiClient', () => ({
 }));
 
 import { api } from '../services/apiClient';
-const mockApi = api as { get: ReturnType<typeof vi.fn> };
+const mockApi = api as unknown as { get: ReturnType<typeof vi.fn> };
 
 // ── 테스트 픽스처 ────────────────────────────────────────────────
 const makeMockToilet = (id: number) => ({

@@ -10,12 +10,6 @@ interface EmergencySheetProps {
   onClose: () => void;
 }
 
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
-
 // 도보 시간 계산 (평균 4.5km/h -> 1px/s 약 75m/min)
 const calculateWalkTime = (meters: number) => {
   const minutes = Math.ceil(meters / 75);
@@ -59,11 +53,13 @@ function MiniMap({
     try {
       window.kakao.maps.load(() => {
         console.log('[MiniMap] kakao.maps.load() callback executed');
-        if (miniMapRef.current) miniMapRef.current.innerHTML = '';
+        const container = miniMapRef.current;
+        if (!container) return;
+        container.innerHTML = '';
 
         const center = new window.kakao.maps.LatLng(userPos.lat, userPos.lng);
         console.log('[MiniMap] Creating map at:', userPos);
-        const map = new window.kakao.maps.Map(miniMapRef.current, {
+        const map = new window.kakao.maps.Map(container, {
           center,
           level: 3,
           draggable: false,

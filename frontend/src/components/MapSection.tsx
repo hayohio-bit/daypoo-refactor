@@ -5,12 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useToilets } from '../hooks/useToilets';
 import type { ToiletData } from '../types/toilet';
 
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
-
 export function MapSection() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
@@ -48,8 +42,10 @@ export function MapSection() {
 
       const initMap = (lat: number, lng: number) => {
         if (mapInstance.current) return;
+        const container = mapRef.current;
+        if (!container) return;
         const center = new window.kakao.maps.LatLng(lat, lng);
-        const map = new window.kakao.maps.Map(mapRef.current, {
+        const map = new window.kakao.maps.Map(container, {
           center,
           level: 4,
         });

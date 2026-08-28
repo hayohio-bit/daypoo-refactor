@@ -34,6 +34,8 @@ declare namespace kakao.maps {
     getLevel(): number;
     panTo(latlng: LatLng): void;
     getBounds(): LatLngBounds;
+    getCenter(): LatLng;
+    setBounds(bounds: LatLngBounds, paddingPixel?: number): void;
     setDraggable(draggable: boolean): void;
     setZoomable(zoomable: boolean): void;
     relayout(): void;
@@ -42,6 +44,8 @@ declare namespace kakao.maps {
   class LatLngBounds {
     getSouthWest(): LatLng;
     getNorthEast(): LatLng;
+    /** 주어진 좌표를 포함하도록 범위를 넓힌다. */
+    extend(latlng: LatLng): void;
   }
 
   class MarkerClusterer {

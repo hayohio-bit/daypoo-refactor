@@ -187,7 +187,7 @@ function App() {
                       <Route path="/forgot-password" element={<ForgotPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
-                      <Route path="/mypage" element={<MyPage openAuth={openAuth} />} />
+                      <Route path="/mypage" element={<MyPage />} />
                       <Route path="/support" element={<SupportPage openAuth={openAuth} />} />
                       <Route path="/auth/callback" element={<AuthCallback />} />
                       <Route path="/signup/social" element={<SocialSignupPage />} />
