@@ -14,13 +14,14 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getAdminStats, getSystemLogs } from '../services/adminService';
 import { api } from '../services/apiClient';
-import type { AdminStatsResponse } from '../types/admin';
+import type { AdminStatsResponse, SystemLog } from '../types/admin';
 
 import { CsView } from './admin/CsView';
 import { DashboardView } from './admin/DashboardView';
 import { LogsView } from './admin/LogsView';
-import { type SystemLog, SystemView } from './admin/SystemView';
+import { SystemView } from './admin/SystemView';
 import { ToiletsView } from './admin/ToiletsView';
 import { UsersView } from './admin/UsersView';
 // ── 분할된 서브 뷰 임포트 ───────────────────────────────────────────────
@@ -81,10 +82,7 @@ export function AdminPage() {
   // H-3 개선: fetchStats를 useCallback으로 래핑하여 리렌더링 시 함수가 계속 생성되는 것을 방지
   const fetchStats = useCallback(async () => {
     try {
-      const [statsData, logsData] = await Promise.all([
-        api.get<AdminStatsResponse>('/admin/stats'),
-        api.get<SystemLog[]>('/admin/logs'),
-      ]);
+      const [statsData, logsData] = await Promise.all([getAdminStats(), getSystemLogs()]);
       setStats(statsData);
       setLogs(Array.isArray(logsData) ? logsData : []);
     } catch (err) {

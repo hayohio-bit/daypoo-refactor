@@ -1,6 +1,6 @@
 import type React from 'react';
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { api } from '../services/apiClient';
+import { getToiletsNearby } from '../services/toiletService';
 import type { ToiletData } from '../types/toilet';
 
 interface ToiletContextType {
@@ -99,9 +99,7 @@ export function ToiletProvider({ children }: { children: React.ReactNode }) {
           fetchRadius = Math.min(dynamicRadius, maxRadiusByLevel);
         }
 
-        const backendData = await api.get(
-          `/toilets?latitude=${finalLat}&longitude=${finalLng}&radius=${fetchRadius}`,
-        );
+        const backendData = await getToiletsNearby(finalLat, finalLng, fetchRadius);
         const rawData = Array.isArray(backendData) ? backendData.slice(0, 1000) : [];
 
         const data: ToiletData[] = rawData.map((item: any) => ({

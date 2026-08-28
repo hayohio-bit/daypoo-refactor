@@ -2,7 +2,8 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { api, getAccessToken } from '../services/apiClient';
+import { getAccessToken } from '../services/apiClient';
+import { issueSseToken } from '../services/notificationService';
 
 const MAX_RETRY_COUNT = 10; // F4: 최대 재시도 횟수
 const BASE_RETRY_DELAY = 1000; // F4: 기본 재시도 지연 (1초)
@@ -34,7 +35,7 @@ export const NotificationSubscriber: React.FC = () => {
       // SSE 전용 단기 토큰 발급 시도 (백엔드 미구현 시 에러 발생 가능)
       let subToken = accessToken;
       try {
-        const res: any = await api.post('/notifications/sse-token', {});
+        const res = await issueSseToken();
         if (res && res.sseToken) subToken = res.sseToken;
       } catch (err) {
         // 백엔드 미구현 시 기존 토큰으로 Fallback

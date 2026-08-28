@@ -1,4 +1,3 @@
-
 /**
  * API 공통 응답 구조
  */
@@ -102,17 +101,13 @@ export interface VisitRecordRequest {
   longitude: number;
 }
 
-/**
- * 배변 패턴 기록 생성 요청 (배변 데이터 전용)
- * imageBase64: 전송 후 서버에서 즉시 폐기 (In-memory pipeline, DB 미저장)
- */
+/** 배변 패턴 기록 생성 요청 (배변 데이터 전용) */
 export interface HealthRecordRequest {
   toiletId?: number;
-  bristolScale?: number; // 미입력 시 AI 자동 분석
+  bristolScale?: number;
   color?: string;
   conditionTags: string[];
   dietTags: string[];
-  imageBase64?: string;
 }
 
 /**

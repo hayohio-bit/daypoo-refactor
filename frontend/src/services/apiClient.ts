@@ -46,6 +46,35 @@ export function removeTokens() {
   sessionStorage.removeItem('refreshToken');
 }
 
+function createApiError(message: string, code: string, status: number): ApiError {
+  const error = new Error(message) as ApiError;
+  error.code = code;
+  error.status = status;
+  return error;
+}
+
+function buildHeaders(token: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    Accept: 'application/json; charset=UTF-8',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+/** 타임아웃(AbortError)과 네트워크 실패를 ApiError 로 정규화한다. 그 밖의 에러는 그대로 통과시킨다. */
+function toTransportError(err: any): any {
+  if (err?.name === 'AbortError') {
+    return createApiError('요청 시간이 초과되었습니다.', 'TIMEOUT', 408);
+  }
+  if (err instanceof TypeError && err.message.includes('fetch')) {
+    return createApiError('네트워크 연결에 실패했습니다.', 'NETWORK_ERROR', 0);
+  }
+  return err;
+}
+
 class ApiClient {
   private baseUrl = BASE_URL;
   private refreshPromise: Promise<boolean> | null = null; // F3: 토큰 리프레시 뮤텍스
@@ -56,113 +85,96 @@ class ApiClient {
     body?: any,
     timeout = 30000,
   ): Promise<T> {
-    const token = getToken('accessToken');
-
-    // 헤더 설정
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json; charset=UTF-8',
-      Accept: 'application/json; charset=UTF-8',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    // F1: AbortController 기반 타임아웃
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const headers = buildHeaders(getToken('accessToken'));
 
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await this.send(method, endpoint, headers, body, timeout);
+
+      // 401 인증 에러 발생 시 토큰 리프레시 시도
+      if (response.status === 401 && !endpoint.includes('/auth/login')) {
+        return await this.handleUnauthorized<T>(method, endpoint, headers, body, timeout);
+      }
+
+      if (!response.ok) {
+        throw await this.toResponseError(response);
+      }
+
+      return await this.parseResponse<T>(response);
+    } catch (err: any) {
+      throw toTransportError(err);
+    }
+  }
+
+  /** F1: AbortController 기반 타임아웃을 건 단일 fetch */
+  private async send(
+    method: string,
+    endpoint: string,
+    headers: Record<string, string>,
+    body: any,
+    timeout: number,
+  ): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    try {
+      return await fetch(`${this.baseUrl}${endpoint}`, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
-
+    } finally {
       clearTimeout(timeoutId);
-
-      // 401 인증 에러 발생 시 토큰 리프레시 시도
-      if (response.status === 401 && !endpoint.includes('/auth/login')) {
-        const refreshed = await this.tryRefreshToken();
-        if (refreshed) {
-          // 리프레시 성공 시 새 토큰으로 재요청
-          return this.request<T>(method, endpoint, body, timeout);
-        } else {
-          // 리프레시 실패 시 (만료된 리프레시 토큰 등) 또는 리프레시 토큰이 아예 없을 때
-          removeTokens();
-
-          // 이미 Authorization 없이 보냈는데도 401이 났다면 바로 에러 (서버가 무조건 인증 요구하는 경로)
-          if (!headers['Authorization']) {
-            const error = new Error('인증이 필요합니다.') as ApiError;
-            error.code = 'AUTHENTICATION_REQUIRED';
-            error.status = 401;
-            throw error;
-          }
-
-          // 💡 핵심: 토큰이 잘못되었거나 만료되어 401이 났을 때, 토큰 제거 후 게스트 권한으로 한 번 더 시도
-          // 이로 인해 게스트 접근이 가능한 API(예: 화장실 조회)는 중단 없이 정상적으로 로딩됨
-          // 원 요청의 타임아웃은 이미 해제되었으므로 폴백 요청에는 새 컨트롤러로 타임아웃을 건다
-          const guestController = new AbortController();
-          const guestTimeoutId = setTimeout(() => guestController.abort(), timeout);
-          try {
-            const guestHeaders: Record<string, string> = { ...headers };
-            delete guestHeaders['Authorization'];
-
-            const guestResponse = await fetch(`${this.baseUrl}${endpoint}`, {
-              method,
-              headers: guestHeaders,
-              body: body ? JSON.stringify(body) : undefined,
-              signal: guestController.signal,
-            });
-
-            if (guestResponse.ok) {
-              return await this.parseResponse<T>(guestResponse);
-            }
-          } catch (retryErr) {
-            console.error('Guest fallback retry failed:', retryErr);
-          } finally {
-            clearTimeout(guestTimeoutId);
-          }
-
-          const error = new Error('인증이 만료되었습니다.') as ApiError;
-          error.code = 'AUTHENTICATION_REQUIRED';
-          error.status = 401;
-          throw error;
-        }
-      }
-
-      if (!response.ok) {
-        const data = await this.parseResponse<any>(response);
-        const error = new Error(
-          typeof data === 'object' && data.message ? data.message : '요청 처리에 실패했습니다.',
-        ) as ApiError;
-        error.code = typeof data === 'object' ? data.code || 'UNKNOWN' : 'UNKNOWN';
-        error.status = response.status;
-        throw error;
-      }
-
-      return await this.parseResponse<T>(response);
-    } catch (err: any) {
-      clearTimeout(timeoutId);
-
-      // AbortError 처리 (타임아웃)
-      if (err.name === 'AbortError') {
-        const timeoutError = new Error('요청 시간이 초과되었습니다.') as ApiError;
-        timeoutError.code = 'TIMEOUT';
-        timeoutError.status = 408;
-        throw timeoutError;
-      }
-
-      // 네트워크 에러
-      if (err instanceof TypeError && err.message.includes('fetch')) {
-        const networkError = new Error('네트워크 연결에 실패했습니다.') as ApiError;
-        networkError.code = 'NETWORK_ERROR';
-        networkError.status = 0;
-        throw networkError;
-      }
-
-      throw err;
     }
+  }
+
+  /**
+   * 401 응답 처리. 리프레시에 성공하면 새 토큰으로 재요청하고,
+   * 실패하면 토큰을 정리한 뒤 게스트 권한으로 한 번 더 시도한다.
+   */
+  private async handleUnauthorized<T>(
+    method: string,
+    endpoint: string,
+    headers: Record<string, string>,
+    body: any,
+    timeout: number,
+  ): Promise<T> {
+    if (await this.tryRefreshToken()) {
+      return this.request<T>(method, endpoint, body, timeout);
+    }
+
+    // 리프레시 실패(만료된 리프레시 토큰 등) 또는 리프레시 토큰이 아예 없는 경우
+    removeTokens();
+
+    // 이미 Authorization 없이 보냈는데도 401이 났다면 바로 에러 (서버가 무조건 인증을 요구하는 경로)
+    if (!headers['Authorization']) {
+      throw createApiError('인증이 필요합니다.', 'AUTHENTICATION_REQUIRED', 401);
+    }
+
+    // 토큰이 잘못되었거나 만료되어 401이 난 경우, 토큰을 제거하고 게스트 권한으로 재시도한다.
+    // 이로써 게스트 접근이 가능한 API(예: 화장실 조회)는 중단 없이 정상적으로 로딩된다.
+    const guestHeaders: Record<string, string> = { ...headers };
+    delete guestHeaders['Authorization'];
+    try {
+      const guestResponse = await this.send(method, endpoint, guestHeaders, body, timeout);
+      if (guestResponse.ok) {
+        return await this.parseResponse<T>(guestResponse);
+      }
+    } catch (retryErr) {
+      console.error('Guest fallback retry failed:', retryErr);
+    }
+
+    throw createApiError('인증이 만료되었습니다.', 'AUTHENTICATION_REQUIRED', 401);
+  }
+
+  /** 실패 응답 본문에서 백엔드 에러 코드·메시지를 뽑아 ApiError 로 만든다. */
+  private async toResponseError(response: Response): Promise<ApiError> {
+    const data = await this.parseResponse<any>(response);
+    const isObject = typeof data === 'object' && data !== null;
+    return createApiError(
+      isObject && data.message ? data.message : '요청 처리에 실패했습니다.',
+      isObject ? data.code || 'UNKNOWN' : 'UNKNOWN',
+      response.status,
+    );
   }
 
   private async parseResponse<T>(response: Response): Promise<T> {

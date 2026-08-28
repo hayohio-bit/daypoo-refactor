@@ -63,7 +63,6 @@ DayPoo는 고성능 데이터 처리를 위해 **서비스 지향 아키텍처(S
 graph TB
     subgraph Client["🖥️ 프론트엔드 (React + Vite + TailwindCSS)"]
         UI[React SPA]
-        WebRTC[무음 Canvas 촬영]
         KakaoMap[카카오맵 SDK]
     end
 
@@ -91,7 +90,7 @@ graph TB
 
 | 파트           | 기술                        | 설명                                                      |
 | :------------- | :-------------------------- | :-------------------------------------------------------- |
-| **Frontend**   | React 19.2, TypeScript, Vite | WebRTC 기반 무음 캡처 및 고성능 지도 UI 구현 (Port: 5173) |
+| **Frontend**   | React 19.2, TypeScript, Vite | 고성능 지도 UI 구현 (Port: 5173) |
 | **Backend**    | Spring Boot 3.4.3 (Java 21) | **가상 스레드(Virtual Threads)** 기반 고성능 병렬 처리    |
 |                | QueryDSL 5.0 / Flyway       | 타입 세이프한 쿼리 작성 및 DB 형상 관리 자동화            |
 | **Data Layer** | PostgreSQL 16 + PostGIS     | 5만 건 공간 데이터 처리 및 공간 인덱싱(GIST)              |
@@ -153,12 +152,12 @@ cp .env.example .env
 ### 2단계: 로컬 개발 실행
 
 - **Docker** (DB/인프라): `docker-compose up -d`
-- **Backend**: `cd backend && ./gradlew bootRun` (URL: `http://localhost:8080`)
+- **Backend**: `cd backend && ./gradlew bootRun` (URL: `http://localhost:18080`)
 - **Frontend**: `cd frontend && npm install && npm run dev` (URL: `http://localhost:5173`)
 
 > 순서대로 실행 권장 — Docker(DB) → Backend → Frontend
 
-기동 확인은 헬스체크(`http://localhost:8080/actuator/health`)와 Swagger UI(`http://localhost:8080/api/docs`)에서 합니다. 포트 충돌 등 자주 겪는 문제와 해결 방법은 [로컬 실행 및 화면 가이드](./docs/local-run-guide.md)를 참고해 주세요.
+기동 확인은 헬스체크(`http://localhost:18080/actuator/health`)와 Swagger UI(`http://localhost:18080/api/docs`)에서 합니다. 로컬 포트는 프론트엔드 5173, 백엔드 18080, PostgreSQL 15432, Redis 16379 로 고정되어 있습니다. 포트 충돌 등 자주 겪는 문제와 해결 방법은 [로컬 실행 및 화면 가이드](./docs/local-run-guide.md)를 참고해 주세요.
 
 ---
 

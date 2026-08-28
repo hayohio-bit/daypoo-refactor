@@ -7,11 +7,24 @@
 
 실행 순서는 DB → 백엔드 → 프론트엔드다. 루트 `.env` 하나를 세 곳(docker-compose, 백엔드, 프론트엔드)이 공유한다.
 
+로컬 포트는 다른 프로젝트와 겹치지 않도록 다음 값으로 고정되어 있다. 별도의 환경 변수를 지정할 필요가 없다.
+
+| 구성 요소 | 로컬 포트 | 고정 위치 |
+|---|---|---|
+| 프론트엔드(Vite) | 5173 | `frontend/vite.config.ts` 의 `server.port` 와 `strictPort: true` |
+| 백엔드(Spring Boot) | 18080 | `backend/build.gradle` 의 `bootRun` 태스크가 `SERVER_PORT=18080` 을 주입한다 |
+| PostgreSQL(PostGIS) | 15432 | `docker-compose.yml` 의 `${DB_PORT:-15432}` 와 루트 `.env` 의 `DB_PORT` |
+| Redis | 16379 | `docker-compose.yml` 의 `${REDIS_PORT:-16379}` 와 루트 `.env` 의 `REDIS_PORT` |
+
+프론트엔드만 5173 으로 고정한 이유가 다르다. 카카오맵 SDK는 개발자 콘솔에 등록된 `http://localhost:5173` 출처에서만 로드되므로 포트를 바꿀 수 없다. `strictPort: true` 를 두었기 때문에 5173 이 이미 점유되어 있으면 Vite가 다른 포트로 옮겨가지 않고 즉시 실패한다. 지도가 빈 화면이 되는 대신 실행 단계에서 문제가 드러난다.
+
+DB 와 Redis 의 포트는 루트 `.env` 의 `DB_PORT`·`REDIS_PORT` 가 있으면 그 값이 우선한다. 예전 값(5432·6379)이 남아 있다면 `.env.example` 과 같은 값(15432·16379)으로 바꿔야 한다. 백엔드도 같은 파일을 읽으므로 컨테이너 포워딩 포트와 접속 포트가 함께 움직인다.
+
 ```bash
 # 1. 인프라 (PostgreSQL + PostGIS, Redis)
 docker compose up -d
 
-# 2. 백엔드 (:8080)
+# 2. 백엔드 (:18080)
 cd backend && ./gradlew bootRun
 
 # 3. 프론트엔드 (:5173)
@@ -20,24 +33,29 @@ cd frontend && npm run dev
 
 기동이 끝나면 다음 두 곳에서 상태를 확인한다.
 
-- 헬스체크: `http://localhost:8080/actuator/health` — `db`, `redis` 가 모두 `UP` 이어야 한다.
-- Swagger UI: `http://localhost:8080/api/docs`
+- 헬스체크: `http://localhost:18080/actuator/health` — `db`, `redis` 가 모두 `UP` 이어야 한다.
+- Swagger UI: `http://localhost:18080/api/docs`
 
 ### 실행 전 확인할 것
 
 | 항목 | 확인 방법 | 어긋났을 때 나타나는 증상 |
 |---|---|---|
-| 5432 포트를 Docker 컨테이너가 점유하는지 | `netstat -ano \| findstr :5432` 로 확인한 PID의 프로세스가 `wslrelay` 인지 (WSL2 Docker 사용 시) | 백엔드 부팅이 Flyway 단계에서 `password authentication failed` 로 실패한다 |
-| Vite 프록시 대상이 8080 인지 | `BACKEND_URL` 환경 변수가 설정되어 있지 않은 상태로 `npm run dev` 실행 | 지도에 마커가 하나도 표시되지 않고, `/api/v1/toilets` 요청이 401 또는 503 을 반환한다 |
-| 프론트엔드가 5173 포트를 확보했는지 | 콘솔에 출력된 Local 주소 | 카카오맵 SDK가 등록 도메인 밖이라고 판단해 지도가 빈 화면이 된다 |
+| 루트 `.env` 의 `DB_PORT`·`REDIS_PORT` 가 15432·16379 인지 | 해당 파일 확인 | 컨테이너가 예전 포트로 열려 다른 프로젝트의 PostgreSQL·Redis 와 충돌한다 |
+| 15432 포트를 Docker 컨테이너가 점유하는지 | `netstat -ano \| findstr :15432` 로 확인한 PID의 프로세스가 `wslrelay` 인지 (WSL2 Docker 사용 시) | 백엔드 부팅이 Flyway 단계에서 `password authentication failed` 로 실패한다 |
+| 프론트엔드가 5173 포트를 확보했는지 | 콘솔에 출력된 Local 주소 (`strictPort` 때문에 확보하지 못하면 실행 자체가 실패한다) | 카카오맵 SDK가 등록 도메인 밖이라고 판단해 지도가 빈 화면이 된다 |
 
-세 항목 모두 실제로 겪은 문제에서 뽑았다. 특히 첫 번째 항목은 Windows에 네이티브 PostgreSQL이 따로 설치되어 있을 때 발생한다. 네이티브 인스턴스가 5432를 먼저 점유하면 백엔드는 Docker 컨테이너가 아니라 그 인스턴스에 접속하고, 해당 인스턴스에는 `.env` 에 적힌 계정이 없으므로 인증에 실패한다. 이때는 네이티브 인스턴스를 내린 뒤 컨테이너를 다시 시작해 포트 포워딩을 재설정해야 한다.
+포트를 고정하기 전에는 세 가지 충돌을 반복해서 겪었다. Windows에 네이티브 PostgreSQL이 설치되어 있으면 그 인스턴스가 5432를 먼저 점유하고, 백엔드는 Docker 컨테이너가 아니라 네이티브 인스턴스에 접속한다. 그 인스턴스에는 루트 환경 변수 파일에 적힌 계정이 없으므로 인증에 실패한다. 백엔드 8080 은 다른 프로젝트와 겹쳤고, 이를 피하려고 8081 로 옮기자 이번에는 또 다른 프로젝트의 백엔드와 겹쳤다. 15432·16379·18080 은 이러한 기본 포트를 피해서 고른 값이다.
+
+고정한 포트마저 다른 프로세스가 점유한 경우에는 그 프로세스를 내린 뒤 컨테이너를 다시 시작해 포트 포워딩을 재설정한다.
 
 ```bash
-# 네이티브 PostgreSQL 종료 (설치 경로와 데이터 디렉터리는 환경에 따라 다르다)
+# 점유 프로세스 확인
+netstat -ano | findstr :15432
+
+# 네이티브 PostgreSQL 을 내려야 한다면 (설치 경로와 데이터 디렉터리는 환경에 따라 다르다)
 pg_ctl -D <데이터 디렉터리> -m fast stop
 
-# 컨테이너를 재시작해 5432 포워딩을 다시 건다 (restart 로는 복구되지 않는 경우가 있다)
+# 컨테이너를 재시작해 포워딩을 다시 건다 (restart 로는 복구되지 않는 경우가 있다)
 docker stop daypoo_postgres && docker start daypoo_postgres
 ```
 
@@ -83,7 +101,7 @@ docker stop daypoo_postgres && docker start daypoo_postgres
 
 자주 묻는 질문, 1:1 문의하기, 나의 문의 내역으로 구성된다. 좌측 `CATEGORIES` 에서 `배변 패턴/AI분석`, `이용방법`, `계정/보안` 으로 질문을 걸러 볼 수 있다. 1:1 문의 작성과 문의 내역 조회는 로그인이 필요하다.
 
-### 2.5 API 문서 (`http://localhost:8080/api/docs`)
+### 2.5 API 문서 (`http://localhost:18080/api/docs`)
 
 ![Swagger UI](./screenshots/07-swagger.jpg)
 

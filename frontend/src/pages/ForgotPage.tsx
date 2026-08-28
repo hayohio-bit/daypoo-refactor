@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../services/apiClient';
+import { findEmailByNickname, requestPasswordReset } from '../services/authService';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type ForgotMode = 'password' | 'email';
@@ -261,7 +261,7 @@ function PasswordForgot({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       // POST /api/v1/auth/password/reset?email=xxx
-      await api.post(`/auth/password/reset?email=${encodeURIComponent(email)}`, null);
+      await requestPasswordReset(email);
       setStep('done');
     } catch (err: any) {
       setErrors({ email: err.response?.data?.message || '비밀번호 재설정 요청에 실패했습니다.' });
@@ -404,7 +404,7 @@ function EmailForgot() {
     setLoading(true);
     try {
       // GET /api/v1/auth/find-id?nickname=xxx
-      const res = await api.get(`/auth/find-id?nickname=${encodeURIComponent(nickname)}`);
+      const res = await findEmailByNickname(nickname);
       setFoundEmail((res as any)?.data || (res as any)); // 서버에 따라 res.data 혹은 res 자체가 문자열일 수 있음
       setStep('done');
     } catch (err: any) {

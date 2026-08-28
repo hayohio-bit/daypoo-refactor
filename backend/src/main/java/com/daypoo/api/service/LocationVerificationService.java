@@ -1,5 +1,6 @@
 package com.daypoo.api.service;
 
+import com.daypoo.api.global.config.CheckInProperties;
 import com.daypoo.api.repository.ToiletRepository;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -14,25 +15,26 @@ public class LocationVerificationService {
 
   private final ToiletRepository toiletRepository;
   private final StringRedisTemplate redisTemplate;
+  private final CheckInProperties checkInProperties;
 
-  // 허용 제한 거리: 150미터 (GPS 음영 지역 및 오차 고려 - A안 반영)
-  private static final double ALLOWED_RADIUS_METERS = 150.0;
+  /**
+   * 화장실까지의 거리와 허용 반경 판정 결과.
+   *
+   * <p>거리를 로그에 남겨야 하는 호출부가 있어서 판정만 돌려주지 않고 원값을 함께 담는다. 거리를 구하지 못하면 {@code distanceMeters} 는 null 이고
+   * 판정은 항상 실패다.
+   */
+  public record DistanceCheck(Double distanceMeters, boolean withinAllowedRadius) {}
 
-  /** 유저의 위치가 화장실 좌표랑 허용 범위(50m) 안에 있는지 체크 */
-  public boolean isWithinAllowedDistance(Long toiletId, double currentLat, double currentLon) {
+  /** 유저의 위치가 화장실 좌표에서 허용 반경 안에 있는지 확인하고, 실제 거리와 함께 돌려준다. */
+  public DistanceCheck checkDistance(Long toiletId, double currentLat, double currentLon) {
     Double distance = toiletRepository.getDistanceToToilet(toiletId, currentLat, currentLon);
     if (distance == null) {
       log.warn("Target toilet {} not found or distance calculation failed.", toiletId);
-      return false;
+      return new DistanceCheck(null, false);
     }
 
     log.info("Calculated distance to toilet {} is {} meters.", toiletId, distance);
-    return distance <= ALLOWED_RADIUS_METERS;
-  }
-
-  /** 실제 화장실까지의 거리를 미터 단위로 반환 (로그 기록용) */
-  public Double getDistanceToToilet(Long toiletId, double currentLat, double currentLon) {
-    return toiletRepository.getDistanceToToilet(toiletId, currentLat, currentLon);
+    return new DistanceCheck(distance, distance <= checkInProperties.getAllowedRadiusMeters());
   }
 
   /** 화장실 도착 시간 기록 및 최초 시간 반환 (Fast Check-in 용) */

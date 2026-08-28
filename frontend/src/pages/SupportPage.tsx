@@ -28,7 +28,15 @@ import { Navbar } from '../components/Navbar';
 import WaveButtonComponent from '../components/WaveButton';
 import { WaveDivider } from '../components/WaveDivider';
 import { BaseModal } from '../components/common/BaseModal';
-import { api, getAccessToken } from '../services/apiClient';
+import { useFeedback } from '../hooks/useFeedback';
+import { getAccessToken } from '../services/apiClient';
+import {
+  createInquiry,
+  deleteInquiry,
+  getFaqs,
+  getMyInquiries,
+  updateInquiry,
+} from '../services/supportService';
 
 // ── 타입 ──────────────────────────────────────────────────────────────
 type SupportTab = 'faq' | 'inquiry' | 'myinquiry';
@@ -248,7 +256,7 @@ function ModernInquiryForm({ onSuccess }: { onSuccess: () => void }) {
     if (!formData.title || formData.content.length < 10) return;
     setLoading(true);
     try {
-      await api.post('/support/inquiries', formData);
+      await createInquiry(formData);
       onSuccess();
     } catch (err: any) {
       setError(err.message || '등록 중 오류가 발생했습니다.');
@@ -363,13 +371,14 @@ const formatInquiryDate = (dateStr: string) => {
 
 // ── 내 문의 내역 섹션 ─────────────────────────────────────────────────
 function ModernHistory() {
+  const { notifyError } = useFeedback();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingInquiry, setEditingInquiry] = useState<Inquiry | null>(null);
 
   const fetchInquiries = useCallback(async () => {
     try {
-      const data = await api.get('/support/inquiries');
+      const data = await getMyInquiries();
       if (Array.isArray(data)) setInquiries(data);
     } catch (err) {
       console.error(err);
@@ -385,10 +394,10 @@ function ModernHistory() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('정말 이 문의를 삭제(취소)하시겠습니까?')) return;
     try {
-      await api.delete(`/support/inquiries/${id}`);
+      await deleteInquiry(id);
       setInquiries((prev) => prev.filter((inq) => inq.id !== id));
     } catch (err) {
-      alert('삭제 중 오류가 발생했습니다.');
+      notifyError(err, '삭제 중 오류가 발생했습니다.', '문의 삭제 실패');
     }
   };
 
@@ -543,7 +552,7 @@ function EditInquiryForm({
     if (!formData.title || formData.content.length < 10) return;
     setLoading(true);
     try {
-      await api.put(`/support/inquiries/${inq.id}`, formData);
+      await updateInquiry(inq.id, formData);
       onSuccess();
     } catch (err: any) {
       setError(err.message || '수정 중 오류가 발생했습니다.');
@@ -641,8 +650,7 @@ export function SupportPage({
   const [faqData, setFaqData] = useState<FaqItem[]>(FALLBACK_FAQ);
 
   useEffect(() => {
-    api
-      .get<FaqItem[]>('/support/faqs')
+    getFaqs<FaqItem>()
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) setFaqData(data);
       })

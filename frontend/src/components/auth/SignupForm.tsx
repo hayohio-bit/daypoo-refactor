@@ -13,7 +13,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/apiClient';
+import { checkEmailAvailable, checkNicknameAvailable, signup } from '../../services/authService';
 import { InputField } from './InputField';
 import { SocialLoginButtons } from './SocialLoginButtons';
 import { TermsCheck } from './TermsCheck';
@@ -214,7 +214,7 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
     if (step === 0) {
       setLoading(true);
       try {
-        await api.get(`/auth/check-email?email=${email}`);
+        await checkEmailAvailable(email);
       } catch (err: any) {
         setErrors({ email: err.message || '이미 사용 중인 이메일입니다.' });
         setShake(true);
@@ -225,7 +225,7 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
     } else if (step === 1) {
       setLoading(true);
       try {
-        await api.get(`/auth/check-nickname?nickname=${nickname}`);
+        await checkNicknameAvailable(nickname);
       } catch (err: any) {
         setErrors({ nickname: err.message || '이미 사용 중인 닉네임입니다.' });
         setShake(true);
@@ -244,7 +244,7 @@ export function SignupForm({ onSwitch, onSuccess }: SignupFormProps) {
     setLoading(true);
     try {
       // signup API가 직접 토큰을 반환하므로 별도 login 호출 불필요
-      const res: any = await api.post('/auth/signup', { email, password, nickname });
+      const res = await signup(email, password, nickname);
       if (res && res.accessToken) {
         authLogin(res.accessToken, res.refreshToken || '');
         onSuccess?.();

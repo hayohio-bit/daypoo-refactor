@@ -3,9 +3,10 @@ import { Activity, Database, Navigation, Plus, RefreshCw, Star, X } from 'lucide
 import { useEffect, useRef, useState } from 'react';
 import WaveButtonComponent from '../../components/WaveButton';
 import { AdminCard } from '../../components/admin/AdminCard';
+import { useFeedback } from '../../hooks/useFeedback';
 import { useToilets } from '../../hooks/useToilets';
-import { api } from '../../services/apiClient';
-import type { ToiletReviewSummaryResponse } from '../../services/reviewService';
+import { getAdminToilets, getToiletSyncStatus, startToiletSync } from '../../services/adminService';
+import { type ToiletReviewSummaryResponse, getReviewSummary } from '../../services/reviewService';
 import type { AdminToiletListResponse, PageResponse, SyncStatusResponse } from '../../types/admin';
 import type { ToiletData } from '../../types/toilet';
 import { COLORS } from './adminCommons';
@@ -20,9 +21,7 @@ const RecentToiletsPanel = () => {
   useEffect(() => {
     const fetchRecentToilets = async () => {
       try {
-        const response = await api.get<PageResponse<AdminToiletListResponse>>(
-          '/admin/toilets?page=0&size=5&sort=id,desc',
-        );
+        const response = await getAdminToilets('page=0&size=5&sort=id,desc');
         setRecentToilets(response?.content || []);
         setTotalCount(response?.totalElements || 0);
       } catch (error) {
@@ -117,6 +116,7 @@ export const ToiletsView = () => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [mapScale, setMapScale] = useState(3);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5172, lng: 127.0473 });
+  const { notifyError } = useFeedback();
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
 
@@ -124,9 +124,8 @@ export const ToiletsView = () => {
   useEffect(() => {
     if (!selectedToilet) return;
     setLoadingDetail(true);
-    api
-      .get(`/toilets/${selectedToilet.id}/reviews/summary`)
-      .then((res: any) => {
+    getReviewSummary(Number(selectedToilet.id))
+      .then((res) => {
         setReviewSummary(res);
         setToiletReviews(Array.isArray(res?.recentReviews) ? res.recentReviews : []);
       })
@@ -153,7 +152,7 @@ export const ToiletsView = () => {
   const startPolling = () => {
     pollingRef.current = setInterval(async () => {
       try {
-        const status = await api.get<SyncStatusResponse>('/admin/sync-toilets/status');
+        const status = await getToiletSyncStatus();
         if (status.status === 'COMPLETED') {
           if (pollingRef.current) clearInterval(pollingRef.current);
           pollingRef.current = null;
@@ -166,13 +165,13 @@ export const ToiletsView = () => {
           if (pollingRef.current) clearInterval(pollingRef.current);
           pollingRef.current = null;
           setSyncing(false);
-          alert('동기화 실패: ' + status.errorMessage);
+          notifyError(status.errorMessage, '동기화가 실패했습니다.', '동기화 실패');
         }
       } catch {
         if (pollingRef.current) clearInterval(pollingRef.current);
         pollingRef.current = null;
         setSyncing(false);
-        alert('동기화 상태 조회 실패');
+        notifyError(undefined, '동기화 상태를 조회하지 못했습니다.', '동기화 상태 조회 실패');
       }
     }, 3000);
   };
@@ -192,12 +191,11 @@ export const ToiletsView = () => {
     setSyncing(true);
     setSyncResult(null);
     try {
-      await api.post('/admin/sync-toilets?startPage=1&endPage=550');
+      await startToiletSync();
       startPolling();
-    } catch (error: any) {
+    } catch (error) {
       setSyncing(false);
-      console.error('동기화 시작 실패:', error);
-      alert('동기화 시작 실패: ' + (error.message || '오류가 발생했습니다.'));
+      notifyError(error, '오류가 발생했습니다.', '동기화 시작 실패');
     }
   };
 

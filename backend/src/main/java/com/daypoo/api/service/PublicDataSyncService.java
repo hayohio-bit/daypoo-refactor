@@ -3,6 +3,7 @@ package com.daypoo.api.service;
 import com.daypoo.api.dto.SyncStatusResponse;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.global.GeometryUtil;
+import com.daypoo.api.global.config.PublicDataProperties;
 import com.daypoo.api.repository.ToiletRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +16,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -38,12 +38,9 @@ public class PublicDataSyncService {
   private final SystemLogService systemLogService;
   private final ToiletRepository toiletRepository;
 
-  @Value("${public-data.api-key}")
-  private String apiKey;
+  private final PublicDataProperties publicDataProperties;
 
   private static final String REDIS_GEO_KEY = "daypoo:toilets:geo";
-  private static final int BATCH_SIZE = 100;
-  private static final int MAX_CONCURRENT_REQUESTS = 10;
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -71,14 +68,15 @@ public class PublicDataSyncService {
       StringRedisTemplate redisTemplate,
       JdbcTemplate jdbcTemplate,
       PlatformTransactionManager transactionManager,
-      @Value("${public-data.url}") String apiUrl,
+      PublicDataProperties publicDataProperties,
       SystemLogService systemLogService) {
     this.objectMapper = objectMapper;
     this.geometryUtil = geometryUtil;
     this.redisTemplate = redisTemplate;
     this.jdbcTemplate = jdbcTemplate;
     this.transactionManager = transactionManager;
-    this.webClient = WebClient.builder().baseUrl(apiUrl).build();
+    this.publicDataProperties = publicDataProperties;
+    this.webClient = WebClient.builder().baseUrl(publicDataProperties.getUrl()).build();
     this.systemLogService = systemLogService;
     this.toiletRepository = toiletRepository;
   }
@@ -135,7 +133,7 @@ public class PublicDataSyncService {
         startPage,
         endPage,
         batchPages,
-        MAX_CONCURRENT_REQUESTS);
+        publicDataProperties.getMaxConcurrentRequests());
 
     TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
@@ -143,7 +141,7 @@ public class PublicDataSyncService {
       for (int batchStart = startPage; batchStart <= endPage; batchStart += batchPages) {
         int batchEnd = Math.min(batchStart + batchPages - 1, endPage);
 
-        Semaphore semaphore = new Semaphore(MAX_CONCURRENT_REQUESTS);
+        Semaphore semaphore = new Semaphore(publicDataProperties.getMaxConcurrentRequests());
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (int page = batchStart; page <= batchEnd; page++) {
@@ -154,7 +152,10 @@ public class PublicDataSyncService {
                     try {
                       semaphore.acquire();
                       int[] result =
-                          syncToiletDataWithInQuery(currentPage, BATCH_SIZE, transactionTemplate);
+                          syncToiletDataWithInQuery(
+                              currentPage,
+                              publicDataProperties.getBatchSize(),
+                              transactionTemplate);
                       totalCount.addAndGet(result[0]);
                       totalInserted.addAndGet(result[1]);
                       totalUpdated.addAndGet(result[2]);
@@ -351,7 +352,7 @@ public class PublicDataSyncService {
             uriBuilder ->
                 uriBuilder
                     .path("")
-                    .queryParam("serviceKey", apiKey)
+                    .queryParam("serviceKey", publicDataProperties.getApiKey())
                     .queryParam("pageNo", pageNo)
                     .queryParam("numOfRows", numOfRows)
                     .queryParam("returnType", "json")

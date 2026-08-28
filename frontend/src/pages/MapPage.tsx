@@ -8,10 +8,13 @@ import { ToiletPopup } from '../components/map/ToiletPopup';
 import { ToiletSearchBar } from '../components/map/ToiletSearchBar';
 import { VisitModal, type VisitModalResult } from '../components/map/VisitModal';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useFeedback } from '../hooks/useFeedback';
 import { useGeoTracking } from '../hooks/useGeoTracking';
 import { useToilets } from '../hooks/useToilets';
-import { api, getAccessToken } from '../services/apiClient';
+import { getAccessToken } from '../services/apiClient';
+import { getFavoriteIds, toggleFavorite } from '../services/favoriteService';
+import { checkIn, createRecord, getMyVisitCounts } from '../services/recordService';
+import { getToiletsNearby, searchToilets } from '../services/toiletService';
 import type { CreateRecordRequest } from '../types/api';
 import type { ToiletData } from '../types/toilet';
 import { calculateDistance } from '../utils/distance';
@@ -43,7 +46,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   }, [visitCounts]);
 
   const { refreshUser, isAuthenticated } = useAuth();
-  const { showToast } = useNotification();
+  const { notifyError, notifyInfo } = useFeedback();
 
   // ── 비즈니스 로직 ──────────────────────────────────────────
 
@@ -61,13 +64,13 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   const handleFilterChange = useCallback(
     (newFilter: FilterMode) => {
       if (newFilter !== 'all' && !isAuthenticated) {
-        showToast('로그인이 필요합니다', '해당 필터링은 로그인 이후 사용 가능합니다.', 'warn');
+        notifyInfo('해당 필터링은 로그인 이후 사용 가능합니다.', '로그인이 필요합니다');
         openAuth('login');
         return;
       }
       setFilter(newFilter);
     },
-    [isAuthenticated, openAuth, showToast],
+    [isAuthenticated, openAuth, notifyInfo],
   );
 
   const handleFavoriteToggle = useCallback(
@@ -95,7 +98,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       });
 
       try {
-        const isAdded = await api.post<boolean>(`/favorites/${id}`);
+        const isAdded = await toggleFavorite(id);
         // 3. 서버 응답으로 재동기화 (낙관적 추측과 다를 경우만 보정)
         if (isAdded !== wasAdded) {
           setFavoriteIds((prev) => {
@@ -127,11 +130,10 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           }
           return prev;
         });
-        console.error('즐겨찾기 처리 실패:', e);
-        alert('즐겨찾기 처리에 실패했습니다.');
+        notifyError(e, '즐겨찾기 처리에 실패했습니다.', '즐겨찾기 실패');
       }
     },
-    [favoriteIds, openAuth, isAuthenticated],
+    [favoriteIds, openAuth, isAuthenticated, notifyError],
   );
 
   // 데이터 훅
@@ -171,7 +173,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
         return;
       }
       try {
-        const data = await api.get<Record<string, number>>('/records/my-visit-counts');
+        const data = await getMyVisitCounts();
         setVisitCounts(data || {});
       } catch (e) {
         console.warn('방문 횟수 조회 실패:', e);
@@ -187,7 +189,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       const token = getAccessToken();
       if (!token) return; // 비로그인 상태면 기존 상태 유지 (sync useEffect 트리거 방지)
       try {
-        const data = await api.get<number[]>('/favorites');
+        const data = await getFavoriteIds();
         setFavoriteIds(new Set((data || []).map((id) => String(id))));
       } catch (e) {
         console.warn('즐겨찾기 조회 실패:', e);
@@ -207,10 +209,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     setSearchLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const locationParams = pos ? `&latitude=${pos.lat}&longitude=${pos.lng}` : '';
-        const data = await api.get<any[]>(
-          `/toilets/search?q=${encodeURIComponent(trimmed)}&size=20${locationParams}`,
-        );
+        const data = await searchToilets(trimmed, 20, pos);
         const results: ToiletData[] = (data || []).map((item: any) => ({
           id: String(item.id),
           name: item.name || '이름없음',
@@ -242,9 +241,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
       const findAndOpenNearest = async () => {
         try {
           // 현재 위치 기준 5km 반경 화장실 검색 (API 사용)
-          const data = await api.get<any[]>(
-            `/toilets?latitude=${pos.lat}&longitude=${pos.lng}&radius=5000`,
-          );
+          const data = await getToiletsNearby(pos.lat, pos.lng, 5000);
           if (data && data.length > 0) {
             const mappedToilets: ToiletData[] = data.map((item: any) => ({
               id: String(item.id),
@@ -307,11 +304,7 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     if (!selectedToilet || !pos) return;
 
     try {
-      const res: any = await api.post('/records/check-in', {
-        toiletId: Number(selectedToilet.id),
-        latitude: pos.lat,
-        longitude: pos.lng,
-      });
+      const res: any = await checkIn(Number(selectedToilet.id), pos.lat, pos.lng);
 
       await refreshUser();
 
@@ -341,8 +334,11 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     async (result: VisitModalResult) => {
       // 1. 위치 정보(pos) 방어 로직 추가
       if (!pos) {
-        console.error('인증 실패: 사용자 위치 정보를 찾을 수 없습니다.');
-        alert('📍 현재 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도해주세요.');
+        notifyError(
+          undefined,
+          '현재 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도해주세요.',
+          '위치 확인 실패',
+        );
         return;
       }
 
@@ -353,13 +349,11 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           dietTags: result.foodTags,
           latitude: pos.lat,
           longitude: pos.lng,
-          // Fast-Track: bristolType / color가 null이면 AI 자동 분석
           ...(result.bristolType !== null && { bristolScale: result.bristolType }),
           ...(result.color !== null && { color: result.color }),
-          ...(result.imageBase64 && { imageBase64: result.imageBase64 }),
         };
 
-        await api.post('/records', payload);
+        await createRecord(payload);
         await refreshUser();
         markVisited(String(result.toiletId));
         setVisitCounts((prev) => ({
@@ -367,31 +361,30 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           [String(result.toiletId)]: (prev[String(result.toiletId)] || 0) + 1,
         }));
         // 방문 인증 완료 후 모달 닫기
-        // alert('방문 인증이 완료되었습니다! 💩✨');
       } catch (e: any) {
         const code = e.code || 'UNKNOWN';
-        const errorMsg = e.message || (typeof e === 'string' ? e : JSON.stringify(e));
 
         switch (code) {
-          case 'R007':
-            throw e; // VisitModal에서 카메라 복귀 처리
           case 'R005': // STAY_TIME_NOT_MET
-            alert('⏳ 아직 1분이 지나지 않았습니다. 잠시 후 다시 시도해주세요!');
+            notifyInfo(
+              '아직 1분이 지나지 않았습니다. 잠시 후 다시 시도해주세요.',
+              '체류 시간 부족',
+            );
             break;
           case 'R001': // LOCATION_OUT_OF_RANGE
           case 'R006': // OUT_OF_RANGE
-            alert('📍 화장실 근처(150m 이내)에서만 인증이 가능합니다.');
-            break;
-          case 'R003': // AI_SERVICE_ERROR
-            alert('🤖 AI 분석 서비스에 일시적 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            notifyInfo('화장실 근처에서만 인증할 수 있습니다.', '인증 범위 밖');
             break;
           default:
-            console.error('인증 실패:', e);
-            alert(`인증 오류: ${errorMsg}\n\n(문제가 지속되면 고객센터로 문의해주세요.)`);
+            notifyError(
+              e,
+              '인증에 실패했습니다. 문제가 지속되면 고객센터로 문의해주세요.',
+              '인증 실패',
+            );
         }
       }
     },
-    [markVisited, pos.lat, pos.lng, refreshUser],
+    [markVisited, pos.lat, pos.lng, refreshUser, notifyError, notifyInfo],
   );
 
   // 검색어가 있으면 ES 결과 사용, 없으면 지도 반경 내 화장실에 필터만 적용

@@ -11,6 +11,7 @@ import com.daypoo.api.dto.PooRecordResponse;
 import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.entity.User;
+import com.daypoo.api.global.config.RewardProperties;
 import com.daypoo.api.mapper.PooRecordMapper;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -47,6 +49,8 @@ class PooRecordServiceTest {
   @Mock private VisitLogRepository visitLogRepository;
   @Mock private UserRepository userRepository;
 
+  @Spy private RewardProperties rewardProperties = new RewardProperties();
+
   private User testUser;
   private Toilet testToilet;
   private PooRecordCreateRequest request;
@@ -69,8 +73,7 @@ class PooRecordServiceTest {
             Collections.singletonList("Good"),
             Collections.singletonList("Meal"),
             37.123,
-            127.123,
-            null);
+            127.123);
   }
 
   @Test
@@ -79,8 +82,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
     given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
         .willReturn(System.currentTimeMillis());
@@ -112,62 +115,14 @@ class PooRecordServiceTest {
     verify(recordRepository, times(1)).save(any(PooRecord.class));
   }
 
-  @Test
-  @DisplayName("성공: 이미지 포함 배변 기록 생성")
-  void createRecord_success_withImage() {
-    // given
-    PooRecordCreateRequest imageRequest =
-        new PooRecordCreateRequest(
-            100L,
-            5,
-            "Golden",
-            Collections.singletonList("Good"),
-            Collections.singletonList("Meal"),
-            37.123,
-            127.123,
-            "base64image");
-
-    given(userService.getByEmail("test@test.com")).willReturn(testUser);
-    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
-    given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
-    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
-        .willReturn(System.currentTimeMillis());
-    given(geocodingService.reverseGeocode(anyDouble(), anyDouble())).willReturn("역삼1동");
-
-    PooRecord savedRecord =
-        PooRecord.builder()
-            .user(testUser)
-            .toilet(testToilet)
-            .bristolScale(5)
-            .color("Golden")
-            .build();
-    ReflectionTestUtils.setField(savedRecord, "id", 502L);
-    given(recordRepository.save(any(PooRecord.class))).willReturn(savedRecord);
-    given(userRepository.save(any(User.class))).willReturn(testUser);
-
-    PooRecordResponse mockResponseAi =
-        PooRecordResponse.builder().bristolScale(5).color("Golden").build();
-    given(recordMapper.toResponse(any(PooRecord.class))).willReturn(mockResponseAi);
-
-    // when
-    PooRecordResponse response = pooRecordService.createRecord("test@test.com", imageRequest);
-
-    // then
-    assertThat(response.bristolScale()).isEqualTo(5);
-    assertThat(response.color()).isEqualTo("Golden");
-  }
-
-  @Test
   @org.junit.jupiter.api.Disabled("개발 모드로 인해 예외 발생 비활성화됨")
   @DisplayName("실패: 화장실 반경 밖에서 인증 시도")
   void createRecord_fail_distance() {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(500.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(500.0, false));
 
     // when & then
     assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
@@ -182,8 +137,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
 
     // when & then
@@ -199,8 +154,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(false);
 
     // when & then

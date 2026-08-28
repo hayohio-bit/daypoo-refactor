@@ -103,6 +103,14 @@ export interface AdminStatsResponse {
 }
 
 // ========== System/Sync Management ==========
+export interface SystemLog {
+  id: number;
+  timestamp: string;
+  level: 'INFO' | 'WARN' | 'ERROR';
+  source: string;
+  message: string;
+}
+
 export interface SyncStatusResponse {
   status: 'IDLE' | 'RUNNING' | 'COMPLETED' | 'FAILED';
   totalCount: number | null;
