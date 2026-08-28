@@ -8,7 +8,6 @@ import { ToiletPopup } from '../components/map/ToiletPopup';
 import { ToiletSearchBar } from '../components/map/ToiletSearchBar';
 import { VisitModal, type VisitModalResult } from '../components/map/VisitModal';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
 import { useFeedback } from '../hooks/useFeedback';
 import { useGeoTracking } from '../hooks/useGeoTracking';
 import { useToilets } from '../hooks/useToilets';
@@ -47,7 +46,6 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   }, [visitCounts]);
 
   const { refreshUser, isAuthenticated } = useAuth();
-  const { showToast } = useNotification();
   const { notifyError, notifyInfo } = useFeedback();
 
   // ── 비즈니스 로직 ──────────────────────────────────────────
@@ -66,13 +64,13 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
   const handleFilterChange = useCallback(
     (newFilter: FilterMode) => {
       if (newFilter !== 'all' && !isAuthenticated) {
-        showToast('로그인이 필요합니다', '해당 필터링은 로그인 이후 사용 가능합니다.', 'warn');
+        notifyInfo('해당 필터링은 로그인 이후 사용 가능합니다.', '로그인이 필요합니다');
         openAuth('login');
         return;
       }
       setFilter(newFilter);
     },
-    [isAuthenticated, openAuth, showToast],
+    [isAuthenticated, openAuth, notifyInfo],
   );
 
   const handleFavoriteToggle = useCallback(
@@ -367,8 +365,6 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
         const code = e.code || 'UNKNOWN';
 
         switch (code) {
-          case 'R007':
-            throw e; // VisitModal에서 카메라 복귀 처리
           case 'R005': // STAY_TIME_NOT_MET
             notifyInfo(
               '아직 1분이 지나지 않았습니다. 잠시 후 다시 시도해주세요.',
@@ -378,9 +374,6 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           case 'R001': // LOCATION_OUT_OF_RANGE
           case 'R006': // OUT_OF_RANGE
             notifyInfo('화장실 근처에서만 인증할 수 있습니다.', '인증 범위 밖');
-            break;
-          case 'R003': // AI_SERVICE_ERROR
-            notifyError(e, '분석 서비스에 일시적인 문제가 발생했습니다.', '인증 실패');
             break;
           default:
             notifyError(

@@ -11,7 +11,6 @@ import com.daypoo.api.dto.PooRecordResponse;
 import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.entity.User;
-import com.daypoo.api.global.config.CheckInProperties;
 import com.daypoo.api.global.config.RewardProperties;
 import com.daypoo.api.mapper.PooRecordMapper;
 import com.daypoo.api.repository.PooRecordRepository;
@@ -50,7 +49,6 @@ class PooRecordServiceTest {
   @Mock private VisitLogRepository visitLogRepository;
   @Mock private UserRepository userRepository;
 
-  @Spy private CheckInProperties checkInProperties = new CheckInProperties();
   @Spy private RewardProperties rewardProperties = new RewardProperties();
 
   private User testUser;
@@ -84,8 +82,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
     given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
         .willReturn(System.currentTimeMillis());
@@ -123,8 +121,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(500.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(500.0, false));
 
     // when & then
     assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
@@ -139,8 +137,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
 
     // when & then
@@ -156,8 +154,8 @@ class PooRecordServiceTest {
     // given
     given(userService.getByEmail("test@test.com")).willReturn(testUser);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.getDistanceToToilet(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(10.0);
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(false);
 
     // when & then

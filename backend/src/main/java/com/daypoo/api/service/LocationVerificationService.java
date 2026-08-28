@@ -17,16 +17,29 @@ public class LocationVerificationService {
   private final StringRedisTemplate redisTemplate;
   private final CheckInProperties checkInProperties;
 
-  /** 유저의 위치가 화장실 좌표에서 허용 반경 안에 있는지 확인한다. */
-  public boolean isWithinAllowedDistance(Long toiletId, double currentLat, double currentLon) {
+  /**
+   * 화장실까지의 거리와 허용 반경 판정 결과.
+   *
+   * <p>거리를 로그에 남겨야 하는 호출부가 있어서 판정만 돌려주지 않고 원값을 함께 담는다. 거리를 구하지 못하면 {@code distanceMeters} 는 null 이고
+   * 판정은 항상 실패다.
+   */
+  public record DistanceCheck(Double distanceMeters, boolean withinAllowedRadius) {}
+
+  /** 유저의 위치가 화장실 좌표에서 허용 반경 안에 있는지 확인하고, 실제 거리와 함께 돌려준다. */
+  public DistanceCheck checkDistance(Long toiletId, double currentLat, double currentLon) {
     Double distance = toiletRepository.getDistanceToToilet(toiletId, currentLat, currentLon);
     if (distance == null) {
       log.warn("Target toilet {} not found or distance calculation failed.", toiletId);
-      return false;
+      return new DistanceCheck(null, false);
     }
 
     log.info("Calculated distance to toilet {} is {} meters.", toiletId, distance);
-    return distance <= checkInProperties.getAllowedRadiusMeters();
+    return new DistanceCheck(distance, distance <= checkInProperties.getAllowedRadiusMeters());
+  }
+
+  /** 유저의 위치가 화장실 좌표에서 허용 반경 안에 있는지 확인한다. */
+  public boolean isWithinAllowedDistance(Long toiletId, double currentLat, double currentLon) {
+    return checkDistance(toiletId, currentLat, currentLon).withinAllowedRadius();
   }
 
   /** 실제 화장실까지의 거리를 미터 단위로 반환 (로그 기록용) */

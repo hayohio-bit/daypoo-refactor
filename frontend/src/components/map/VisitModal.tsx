@@ -24,6 +24,9 @@ interface VisitModalProps {
   checkInTime: number | null;
 }
 
+/** 인증에 필요한 최소 체류 시간(초). 백엔드 STAY_TIME_NOT_MET 판정과 같은 값이다. */
+const REQUIRED_STAY_SECONDS = 60;
+
 export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitModalProps) {
   // 방문 인증 완료 여부
   const { notifyError, notifyInfo } = useFeedback();
@@ -34,20 +37,20 @@ export function VisitModal({ toilet, onClose, onComplete, checkInTime }: VisitMo
 
   // 타이머
   const [remainingSeconds, setRemainingSeconds] = useState(() => {
-    if (!checkInTime) return 60;
+    if (!checkInTime) return REQUIRED_STAY_SECONDS;
     const elapsed = Math.floor((Date.now() - checkInTime) / 1000);
-    return Math.max(0, 60 - elapsed);
+    return Math.max(0, REQUIRED_STAY_SECONDS - elapsed);
   });
-  const [canComplete, setCanComplete] = useState(false);
+  // 남은 시간에서 유도한다. 별도 상태로 두면 첫 렌더에서 두 값이 어긋난다.
+  const canComplete = remainingSeconds === 0;
 
   useEffect(() => {
     if (!checkInTime) return;
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - checkInTime) / 1000);
-      const remaining = Math.max(0, 60 - elapsed);
+      const remaining = Math.max(0, REQUIRED_STAY_SECONDS - elapsed);
       setRemainingSeconds(remaining);
       if (remaining === 0) {
-        setCanComplete(true);
         clearInterval(interval);
       }
     }, 1000);

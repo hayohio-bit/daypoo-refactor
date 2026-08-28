@@ -54,6 +54,18 @@ class LocationVerificationServiceTest {
   }
 
   @Test
+  @DisplayName("checkDistance 는 판정과 함께 실제 거리를 돌려준다")
+  void 거리와_판정을_함께_반환한다() {
+    given(toiletRepository.getDistanceToToilet(TOILET_ID, LAT, LON)).willReturn(42.0);
+
+    LocationVerificationService.DistanceCheck check =
+        serviceWithRadius(150.0).checkDistance(TOILET_ID, LAT, LON);
+
+    assertThat(check.distanceMeters()).isEqualTo(42.0);
+    assertThat(check.withinAllowedRadius()).isTrue();
+  }
+
+  @Test
   @DisplayName("거리 계산이 실패하면 허용하지 않는다")
   void 거리를_구하지_못하면_실패한다() {
     given(toiletRepository.getDistanceToToilet(TOILET_ID, LAT, LON)).willReturn(null);

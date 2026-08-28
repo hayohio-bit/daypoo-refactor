@@ -9,7 +9,6 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.VisitLog;
 import com.daypoo.api.entity.enums.VisitEventType;
 import com.daypoo.api.event.PooRecordCreatedEvent;
-import com.daypoo.api.global.config.CheckInProperties;
 import com.daypoo.api.global.config.RewardProperties;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
@@ -48,7 +47,6 @@ public class PooRecordService {
   private final PooRecordMapper recordMapper;
   private final VisitLogRepository visitLogRepository;
   private final com.daypoo.api.repository.UserRepository userRepository;
-  private final CheckInProperties checkInProperties;
   private final RewardProperties rewardProperties;
 
   /** 화장실 도착 체크인 담당 */
@@ -57,11 +55,12 @@ public class PooRecordService {
       String email, Long toiletId, double lat, double lon, Long enteredAt) {
     User user = userService.getByEmail(email);
 
-    // 위치 검증 (app.check-in.allowed-radius-meters 반경 사용)
-    Double distance = locationVerificationService.getDistanceToToilet(toiletId, lat, lon);
-    boolean isNear = distance != null && distance <= checkInProperties.getAllowedRadiusMeters();
+    // 위치 검증. 반경 정책은 LocationVerificationService 가 소유한다.
+    LocationVerificationService.DistanceCheck check =
+        locationVerificationService.checkDistance(toiletId, lat, lon);
+    Double distance = check.distanceMeters();
 
-    if (!isNear) {
+    if (!check.withinAllowedRadius()) {
       logVisit(
           user,
           toiletId,
@@ -205,8 +204,10 @@ public class PooRecordService {
       return;
     }
 
-    Double distance = locationVerificationService.getDistanceToToilet(toilet.getId(), lat, lon);
-    if (distance == null || distance > checkInProperties.getAllowedRadiusMeters()) {
+    LocationVerificationService.DistanceCheck check =
+        locationVerificationService.checkDistance(toilet.getId(), lat, lon);
+    Double distance = check.distanceMeters();
+    if (!check.withinAllowedRadius()) {
       logVisit(
           user,
           toilet.getId(),
