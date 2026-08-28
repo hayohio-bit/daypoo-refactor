@@ -11,6 +11,8 @@ import com.daypoo.api.dto.PooRecordResponse;
 import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.entity.User;
+import com.daypoo.api.global.config.CheckInProperties;
+import com.daypoo.api.global.config.RewardProperties;
 import com.daypoo.api.mapper.PooRecordMapper;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -46,6 +49,9 @@ class PooRecordServiceTest {
   @Mock private PooRecordMapper recordMapper;
   @Mock private VisitLogRepository visitLogRepository;
   @Mock private UserRepository userRepository;
+
+  @Spy private CheckInProperties checkInProperties = new CheckInProperties();
+  @Spy private RewardProperties rewardProperties = new RewardProperties();
 
   private User testUser;
   private Toilet testToilet;

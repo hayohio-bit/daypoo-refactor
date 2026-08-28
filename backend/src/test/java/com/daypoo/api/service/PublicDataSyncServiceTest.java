@@ -13,6 +13,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import com.daypoo.api.global.GeometryUtil;
+import com.daypoo.api.global.config.PublicDataProperties;
 import com.daypoo.api.repository.ToiletRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
@@ -65,7 +66,7 @@ class PublicDataSyncServiceTest {
                 redisTemplate,
                 jdbcTemplate,
                 transactionManager,
-                "https://example.invalid/api",
+                publicDataProperties(),
                 systemLogService));
 
     // 유효 좌표(T-001)만 통과, (0,0)은 탈락
@@ -76,6 +77,13 @@ class PublicDataSyncServiceTest {
     lenient().when(point.getX()).thenReturn(126.9780);
     lenient().when(point.getY()).thenReturn(37.5665);
     lenient().when(redisTemplate.opsForGeo()).thenReturn(geoOperations);
+  }
+
+  private PublicDataProperties publicDataProperties() {
+    PublicDataProperties properties = new PublicDataProperties();
+    properties.setUrl("https://example.invalid/api");
+    properties.setApiKey("dummy_public_data_key");
+    return properties;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

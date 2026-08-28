@@ -9,6 +9,8 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.VisitLog;
 import com.daypoo.api.entity.enums.VisitEventType;
 import com.daypoo.api.event.PooRecordCreatedEvent;
+import com.daypoo.api.global.config.CheckInProperties;
+import com.daypoo.api.global.config.RewardProperties;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.mapper.PooRecordMapper;
@@ -46,9 +48,8 @@ public class PooRecordService {
   private final PooRecordMapper recordMapper;
   private final VisitLogRepository visitLogRepository;
   private final com.daypoo.api.repository.UserRepository userRepository;
-
-  // 보상 설정 (방문 1회당 경험치 5)
-  private static final int REWARD_EXP = 5;
+  private final CheckInProperties checkInProperties;
+  private final RewardProperties rewardProperties;
 
   /** 화장실 도착 체크인 담당 */
   @Transactional
@@ -56,9 +57,9 @@ public class PooRecordService {
       String email, Long toiletId, double lat, double lon, Long enteredAt) {
     User user = userService.getByEmail(email);
 
-    // 위치 검증 (확대된 150m 반경 사용)
+    // 위치 검증 (app.check-in.allowed-radius-meters 반경 사용)
     Double distance = locationVerificationService.getDistanceToToilet(toiletId, lat, lon);
-    boolean isNear = distance != null && distance <= 150.0;
+    boolean isNear = distance != null && distance <= checkInProperties.getAllowedRadiusMeters();
 
     if (!isNear) {
       logVisit(
@@ -172,7 +173,8 @@ public class PooRecordService {
   }
 
   private void processRewards(User user, String regionName) {
-    eventPublisher.publishEvent(new PooRecordCreatedEvent(user.getEmail(), regionName, REWARD_EXP));
+    eventPublisher.publishEvent(
+        new PooRecordCreatedEvent(user.getEmail(), regionName, rewardProperties.getRecordExp()));
   }
 
   private void logVisitOnSuccess(
@@ -204,7 +206,7 @@ public class PooRecordService {
     }
 
     Double distance = locationVerificationService.getDistanceToToilet(toilet.getId(), lat, lon);
-    if (distance == null || distance > 150.0) {
+    if (distance == null || distance > checkInProperties.getAllowedRadiusMeters()) {
       logVisit(
           user,
           toilet.getId(),

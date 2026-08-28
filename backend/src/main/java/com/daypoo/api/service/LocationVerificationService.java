@@ -1,5 +1,6 @@
 package com.daypoo.api.service;
 
+import com.daypoo.api.global.config.CheckInProperties;
 import com.daypoo.api.repository.ToiletRepository;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,9 @@ public class LocationVerificationService {
 
   private final ToiletRepository toiletRepository;
   private final StringRedisTemplate redisTemplate;
+  private final CheckInProperties checkInProperties;
 
-  // 허용 제한 거리: 150미터 (GPS 음영 지역 및 오차 고려 - A안 반영)
-  private static final double ALLOWED_RADIUS_METERS = 150.0;
-
-  /** 유저의 위치가 화장실 좌표랑 허용 범위(50m) 안에 있는지 체크 */
+  /** 유저의 위치가 화장실 좌표에서 허용 반경 안에 있는지 확인한다. */
   public boolean isWithinAllowedDistance(Long toiletId, double currentLat, double currentLon) {
     Double distance = toiletRepository.getDistanceToToilet(toiletId, currentLat, currentLon);
     if (distance == null) {
@@ -27,7 +26,7 @@ public class LocationVerificationService {
     }
 
     log.info("Calculated distance to toilet {} is {} meters.", toiletId, distance);
-    return distance <= ALLOWED_RADIUS_METERS;
+    return distance <= checkInProperties.getAllowedRadiusMeters();
   }
 
   /** 실제 화장실까지의 거리를 미터 단위로 반환 (로그 기록용) */
