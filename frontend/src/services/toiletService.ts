@@ -1,7 +1,7 @@
 import { api } from './apiClient';
+import type { ToiletApiItem } from './toiletMapper';
 
-/** 백엔드 화장실 응답 원형. 화면용 `ToiletData` 매핑은 호출부가 담당한다. */
-export type ToiletApiItem = Record<string, any>;
+export type { ToiletApiItem };
 
 /** GET /api/v1/toilets — 좌표 기준 반경 검색 */
 export async function getToiletsNearby(

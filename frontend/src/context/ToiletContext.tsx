@@ -1,5 +1,6 @@
 import type React from 'react';
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { toToiletData } from '../services/toiletMapper';
 import { getToiletsNearby } from '../services/toiletService';
 import type { ToiletData } from '../types/toilet';
 
@@ -102,21 +103,9 @@ export function ToiletProvider({ children }: { children: React.ReactNode }) {
         const backendData = await getToiletsNearby(finalLat, finalLng, fetchRadius);
         const rawData = Array.isArray(backendData) ? backendData.slice(0, 1000) : [];
 
-        const data: ToiletData[] = rawData.map((item: any) => ({
-          id: String(item.id),
-          name: item.name || '이름없음',
-          roadAddress: item.address || '',
-          lat: item.latitude,
-          lng: item.longitude,
-          openTime: item.openHours,
-          isOpen24h: item.is24h,
-          isVisited: visitedIds?.has(String(item.id)) ?? false,
-          isFavorite: favoriteIds?.has(String(item.id)) ?? false,
-          isMixedGender: item.isMixedGender || false,
-          hasDiaperTable: item.hasDiaperTable || false,
-          hasEmergencyBell: item.hasEmergencyBell || false,
-          hasCCTV: item.hasCCTV || false,
-        }));
+        const data: ToiletData[] = rawData.map((item) =>
+          toToiletData(item, { visitedIds, favoriteIds }),
+        );
 
         setToilets((prev) => {
           if (prev.length === 0) return data;

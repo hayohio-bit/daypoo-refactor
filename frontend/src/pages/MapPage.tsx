@@ -14,6 +14,7 @@ import { useToilets } from '../hooks/useToilets';
 import { getAccessToken } from '../services/apiClient';
 import { getFavoriteIds, toggleFavorite } from '../services/favoriteService';
 import { checkIn, createRecord, getMyVisitCounts } from '../services/recordService';
+import { toToiletData } from '../services/toiletMapper';
 import { getToiletsNearby, searchToilets } from '../services/toiletService';
 import type { CreateRecordRequest } from '../types/api';
 import type { ToiletData } from '../types/toilet';
@@ -210,20 +211,9 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
     const timer = setTimeout(async () => {
       try {
         const data = await searchToilets(trimmed, 20, pos);
-        const results: ToiletData[] = (data || []).map((item: any) => ({
-          id: String(item.id),
-          name: item.name || '이름없음',
-          roadAddress: item.address || '',
-          lat: item.latitude,
-          lng: item.longitude,
-          isOpen24h: false,
-          isMixedGender: false,
-          hasDiaperTable: false,
-          hasEmergencyBell: false,
-          hasCCTV: false,
-          isVisited: visitedIds.has(String(item.id)),
-          isFavorite: favoriteIds.has(String(item.id)),
-        }));
+        const results: ToiletData[] = (data || []).map((item) =>
+          toToiletData(item, { visitedIds, favoriteIds }),
+        );
         setSearchResults(results);
       } catch (e) {
         console.warn('검색 실패:', e);
@@ -243,20 +233,9 @@ export function MapPage({ openAuth }: { openAuth: (mode: 'login' | 'signup') => 
           // 현재 위치 기준 5km 반경 화장실 검색 (API 사용)
           const data = await getToiletsNearby(pos.lat, pos.lng, 5000);
           if (data && data.length > 0) {
-            const mappedToilets: ToiletData[] = data.map((item: any) => ({
-              id: String(item.id),
-              name: item.name || '이름없음',
-              roadAddress: item.address || '',
-              lat: item.latitude,
-              lng: item.longitude,
-              isOpen24h: item.open_24h || false,
-              isMixedGender: item.mixed_gender || false,
-              hasDiaperTable: item.diaper_table || false,
-              hasEmergencyBell: item.emergency_bell || false,
-              hasCCTV: item.cctv || false,
-              isVisited: visitedIds.has(String(item.id)),
-              isFavorite: favoriteIds.has(String(item.id)),
-            }));
+            const mappedToilets: ToiletData[] = data.map((item) =>
+              toToiletData(item, { visitedIds, favoriteIds }),
+            );
 
             // 가장 가까운 화장실 계산
             let nearest = mappedToilets[0];
