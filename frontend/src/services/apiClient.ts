@@ -1,4 +1,5 @@
 import { ApiResponse } from '../types/api';
+import { DEFAULT_ERROR_MESSAGE } from '../utils/errorMessage';
 
 const BASE_URL = '/api/v1';
 
@@ -171,7 +172,7 @@ class ApiClient {
     const data = await this.parseResponse<any>(response);
     const isObject = typeof data === 'object' && data !== null;
     return createApiError(
-      isObject && data.message ? data.message : '요청 처리에 실패했습니다.',
+      isObject && data.message ? data.message : DEFAULT_ERROR_MESSAGE,
       isObject ? data.code || 'UNKNOWN' : 'UNKNOWN',
       response.status,
     );

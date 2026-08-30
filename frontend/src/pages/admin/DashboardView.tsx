@@ -1,19 +1,15 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Activity,
-  ChevronRight,
-  LayoutDashboard,
   MessageSquare,
   Plus,
   RefreshCw,
   Shield,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
   Area,
-  AreaChart,
   CartesianGrid,
   ComposedChart,
   ResponsiveContainer,
@@ -21,9 +17,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { CountUp } from '../../components/common/CountUp';
 import { GlassCard } from '../../components/common/GlassCard';
-import { api } from '../../services/apiClient';
 import type { AdminStatsResponse } from '../../types/admin';
 import { type AdminTab, COLORS } from './adminCommons';
 import { DashboardBottomSection } from './dashboard/DashboardBottomSection';

@@ -138,12 +138,12 @@ public class ReportStatisticsCalculator {
 
   /** 가장 자주 등장한 컨디션 태그 */
   public String computeMostFrequentConditionTag(List<PooRecord> records) {
-    return computeMostFrequentTag(splitTags(records, PooRecord::getConditionTags));
+    return computeMostFrequent(splitTags(records, PooRecord::getConditionTags));
   }
 
   /** 가장 자주 등장한 식단 태그 */
   public String computeMostFrequentDietTag(List<PooRecord> records) {
-    return computeMostFrequentTag(splitTags(records, PooRecord::getDietTags));
+    return computeMostFrequent(splitTags(records, PooRecord::getDietTags));
   }
 
   /** 빈도 상위 limit 개의 태그를 쉼표로 이어 반환한다. */
@@ -190,10 +190,5 @@ public class ReportStatisticsCalculator {
         .max(Map.Entry.comparingByValue())
         .map(Map.Entry::getKey)
         .orElse(null);
-  }
-
-  private String computeMostFrequentTag(List<String> tags) {
-    Object frequent = computeMostFrequent(tags);
-    return frequent != null ? frequent.toString() : null;
   }
 }

@@ -1,8 +1,6 @@
 import { api } from './apiClient';
 import type { ToiletApiItem } from './toiletMapper';
 
-export type { ToiletApiItem };
-
 /** GET /api/v1/toilets — 좌표 기준 반경 검색 */
 export async function getToiletsNearby(
   latitude: number,
