@@ -91,7 +91,17 @@ public class ReportService {
         .find(cacheKey)
         .filter(
             response -> {
-              LocalDateTime analyzedAt = LocalDateTime.parse(response.analyzedAt());
+              LocalDateTime analyzedAt;
+              try {
+                analyzedAt = LocalDateTime.parse(response.analyzedAt());
+              } catch (Exception e) {
+                // 분석 시각을 읽지 못한 캐시는 신뢰할 수 없으므로 버리고 다시 생성한다.
+                log.warn(
+                    "Failed to parse analyzedAt from cached report for user {}: {}",
+                    user.getId(),
+                    e.getMessage());
+                return false;
+              }
               boolean usable = !shouldRegenerateReport(type, analyzedAt, latestRecordTime);
               if (!usable) {
                 log.info(
