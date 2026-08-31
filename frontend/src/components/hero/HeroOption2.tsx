@@ -63,7 +63,7 @@ export function HeroOption2({ onCtaClick }: HeroProps) {
             transition={{ delay: 1.2, duration: 1 }}
             className="text-xl md:text-3xl text-emerald-300 font-light tracking-wide max-w-3xl mx-auto"
           >
-            AI가 분석하는 당신의 매일, 기록하는 즐거움을 경험하세요.
+            기록을 분석해 보여주는 당신의 매일, 기록하는 즐거움을 경험하세요.
           </motion.p>
 
           <motion.div

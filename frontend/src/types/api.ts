@@ -77,14 +77,6 @@ export interface PooRecordResponse {
 }
 
 /**
- * AI 분석 응답
- */
-export interface AiAnalysisResponse {
-  bristolScale: number;
-  color: string;
-}
-
-/**
  * 체크인 상태 응답
  */
 export interface CheckInResponse {

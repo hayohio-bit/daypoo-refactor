@@ -29,7 +29,7 @@ const STEPS: Step[] = [
   {
     icon: <Brain size={28} />,
     step: '03',
-    title: 'AI 장 컨디션 분석 받기',
+    title: '장 컨디션 분석 받기',
     desc: '축적된 데이터를 기반으로 장 상태를 과학적으로 분석해 드립니다.',
     color: '#52b788',
   },
@@ -37,7 +37,7 @@ const STEPS: Step[] = [
     icon: <Sparkles size={28} />,
     step: '04',
     title: '나만의 리포트 완성',
-    desc: '오늘 첫 기록을 남기고, 맞춤형 AI 쾌변 가이드를 바로 확인해보세요.',
+    desc: '오늘 첫 기록을 남기고, 맞춤형 쾌변 가이드를 바로 확인해보세요.',
     color: '#1B4332',
     isAction: true,
   },

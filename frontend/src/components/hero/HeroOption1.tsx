@@ -79,7 +79,7 @@ export function HeroOption1({ onCtaClick, openAuth }: HeroProps) {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-sm font-bold border border-emerald-100 mb-4">
             <Sparkles size={16} />
-            <span>AI 기반 실시간 배변 분석 서비스</span>
+            <span>실시간 배변 기록 분석 서비스</span>
           </div>
 
           <h1 className="text-5xl md:text-8xl font-black text-[#1A2B27] leading-[1.1] tracking-tighter">
@@ -88,7 +88,7 @@ export function HeroOption1({ onCtaClick, openAuth }: HeroProps) {
           </h1>
 
           <p className="text-lg md:text-2xl text-slate-600 max-w-2xl mx-auto font-medium leading-relaxed">
-            전국 약 5만 건의 화장실 데이터와 지능형 AI 분석으로 <br className="hidden md:block" />
+            전국 약 5만 건의 화장실 데이터와 배변 기록 분석으로 <br className="hidden md:block" />
             당신의 편안한 하루를 완벽하게 서포트합니다.
           </p>
         </motion.div>
@@ -110,7 +110,7 @@ export function HeroOption1({ onCtaClick, openAuth }: HeroProps) {
           />
           <FeatureCard
             icon={<ShieldCheck className="text-blue-500" />}
-            title="AI 배변 패턴 분석"
+            title="배변 패턴 분석"
             desc="프라이버시 중심 로컬 연동"
           />
         </motion.div>

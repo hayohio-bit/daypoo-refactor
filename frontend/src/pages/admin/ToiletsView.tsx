@@ -439,7 +439,7 @@ export const ToiletsView = () => {
                   {reviewSummary?.aiSummary && (
                     <div className="mb-6 p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100">
                       <p className="text-[10px] font-black text-emerald-600 mb-1 uppercase">
-                        AI 리뷰 요약
+                        리뷰 요약
                       </p>
                       <p className="text-xs font-bold text-[#1A2B27]">{reviewSummary.aiSummary}</p>
                     </div>

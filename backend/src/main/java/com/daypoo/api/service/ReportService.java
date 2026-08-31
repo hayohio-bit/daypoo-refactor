@@ -179,7 +179,7 @@ public class ReportService {
         user,
         NotificationType.HEALTH,
         type.name() + " 배변 패턴 리포트가 도착했습니다!",
-        "AI가 분석한 당신의 최신 장 컨디션 체크 결과를 지금 바로 확인해보세요.",
+        "기록을 분석한 최신 장 컨디션 체크 결과를 지금 바로 확인해보세요.",
         "/mypage?tab=report");
   }
 

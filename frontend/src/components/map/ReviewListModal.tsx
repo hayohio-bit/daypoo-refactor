@@ -102,13 +102,13 @@ export function ReviewListModal({ toilet, onClose }: ReviewListModalProps) {
             </div>
           ) : (
             <>
-              {/* AI 요약 (첫 페이지만) */}
+              {/* 리뷰 요약 (첫 페이지만) */}
               {currentPage === 0 && summaryData?.aiSummary && (
                 <div className="mb-6 p-4 rounded-2xl" style={{ background: '#f4faf6' }}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-base">✨</span>
                     <span className="text-sm font-bold" style={{ color: '#2D6A4F' }}>
-                      AI 요약
+                      리뷰 요약
                     </span>
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: '#5a7a6a' }}>
