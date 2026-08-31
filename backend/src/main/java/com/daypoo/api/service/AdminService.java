@@ -58,20 +58,12 @@ public class AdminService {
     long todayNewUsers = userRepository.countByCreatedAtAfter(todayStart);
     long todayInquiriesCount = inquiryRepository.countByCreatedAtBetween(todayStart, todayEnd);
 
-    // 당일 AI 호출 건수 집계 (SystemLog 기준)
-    // build/check-in/report 생성 시 'AI' source로 로그를 남긴다고 가정
-    long todayApiCalls =
-        systemLogService.getRecentLogs().stream()
-            .filter(l -> "AI".equals(l.source()) && l.timestamp().isAfter(todayStart))
-            .count();
-
     return AdminStatsResponse.builder()
         .totalUsers(allUsers)
         .totalToilets(totalToilets)
         .pendingInquiries(pendingInquiriesCount)
         .todayNewUsers(todayNewUsers)
         .todayInquiries(todayInquiriesCount)
-        .todayApiCalls(todayApiCalls)
         .weeklyTrend(weeklyTrend)
         .build();
   }
