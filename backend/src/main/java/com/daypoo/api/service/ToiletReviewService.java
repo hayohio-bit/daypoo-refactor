@@ -4,7 +4,6 @@ import com.daypoo.api.dto.*;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.entity.ToiletReview;
 import com.daypoo.api.entity.User;
-import com.daypoo.api.event.ToiletReviewCreatedEvent;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.ToiletRepository;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +26,6 @@ public class ToiletReviewService {
   private final ToiletReviewRepository toiletReviewRepository;
   private final ToiletRepository toiletRepository;
   private final UserService userService;
-  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public ToiletReviewResponse createReview(
@@ -59,12 +56,6 @@ public class ToiletReviewService {
 
     // 화장실 통계 업데이트
     updateToiletStats(toilet);
-
-    // 리뷰 5개 단위(5, 10, 15...)마다 요약 재생성 이벤트를 발행한다 (매 리뷰마다 발행하지 않음)
-    int reviewCount = toilet.getReviewCount();
-    if (reviewCount >= 5 && reviewCount % 5 == 0) {
-      eventPublisher.publishEvent(new ToiletReviewCreatedEvent(toilet.getId()));
-    }
 
     return ToiletReviewResponse.from(savedReview);
   }
@@ -108,6 +99,8 @@ public class ToiletReviewService {
 
     List<ToiletReviewResponse> recentReviews = getRecentReviews(toiletId);
     long actualCount = toiletReviewRepository.countByToiletId(toiletId);
+    // 요약문을 생성하는 경로는 아직 구현되어 있지 않아 현재는 항상 null 이다.
+    // 컬럼과 응답 필드는 향후 구현을 위해 유지한다.
     String aiSummary = actualCount >= 5 ? toilet.getAiSummary() : null;
 
     return ToiletReviewSummaryResponse.builder()
