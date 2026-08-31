@@ -7,9 +7,7 @@ import com.daypoo.api.dto.SignUpRequest;
 import com.daypoo.api.dto.SocialSignUpRequest;
 import com.daypoo.api.dto.TokenResponse;
 import com.daypoo.api.dto.UserResponse;
-import com.daypoo.api.entity.Inventory;
 import com.daypoo.api.entity.User;
-import com.daypoo.api.entity.enums.ItemType;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
@@ -38,12 +36,9 @@ public class AuthService {
   private final JwtProvider jwtProvider;
   private final EmailService emailService;
   private final StringRedisTemplate redisTemplate;
-  private final TitleRepository titleRepository;
   private final UserDeletionService userDeletionService;
   private final PooRecordRepository pooRecordRepository;
   private final SystemLogService systemLogService;
-  private final InventoryRepository inventoryRepository;
-  private final ItemRepository itemRepository;
   private final AdminSettingsService adminSettingsService;
 
   @org.springframework.beans.factory.annotation.Value("${app.admin.emails:admin@admin.com}")
@@ -114,7 +109,6 @@ public class AuthService {
             .build();
 
     userRepository.save(user);
-    assignDefaultAvatar(user);
     systemLogService.info("Auth", "Social user registered: " + email);
 
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
@@ -130,16 +124,6 @@ public class AuthService {
   public UserResponse getCurrentUserInfo() {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
     User user = userService.getByEmail(email);
-
-    String titleName = null;
-    Long equippedTitleId = user.getEquippedTitleId();
-    if (equippedTitleId != null) {
-      titleName =
-          titleRepository
-              .findById(equippedTitleId)
-              .map(com.daypoo.api.entity.Title::getName)
-              .orElse(null);
-    }
 
     // Calculate statistics
     Long totalAuthCount = pooRecordRepository.countByUser(user);
@@ -175,18 +159,7 @@ public class AuthService {
       consecutiveDays = streak;
     }
 
-    // 장착된 아바타 아이템 조회
-    String equippedAvatarUrl =
-        inventoryRepository
-            .findAllByUserAndIsEquippedTrueAndItemType(user, ItemType.AVATAR)
-            .stream()
-            .findFirst()
-            .map(Inventory::getItem)
-            .map(com.daypoo.api.entity.Item::getImageUrl)
-            .orElse(null);
-
-    return UserResponse.from(
-        user, titleName, totalAuthCount, totalVisitCount, consecutiveDays, equippedAvatarUrl);
+    return UserResponse.from(user, totalAuthCount, totalVisitCount, consecutiveDays);
   }
 
   // Redis-only 작업이므로 @Transactional 불필요 (DB 커넥션 점유 방지)
@@ -231,7 +204,6 @@ public class AuthService {
             .build();
 
     userRepository.save(user);
-    assignDefaultAvatar(user);
     systemLogService.info("Auth", "New user registered: " + request.email());
 
     // 회원가입 성공 시 바로 토큰 발급 (별도 login 호출 불필요 → BCrypt 1회로 성능 개선)
@@ -240,21 +212,6 @@ public class AuthService {
     storeRefreshToken(user.getEmail(), refreshToken);
 
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
-  }
-
-  private void assignDefaultAvatar(User user) {
-    Long defaultItemId = adminSettingsService.getDefaultAvatarItemId();
-    if (defaultItemId == null) {
-      return;
-    }
-    itemRepository
-        .findById(defaultItemId)
-        .ifPresent(
-            item -> {
-              Inventory inventory =
-                  Inventory.builder().user(user).item(item).isEquipped(true).build();
-              inventoryRepository.save(inventory);
-            });
   }
 
   public String findIdByNickname(String nickname) {

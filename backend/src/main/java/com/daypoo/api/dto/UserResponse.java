@@ -13,29 +13,17 @@ public record UserResponse(
     long exp,
     String birthDate,
     String createdAt,
-    Long equippedTitleId,
-    String equippedTitleName,
-    String equippedAvatarUrl,
     Long totalAuthCount,
     Long totalVisitCount,
     Integer consecutiveDays,
     String homeRegion) {
 
   public static UserResponse from(User user) {
-    return from(user, null, null, null, null, null);
-  }
-
-  public static UserResponse from(User user, String equippedTitleName) {
-    return from(user, equippedTitleName, null, null, null, null);
+    return from(user, null, null, null);
   }
 
   public static UserResponse from(
-      User user,
-      String equippedTitleName,
-      Long totalAuthCount,
-      Long totalVisitCount,
-      Integer consecutiveDays,
-      String equippedAvatarUrl) {
+      User user, Long totalAuthCount, Long totalVisitCount, Integer consecutiveDays) {
 
     return UserResponse.builder()
         .id(user.getId())
@@ -46,9 +34,6 @@ public record UserResponse(
         .exp(user.getExp())
         .birthDate(null)
         .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
-        .equippedTitleId(user.getEquippedTitleId())
-        .equippedTitleName(equippedTitleName)
-        .equippedAvatarUrl(equippedAvatarUrl)
         .totalAuthCount(totalAuthCount)
         .totalVisitCount(totalVisitCount)
         .consecutiveDays(consecutiveDays)

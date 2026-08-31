@@ -20,8 +20,6 @@ public class UserDeletionService {
   private final PooRecordRepository pooRecordRepository;
   private final VisitLogRepository visitLogRepository;
   private final NotificationRepository notificationRepository;
-  private final InventoryRepository inventoryRepository;
-  private final UserTitleRepository userTitleRepository;
   private final InquiryRepository inquiryRepository;
   private final ToiletReviewRepository toiletReviewRepository;
   private final ToiletRepository toiletRepository;
@@ -38,8 +36,10 @@ public class UserDeletionService {
     // 1. 순수 하위 엔티티 (참조하는 대상이 적은 데이터부터 삭제)
     healthReportSnapshotRepository.deleteAllByUser(user);
     notificationRepository.deleteAllByUser(user);
-    inventoryRepository.deleteAllByUser(user);
-    userTitleRepository.deleteAllByUser(user);
+    // 상점·칭호 기능 제거 후에도 과거 데이터가 남은 DB 가 있어, users FK 정합성을 위해
+    // inventories·user_titles 의 잔여 행을 직접 삭제한다
+    jdbcTemplate.update("DELETE FROM inventories WHERE user_id = ?", userId);
+    jdbcTemplate.update("DELETE FROM user_titles WHERE user_id = ?", userId);
     inquiryRepository.deleteAllByUser(user);
     // 리뷰 삭제 전 영향받을 화장실 목록 수집
     List<Toilet> affectedToilets = toiletReviewRepository.findDistinctToiletsByUser(user);
