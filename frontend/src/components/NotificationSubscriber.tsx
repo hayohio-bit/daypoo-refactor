@@ -34,13 +34,13 @@ export const NotificationSubscriber: React.FC = () => {
     try {
       const BASE_URL = import.meta.env.VITE_API_URL || '';
 
-      // SSE 전용 단기 토큰 발급 시도 (백엔드 미구현 시 에러 발생 가능)
+      // SSE 전용 단기 토큰 발급 (POST /notifications/sse-token)
       let subToken = accessToken;
       try {
         const res = await issueSseToken();
         if (res && res.sseToken) subToken = res.sseToken;
       } catch (err) {
-        // 백엔드 미구현 시 기존 토큰으로 Fallback
+        // 발급에 실패하면 기존 액세스 토큰으로 구독을 시도한다
         console.warn('SSE 전용 토큰 발급 실패, 기존 토큰 사용:', err);
       }
 
