@@ -52,7 +52,7 @@ public class ToiletReviewController {
     return ResponseEntity.ok(reviewService.getReviewsWithPaging(toiletId, page, size, sort));
   }
 
-  @Operation(summary = "리뷰 요약 정보 조회", description = "AI 한 줄 요약을 포함한 화장실 리뷰 통계 정보를 조회합니다.")
+  @Operation(summary = "리뷰 요약 정보 조회", description = "한 줄 요약을 포함한 화장실 리뷰 통계 정보를 조회합니다.")
   @ApiResponse(responseCode = "200", description = "조회 성공")
   @GetMapping("/{toiletId}/reviews/summary")
   public ResponseEntity<ToiletReviewSummaryResponse> getReviewSummary(

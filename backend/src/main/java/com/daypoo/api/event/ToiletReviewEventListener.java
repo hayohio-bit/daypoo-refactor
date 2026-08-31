@@ -14,6 +14,8 @@ public class ToiletReviewEventListener {
   @Async("taskExecutor")
   @EventListener
   public void handleToiletReviewCreated(ToiletReviewCreatedEvent event) {
-    log.info("Review event received for toilet: {} (AI summary disabled)", event.toiletId());
+    log.info(
+        "Review event received for toilet: {} (summary generation not implemented)",
+        event.toiletId());
   }
 }

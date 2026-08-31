@@ -125,7 +125,7 @@ public class PooRecordService {
     // 수동 입력값 결정
     PoopAttributes attrs = resolvePoopAttributes(request);
 
-    // AI 분석 성공 후, 방문 인증인 경우에만 타이머 리셋
+    // 기록 저장 성공 후, 방문 인증인 경우에만 타이머 리셋
     if (isVisitAuth && toilet != null) {
       locationVerificationService.resetArrivalTime(user.getId(), toilet.getId());
     }

@@ -4,7 +4,7 @@ const FOOTER_LINKS = [
     title: '서비스',
     links: [
       { label: '지도', to: '/map' },
-      { label: 'AI 장 컨디션 체크', to: '/main#health-section' },
+      { label: '장 컨디션 체크', to: '/main#health-section' },
     ],
   },
   {

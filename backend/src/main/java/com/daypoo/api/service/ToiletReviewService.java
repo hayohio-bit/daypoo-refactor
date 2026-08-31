@@ -60,7 +60,7 @@ public class ToiletReviewService {
     // 화장실 통계 업데이트
     updateToiletStats(toilet);
 
-    // 리뷰 5개 단위(5, 10, 15...)마다 AI 요약 재생성 (매 리뷰마다 호출하지 않음)
+    // 리뷰 5개 단위(5, 10, 15...)마다 요약 재생성 이벤트를 발행한다 (매 리뷰마다 발행하지 않음)
     int reviewCount = toilet.getReviewCount();
     if (reviewCount >= 5 && reviewCount % 5 == 0) {
       eventPublisher.publishEvent(new ToiletReviewCreatedEvent(toilet.getId()));
