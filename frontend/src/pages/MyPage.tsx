@@ -16,7 +16,7 @@ import { KnockoutWobble } from '../components/common/KnockoutWobble';
 import { useAuth } from '../context/AuthContext';
 import { getMyRecords } from '../services/recordService';
 import type { UserResponse } from '../types/api';
-import { generateProfileAvatar } from '../utils/avatar';
+import { generateAvatar } from '../utils/avatar';
 
 import { HomeTab } from './mypage/HomeTab';
 import { ReportTab } from './mypage/ReportTab';
@@ -90,7 +90,7 @@ function HeroBanner({ onAvatarClick, user, records = [] }: HeroBannerProps) {
                 >
                   {user?.id ? (
                     <img
-                      src={generateProfileAvatar(user.id)}
+                      src={generateAvatar(user.id)}
                       alt={user.nickname || '프로필'}
                       className="w-full h-full object-cover"
                     />

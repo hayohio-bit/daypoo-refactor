@@ -18,10 +18,6 @@ public record UserResponse(
     Integer consecutiveDays,
     String homeRegion) {
 
-  public static UserResponse from(User user) {
-    return from(user, null, null, null);
-  }
-
   public static UserResponse from(
       User user, Long totalAuthCount, Long totalVisitCount, Integer consecutiveDays) {
 
