@@ -39,6 +39,20 @@
 - [x] **수익화 기능 제거 (MVP 범위 결정)** — 사용자 결정(2026-08-28 "결제 제거, 적립 삭제, 수익화 미포함")에 따라 Toss 결제·구독 스택과 포인트 경제를 전부 제거했다 (`0d00895`). 기록 보상은 경험치만 남기고, PRO/PREMIUM 게이트·포인트 차감이 걸려 있던 리포트는 전면 공개로 전환했다(마스킹 제거, 캐시 v19). 관리자 통계에서 매출·플랜 분포를 제거하고 주간 트렌드는 일별 신규 가입자로 재정의했다. **스키마는 무변경**: payments·subscriptions 테이블과 users.points 컬럼은 남기고, 회원 삭제 시 잔여 행은 JDBC로 정리한다. 선행으로 AI 모듈 제거 후 404가 나던 관리자 "AI 요약 일괄 생성" 버튼도 정리했다 (`aa083c5`).
 - [x] **수익화 잔재 콘텐츠·배포 설정 정리** — 사용자 확인 후 코드 밖 잔재를 정리했다 (`7d09846`). `InquiryType.PAYMENT_ITEM`을 삭제하고 기존 DB 행은 V33 마이그레이션으로 OTHERS에 이관했다. FAQ는 결제·환불 안내를 삭제하고 '결제/아바타' 카테고리의 나머지 항목을 '이용방법'으로 이동했다(DB 데이터는 V33, 프론트는 SupportPage FALLBACK·카테고리 목록). 문의 테스트 데이터 생성기의 결제·포인트·아이템 문구도 교체했다. 배포 쪽은 `deploy-oci.yml`·`docker-compose.prod.yml`·`frontend/Dockerfile`·`docs/infrastructure/*`·README에서 TOSS_SECRET_KEY·VITE_TOSS_CLIENT_KEY·OPENAI_API_KEY 참조를 제거했다. terraform 시뮬레이션 봇 Lambda의 OPENAI_API_KEY는 리뷰 문구 생성용 별도 인프라(키 없이도 동작)라 유지했다.
 
+## 2026-08-31 재조사분
+
+- [x] **AI 표기 정리** — 구현되지 않은 AI 분석을 가리키던 제품 문구·Swagger 설명·주석을 실제 동작(통계 계산)에 맞게 고치고, 문서의 미구현 LLM 아키텍처에 미구현 계획임을 명시했다 (`7771183`·`59c632c`). DB 컬럼과 API 필드인 `aiSummary`·`aiReportEnabled` 는 계약이라 이름을 유지했다.
+- [x] **도달 불가능한 코드·미사용 의존성 제거** — 프론트엔드 미참조 컴포넌트 7개와 훅 1개(1,170줄), 백엔드 고아 DTO 7종, npm 의존성 4종(`@tosspayments/payment-sdk`·`react-markdown`·`remark-gfm`·`swiper`)을 삭제했다 (`d57fa90`).
+- [x] **커버리지 임계치 정상화** — `vite.config.ts` 의 커버리지 `include` 가 두 파일(`useToilets.ts`·`HeroSection.tsx`)만 대상으로 삼고 있어 70% 임계치가 나머지 143개 파일을 전혀 보호하지 못했다. 측정 대상을 `src/**/*.{ts,tsx}` 전체로 넓히고, 임계치는 실측치(lines 9.52 / branches 7.10 / functions 6.78) 바로 아래로 잡은 래칫으로 교체했다. 테스트를 추가할 때마다 함께 올린다.
+
+### 미착수 — 사용자 결정 대기
+
+- [ ] **채워지지 않는 데이터 경로 정리** — 아래 세 갈래는 사용자에게 항상 비어 보이는 기능이며, 제거하려면 API 응답 필드나 스키마를 건드려야 해 결정이 필요하다.
+  - 리뷰 AI 요약: `toilets.ai_summary` 에 값을 쓰는 코드가 없다. `ToiletReviewService:63` 의 이벤트 발행 → `ToiletReviewEventListener`(로그만 남김) → 컬럼으로 이어지는 사슬 전체가 비어 있고, `ToiletRepository.findToiletsNeedingAiSummary()` 는 호출부가 0곳이다. 응답의 `aiSummary` 필드 제거는 계약 변경이다.
+  - 관리자 대시보드 `todayApiCalls`: `AdminService:65` 가 `SystemLog.source == "AI"` 를 세지만 그 source 로 로그를 쓰는 곳이 없어 항상 0 이고, 화면에도 표시되지 않는다.
+  - 상점·칭호 데이터 모델: `Item`·`Inventory`·`Title`·`UserTitle` 엔티티와 리포지토리 4종이 남아 있고 `AuthService` 가 프로필 조회 시 장착 아바타와 칭호를 읽는다. 생성 경로(관리자 화면·엔드포인트)는 `061d822`·`16094c4` 로 이미 제거되어 항상 null 이다. `SystemSettings.defaultAvatarItemId` 도 같다.
+- [ ] **호출되지 않는 엔드포인트** — `GET /reports/history`, `GET /reports/patterns` 는 프론트엔드 호출부가 없다. `GET /admin/toilets/reindex` 는 호출부가 없으나 운영자가 수동으로 쓰는 도구다.
+
 ## 완료
 
 - [x] 존재하지 않는 경로·잘못된 메서드·파라미터 오류가 500으로 응답하던 문제 수정 — 전용 핸들러 4종과 단위 테스트 추가 (`3341f9f`)

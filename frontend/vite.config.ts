@@ -244,11 +244,16 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/hooks/useToilets.ts', 'src/components/HeroSection.tsx'],
+      // 측정 대상을 전체 소스로 둔다. 일부 파일만 include 하면 임계치가
+      // 사실상 아무것도 보호하지 못한다.
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/test-setup.ts', 'src/**/*.d.ts'],
+      // 현재 실측치(2026-08-31: lines 9.52 / branches 7.10 / functions 6.78)
+      // 바로 아래로 잡은 래칫이다. 테스트를 늘릴 때마다 함께 올린다.
       thresholds: {
-        lines: 70,
-        branches: 60,
-        functions: 70,
+        lines: 9,
+        branches: 7,
+        functions: 6,
       },
     },
   },
