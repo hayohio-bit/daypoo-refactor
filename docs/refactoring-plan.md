@@ -45,13 +45,12 @@
 - [x] **도달 불가능한 코드·미사용 의존성 제거** — 프론트엔드 미참조 컴포넌트 7개와 훅 1개(1,170줄), 백엔드 고아 DTO 7종, npm 의존성 4종(`@tosspayments/payment-sdk`·`react-markdown`·`remark-gfm`·`swiper`)을 삭제했다 (`d57fa90`).
 - [x] **커버리지 임계치 정상화** — `vite.config.ts` 의 커버리지 `include` 가 두 파일(`useToilets.ts`·`HeroSection.tsx`)만 대상으로 삼고 있어 70% 임계치가 나머지 143개 파일을 전혀 보호하지 못했다. 측정 대상을 `src/**/*.{ts,tsx}` 전체로 넓히고, 임계치는 실측치(lines 9.52 / branches 7.10 / functions 6.78) 바로 아래로 잡은 래칫으로 교체했다. 테스트를 추가할 때마다 함께 올린다.
 
-### 미착수 — 사용자 결정 대기
+### 사용자 결정 후 처리 (2026-08-31)
 
-- [ ] **채워지지 않는 데이터 경로 정리** — 아래 세 갈래는 사용자에게 항상 비어 보이는 기능이며, 제거하려면 API 응답 필드나 스키마를 건드려야 해 결정이 필요하다.
-  - 리뷰 AI 요약: `toilets.ai_summary` 에 값을 쓰는 코드가 없다. `ToiletReviewService:63` 의 이벤트 발행 → `ToiletReviewEventListener`(로그만 남김) → 컬럼으로 이어지는 사슬 전체가 비어 있고, `ToiletRepository.findToiletsNeedingAiSummary()` 는 호출부가 0곳이다. 응답의 `aiSummary` 필드 제거는 계약 변경이다.
-  - 관리자 대시보드 `todayApiCalls`: `AdminService:65` 가 `SystemLog.source == "AI"` 를 세지만 그 source 로 로그를 쓰는 곳이 없어 항상 0 이고, 화면에도 표시되지 않는다.
-  - 상점·칭호 데이터 모델: `Item`·`Inventory`·`Title`·`UserTitle` 엔티티와 리포지토리 4종이 남아 있고 `AuthService` 가 프로필 조회 시 장착 아바타와 칭호를 읽는다. 생성 경로(관리자 화면·엔드포인트)는 `061d822`·`16094c4` 로 이미 제거되어 항상 null 이다. `SystemSettings.defaultAvatarItemId` 도 같다.
-- [ ] **호출되지 않는 엔드포인트** — `GET /reports/history`, `GET /reports/patterns` 는 프론트엔드 호출부가 없다. `GET /admin/toilets/reindex` 는 호출부가 없으나 운영자가 수동으로 쓰는 도구다.
+- [x] **리뷰 요약 이벤트 사슬 제거** — `toilets.ai_summary` 에 값을 쓰는 코드가 없어, 이벤트 발행 → 비동기 리스너(로그만 남김) → 컬럼으로 이어지던 사슬이 전부 비어 있었다. 발행부와 `ToiletReviewCreatedEvent`·`ToiletReviewEventListener`, 호출부가 없던 `findToiletsNeedingAiSummary()` 를 삭제했다 (`77601e2`). 사용자 결정에 따라 응답 필드 `aiSummary` 와 DB 컬럼은 향후 구현 여지를 남겨 유지하고, 조회 지점에 항상 null 인 이유를 주석으로 남겼다.
+- [x] **todayApiCalls 제거** — 집계 기준인 `SystemLog.source == "AI"` 로 로그를 쓰는 곳이 없어 값이 항상 0 이었고 화면에도 표시되지 않았다. 집계 로직과 `AdminStatsResponse` 응답 필드, 프론트엔드 타입 선언을 함께 삭제했다 (`f4b22f3`).
+- [x] **상점·칭호 코드 제거 (테이블 유지)** — 엔티티 4종·리포지토리 4종·`ItemType`, `AuthService` 의 장착 칭호·아바타 조회와 기본 아바타 지급, `SystemSettings.defaultAvatarItemId`, `User.equippedTitleId` 와 연관 컬렉션, `UserResponse` 의 세 필드를 삭제했다. 프론트엔드는 MyPage 의 장착 아이템 렌더링 분기와 칭호 배지를 지우고 아바타는 Dicebear 자동 생성 경로만 남겼다 (`18053b0`). 사용자 결정에 따라 테이블은 수익화 제거 때와 같은 방침으로 유지하며, 회원 탈퇴 시 남는 `inventories`·`user_titles` 행은 `JdbcTemplate` 으로 직접 삭제한다.
+- [ ] **호출되지 않는 리포트 엔드포인트** — `GET /reports/history`, `GET /reports/patterns` 는 프론트엔드 호출부가 없으나, 구현이 완결되어 있고 Swagger 에 노출되므로 사용자 결정에 따라 그대로 둔다. `GET /admin/toilets/reindex` 는 운영자가 수동으로 쓰는 도구다.
 
 ## 완료
 
