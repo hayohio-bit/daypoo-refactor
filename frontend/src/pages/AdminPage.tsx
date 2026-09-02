@@ -16,7 +16,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAdminStats, getSystemLogs } from '../services/adminService';
-import { api } from '../services/apiClient';
 import type { AdminStatsResponse, SystemLog } from '../types/admin';
 
 import { CsView } from './admin/CsView';

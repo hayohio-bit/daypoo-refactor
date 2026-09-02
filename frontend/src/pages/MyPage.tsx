@@ -9,7 +9,7 @@ import {
   Settings,
   Sparkles,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CountUp } from '../components/common/CountUp';
 import { KnockoutWobble } from '../components/common/KnockoutWobble';
@@ -43,6 +43,8 @@ interface HeroBannerProps {
 }
 
 function HeroBanner({ onAvatarClick, user, records = [] }: HeroBannerProps) {
+  // SVG 생성과 base64 인코딩을 렌더마다 반복하지 않도록 사용자 id 기준으로 캐시한다
+  const avatarSrc = useMemo(() => (user?.id ? generateAvatar(user.id) : null), [user?.id]);
   return (
     <div className="relative overflow-hidden" style={{ background: 'transparent' }}>
       <div className="absolute inset-0 pointer-events-none">
@@ -88,10 +90,10 @@ function HeroBanner({ onAvatarClick, user, records = [] }: HeroBannerProps) {
                     boxShadow: '0 16px 48px rgba(27,67,50,0.12)',
                   }}
                 >
-                  {user?.id ? (
+                  {avatarSrc ? (
                     <img
-                      src={generateAvatar(user.id)}
-                      alt={user.nickname || '프로필'}
+                      src={avatarSrc}
+                      alt={user?.nickname || '프로필'}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -329,7 +331,7 @@ export function MyPage() {
   const { user, refreshUser, logout, deleteMe, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<TabKey>('home');
 
-  // 상점 데이터 상태 관리
+  // 배변 기록 상태
   const [records, setRecords] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 

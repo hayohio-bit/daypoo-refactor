@@ -99,7 +99,7 @@ docker stop daypoo_postgres && docker start daypoo_postgres
 
 ![고객 지원 화면](./screenshots/05-support.jpg)
 
-자주 묻는 질문, 1:1 문의하기, 나의 문의 내역으로 구성된다. 좌측 `CATEGORIES` 에서 `배변 패턴/AI분석`, `이용방법`, `계정/보안` 으로 질문을 걸러 볼 수 있다. 1:1 문의 작성과 문의 내역 조회는 로그인이 필요하다.
+자주 묻는 질문, 1:1 문의하기, 나의 문의 내역으로 구성된다. 좌측 `CATEGORIES` 에서 `배변 패턴 분석`, `이용방법`, `계정/보안` 으로 질문을 걸러 볼 수 있다. 1:1 문의 작성과 문의 내역 조회는 로그인이 필요하다.
 
 ### 2.5 API 문서 (`http://localhost:18080/api/docs`)
 
@@ -111,5 +111,5 @@ docker stop daypoo_postgres && docker start daypoo_postgres
 
 다음 화면은 로그인한 계정이 필요해 촬영하지 않았다. 계정을 만든 뒤 같은 방식으로 추가하면 된다.
 
-- 마이페이지 (`/mypage`) — 배변 기록 달력, AI 분석 리포트, 획득 칭호
+- 마이페이지 (`/mypage`) — 배변 기록 달력, 건강 리포트
 - 관리자 (`/admin`) — 유저 관리, 문의 관리, 시스템 설정. `ADMIN` 역할을 가진 계정만 접근할 수 있고, 그 외 계정은 `/main` 으로 리다이렉트된다
