@@ -12,6 +12,9 @@
       "recommended": false,
       "correctness": {
         "noUnusedVariables": "off"
+      },
+      "nursery": {
+        "noCommonJs": "error"
       }
     }
   },
