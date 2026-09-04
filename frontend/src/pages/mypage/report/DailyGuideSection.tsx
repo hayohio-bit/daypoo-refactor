@@ -62,7 +62,7 @@ export const DailyGuideSection = ({ reportData, isFetchLoading }: DailyGuideSect
               <Sparkles size={60} />
             </div>
             <p className="text-[11px] sm:text-[13px] font-black text-emerald-300 mb-2 sm:mb-3 uppercase tracking-[0.2em] flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> AI Guide Poo Insight
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Daily Poo Insight
             </p>
             <p className="text-base sm:text-xl font-bold leading-relaxed relative z-10 tracking-tight">
               "{reportData?.summary || '기록을 분석하고 있습니다. 화장실 기록을 남겨주세요!'}"

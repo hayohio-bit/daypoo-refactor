@@ -10,12 +10,12 @@ import {
   MapPin,
   MessageSquare,
   Settings,
+  Users,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAdminStats, getSystemLogs } from '../services/adminService';
-import { api } from '../services/apiClient';
 import type { AdminStatsResponse, SystemLog } from '../types/admin';
 
 import { CsView } from './admin/CsView';
@@ -114,7 +114,7 @@ export function AdminPage() {
     {
       id: 'users',
       label: '유저 관리',
-      icon: import('lucide-react').then((m) => m.Users), // 동적으로 lucide-react에서 icon을 들고오는 구조 대응용 (Menu에서 직접 Users 컴포넌트로 전달)
+      icon: Users,
       badge:
         !visitedTabs.includes('users') && stats?.todayNewUsers && stats.todayNewUsers > 0
           ? stats.todayNewUsers
@@ -183,7 +183,7 @@ export function AdminPage() {
 
         <nav className="flex-1 w-full space-y-2 px-4">
           {menuItems.map((item) => {
-            const IconComponent = item.id === 'users' ? require('lucide-react').Users : item.icon;
+            const IconComponent = item.icon;
             return (
               <button
                 key={item.id}

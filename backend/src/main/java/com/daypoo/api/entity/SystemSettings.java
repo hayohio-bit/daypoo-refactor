@@ -32,9 +32,6 @@ public class SystemSettings extends BaseTimeEntity {
   @Column(name = "ai_report_enabled", nullable = false)
   private boolean aiReportEnabled = true;
 
-  @Column(name = "default_avatar_item_id")
-  private Long defaultAvatarItemId;
-
   @Builder
   public SystemSettings(
       String noticeMessage,

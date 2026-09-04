@@ -1,6 +1,6 @@
 # 🎯 DayPoo 배포 준비 완료 요약
 
-이 문서는 Claude Code가 완료한 작업과 다음 단계를 요약합니다.
+이 문서는 배포 준비 과정에서 완료한 작업과 다음 단계를 요약합니다.
 
 ---
 
@@ -204,7 +204,6 @@ curl http://localhost:8000/health
 ---
 
 **작성일**: 2026-03-26
-**작성자**: Claude Code (Opus 4.6)
 **프로젝트**: DayPoo
 **배포 대상**: AWS Free Tier
 

@@ -43,7 +43,4 @@ public interface ToiletRepository extends JpaRepository<Toilet, Long> {
   boolean existsByMngNo(String mngNo);
 
   java.util.Optional<Toilet> findByMngNo(String mngNo);
-
-  @Query("SELECT t FROM Toilet t WHERE t.reviewCount >= 5 AND t.aiSummary IS NULL")
-  List<Toilet> findToiletsNeedingAiSummary();
 }

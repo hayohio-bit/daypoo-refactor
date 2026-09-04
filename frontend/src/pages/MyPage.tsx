@@ -8,22 +8,21 @@ import {
   RefreshCw,
   Settings,
   Sparkles,
-  Trophy,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CountUp } from '../components/common/CountUp';
 import { KnockoutWobble } from '../components/common/KnockoutWobble';
 import { useAuth } from '../context/AuthContext';
 import { getMyRecords } from '../services/recordService';
 import type { UserResponse } from '../types/api';
-import { generateProfileAvatar, isEmoji, parseDicebearUrl } from '../utils/avatar';
+import { generateAvatar } from '../utils/avatar';
 
 import { HomeTab } from './mypage/HomeTab';
 import { ReportTab } from './mypage/ReportTab';
 import { SettingsTab } from './mypage/SettingsTab';
 // ── 분할된 서브 탭 임포트 ───────────────────────────────────────────────
-import { AvatarEffect, type AvatarItem, type TabKey } from './mypage/myPageCommons';
+import type { TabKey } from './mypage/myPageCommons';
 
 // ── 애니메이션 프리셋 ──────────────────────────────────────────────────
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
@@ -38,20 +37,14 @@ const fadeUp = (delay = 0) => ({
 
 // ── 히어로 배너 (상단 프로필) ────────────────────────────────────────────
 interface HeroBannerProps {
-  equippedItem: AvatarItem | null;
-  equippedEffect: AvatarItem | null;
   onAvatarClick: () => void;
   user: UserResponse | null;
   records?: any[];
 }
 
-function HeroBanner({
-  equippedItem,
-  equippedEffect,
-  onAvatarClick,
-  user,
-  records = [],
-}: HeroBannerProps) {
+function HeroBanner({ onAvatarClick, user, records = [] }: HeroBannerProps) {
+  // SVG 생성과 base64 인코딩을 렌더마다 반복하지 않도록 사용자 id 기준으로 캐시한다
+  const avatarSrc = useMemo(() => (user?.id ? generateAvatar(user.id) : null), [user?.id]);
   return (
     <div className="relative overflow-hidden" style={{ background: 'transparent' }}>
       <div className="absolute inset-0 pointer-events-none">
@@ -80,7 +73,6 @@ function HeroBanner({
           >
             {/* 아바타 */}
             <motion.div variants={fadeUp(0)} className="relative flex-shrink-0">
-              {equippedEffect?.emoji && <AvatarEffect emoji={equippedEffect.emoji} />}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -98,30 +90,10 @@ function HeroBanner({
                     boxShadow: '0 16px 48px rgba(27,67,50,0.12)',
                   }}
                 >
-                  {equippedItem?.id ? (
-                    equippedItem.imageUrl &&
-                    (isEmoji(equippedItem.imageUrl) ||
-                      (!equippedItem.imageUrl.includes(':') &&
-                        !equippedItem.imageUrl.startsWith('http') &&
-                        !equippedItem.imageUrl.startsWith('/'))) ? (
-                      <span className="text-5xl select-none leading-none">
-                        {equippedItem.imageUrl}
-                      </span>
-                    ) : (
-                      <img
-                        src={parseDicebearUrl(
-                          equippedItem.imageUrl || '',
-                          equippedItem.id,
-                          equippedItem.rawType || 'AVATAR',
-                        )}
-                        alt={equippedItem.name}
-                        className="w-full h-full object-cover"
-                      />
-                    )
-                  ) : user?.id ? (
+                  {avatarSrc ? (
                     <img
-                      src={generateProfileAvatar(user.id, user.equippedAvatarUrl)}
-                      alt={user.nickname || '프로필'}
+                      src={avatarSrc}
+                      alt={user?.nickname || '프로필'}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -149,22 +121,6 @@ function HeroBanner({
 
             {/* 텍스트 영역 */}
             <div className="pb-1">
-              <motion.div variants={fadeUp(0.05)}>
-                <span
-                  className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full mb-2"
-                  style={{
-                    background: 'rgba(232,168,56,0.12)',
-                    color: '#E8A838',
-                    border: '1px solid rgba(232,168,56,0.2)',
-                  }}
-                >
-                  <Trophy size={9} />{' '}
-                  {user?.equippedTitleName && user.equippedTitleName !== '새내기 쾌변러'
-                    ? user.equippedTitleName
-                    : '보유 칭호 없음'}
-                </span>
-              </motion.div>
-
               <motion.div variants={fadeUp(0.1)} className="mb-1">
                 <KnockoutWobble
                   text={user?.nickname || '익명의 쾌변러'}
@@ -375,7 +331,7 @@ export function MyPage() {
   const { user, refreshUser, logout, deleteMe, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<TabKey>('home');
 
-  // 상점 데이터 상태 관리
+  // 배변 기록 상태
   const [records, setRecords] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -422,13 +378,7 @@ export function MyPage() {
       className="min-h-screen overflow-x-hidden font-['Pretendard']"
       style={{ background: '#f8faf9' }}
     >
-      <HeroBanner
-        equippedItem={null}
-        equippedEffect={null}
-        onAvatarClick={() => setTab('home')}
-        user={user}
-        records={records}
-      />
+      <HeroBanner onAvatarClick={() => setTab('home')} user={user} records={records} />
 
       <TabBar active={tab} onChange={setTab} />
 

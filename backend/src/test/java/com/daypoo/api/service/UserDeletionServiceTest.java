@@ -11,13 +11,11 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.repository.FavoriteRepository;
 import com.daypoo.api.repository.HealthReportSnapshotRepository;
 import com.daypoo.api.repository.InquiryRepository;
-import com.daypoo.api.repository.InventoryRepository;
 import com.daypoo.api.repository.NotificationRepository;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.ToiletReviewRepository;
 import com.daypoo.api.repository.UserRepository;
-import com.daypoo.api.repository.UserTitleRepository;
 import com.daypoo.api.repository.VisitLogRepository;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -38,8 +36,6 @@ class UserDeletionServiceTest {
   @Mock private PooRecordRepository pooRecordRepository;
   @Mock private VisitLogRepository visitLogRepository;
   @Mock private NotificationRepository notificationRepository;
-  @Mock private InventoryRepository inventoryRepository;
-  @Mock private UserTitleRepository userTitleRepository;
   @Mock private InquiryRepository inquiryRepository;
   @Mock private ToiletReviewRepository toiletReviewRepository;
   @Mock private ToiletRepository toiletRepository;
@@ -59,8 +55,6 @@ class UserDeletionServiceTest {
     // 전 리포지토리 삭제 호출 확인
     verify(healthReportSnapshotRepository).deleteAllByUser(user);
     verify(notificationRepository).deleteAllByUser(user);
-    verify(inventoryRepository).deleteAllByUser(user);
-    verify(userTitleRepository).deleteAllByUser(user);
     verify(inquiryRepository).deleteAllByUser(user);
     verify(toiletReviewRepository).deleteAllByUser(user);
     verify(favoriteRepository).deleteAllByUser(user);
@@ -70,10 +64,12 @@ class UserDeletionServiceTest {
     visitBeforeRecord.verify(visitLogRepository).deleteAllByUser(user);
     visitBeforeRecord.verify(pooRecordRepository).deleteAllByUser(user);
 
-    // 잔여 결제·구독 행은 subscriptions(payments 참조) → payments 순서로 삭제되어야 한다
-    InOrder subBeforePayment = inOrder(jdbcTemplate);
-    subBeforePayment.verify(jdbcTemplate).update("DELETE FROM subscriptions WHERE user_id = ?", 1L);
-    subBeforePayment.verify(jdbcTemplate).update("DELETE FROM payments WHERE user_id = ?", 1L);
+    // 제거된 기능이 남긴 잔여 행은 subscriptions(payments 참조) → payments 순서를 지켜 직접 삭제되어야 한다
+    InOrder legacyTables = inOrder(jdbcTemplate);
+    legacyTables.verify(jdbcTemplate).update("DELETE FROM inventories WHERE user_id = ?", 1L);
+    legacyTables.verify(jdbcTemplate).update("DELETE FROM user_titles WHERE user_id = ?", 1L);
+    legacyTables.verify(jdbcTemplate).update("DELETE FROM subscriptions WHERE user_id = ?", 1L);
+    legacyTables.verify(jdbcTemplate).update("DELETE FROM payments WHERE user_id = ?", 1L);
 
     // 회원 본체는 모든 하위 데이터 삭제 후 마지막에 삭제되어야 한다
     InOrder userLast = inOrder(pooRecordRepository, userRepository);
@@ -94,13 +90,13 @@ class UserDeletionServiceTest {
     userDeletionService.deleteUserAndRelatedData(user);
 
     verify(toilet).updateReviewStats(4.2, 7);
-    // 리뷰가 5개 이상 남아 있으면 AI 요약을 유지한다
+    // 리뷰가 5개 이상 남아 있으면 요약을 유지한다
     verify(toilet, never()).updateAiSummary(null);
     verify(toiletRepository).save(toilet);
   }
 
   @Test
-  @DisplayName("남은 리뷰가 5개 미만이면 화장실의 AI 요약을 초기화한다")
+  @DisplayName("남은 리뷰가 5개 미만이면 화장실의 요약을 초기화한다")
   void deleteUserAndRelatedData_clearsAiSummaryWhenFewReviewsRemain() {
     User user = mock(User.class);
     Toilet toilet = mock(Toilet.class);

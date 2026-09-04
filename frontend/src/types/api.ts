@@ -28,15 +28,12 @@ export interface UserResponse {
   role: string;
   level: number;
   exp: number;
-  equippedTitleId?: number | null;
-  equippedTitleName?: string | null;
   birthDate?: string | null;
   homeRegion?: string | null;
   createdAt?: string;
   totalAuthCount?: number;
   totalVisitCount?: number;
   consecutiveDays?: number;
-  equippedAvatarUrl?: string | null;
 }
 
 /**
@@ -74,14 +71,6 @@ export interface PooRecordResponse {
   conditionTags: string[];
   dietTags: string[];
   createdAt: string;
-}
-
-/**
- * AI 분석 응답
- */
-export interface AiAnalysisResponse {
-  bristolScale: number;
-  color: string;
 }
 
 /**

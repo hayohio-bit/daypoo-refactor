@@ -20,14 +20,19 @@ public class UserDeletionService {
   private final PooRecordRepository pooRecordRepository;
   private final VisitLogRepository visitLogRepository;
   private final NotificationRepository notificationRepository;
-  private final InventoryRepository inventoryRepository;
-  private final UserTitleRepository userTitleRepository;
   private final InquiryRepository inquiryRepository;
   private final ToiletReviewRepository toiletReviewRepository;
   private final ToiletRepository toiletRepository;
   private final FavoriteRepository favoriteRepository;
   private final HealthReportSnapshotRepository healthReportSnapshotRepository;
   private final JdbcTemplate jdbcTemplate;
+
+  /**
+   * 기능 제거 후 엔티티는 사라졌지만 과거 데이터가 남은 DB 가 있어 테이블은 유지 중인 잔여 테이블. users FK 정합성을 위해 회원 삭제 전에 직접 비운다.
+   * subscriptions 가 payments 를 참조하므로 이 순서를 유지해야 한다.
+   */
+  private static final List<String> LEGACY_USER_TABLES =
+      List.of("inventories", "user_titles", "subscriptions", "payments");
 
   /** 회원과 연관된 모든 데이터를 FK 의존성 순서에 맞춰 삭제 후 최종적으로 회원 삭제 */
   @Transactional
@@ -38,8 +43,6 @@ public class UserDeletionService {
     // 1. 순수 하위 엔티티 (참조하는 대상이 적은 데이터부터 삭제)
     healthReportSnapshotRepository.deleteAllByUser(user);
     notificationRepository.deleteAllByUser(user);
-    inventoryRepository.deleteAllByUser(user);
-    userTitleRepository.deleteAllByUser(user);
     inquiryRepository.deleteAllByUser(user);
     // 리뷰 삭제 전 영향받을 화장실 목록 수집
     List<Toilet> affectedToilets = toiletReviewRepository.findDistinctToiletsByUser(user);
@@ -63,10 +66,9 @@ public class UserDeletionService {
     // VisitLog는 PooRecord를 참조하므로 먼저 삭제
     visitLogRepository.deleteAllByUser(user);
 
-    // 결제 기능 제거 후에도 과거 데이터가 남은 DB가 있을 수 있어, users FK 정합성을 위해
-    // subscriptions(payments 참조) → payments 순서로 잔여 행을 직접 삭제한다
-    jdbcTemplate.update("DELETE FROM subscriptions WHERE user_id = ?", userId);
-    jdbcTemplate.update("DELETE FROM payments WHERE user_id = ?", userId);
+    for (String table : LEGACY_USER_TABLES) {
+      jdbcTemplate.update("DELETE FROM " + table + " WHERE user_id = ?", userId);
+    }
 
     // 3. 2단계 삭제 완료 후 안전하게 삭제 가능한 엔티티
     pooRecordRepository.deleteAllByUser(user);

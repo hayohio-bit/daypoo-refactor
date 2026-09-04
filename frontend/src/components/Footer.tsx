@@ -4,7 +4,7 @@ const FOOTER_LINKS = [
     title: '서비스',
     links: [
       { label: '지도', to: '/map' },
-      { label: 'AI 장 컨디션 체크', to: '/main#health-section' },
+      { label: '장 컨디션 체크', to: '/main#health-section' },
     ],
   },
   {
@@ -54,7 +54,7 @@ export function Footer() {
               Day<span className="text-[#E8A838]">.</span>Poo
             </h2>
             <p className="text-xs sm:text-sm font-bold text-white/30 max-w-sm leading-relaxed">
-              당신의 편안한 일상을 위한 <br className="sm:hidden" /> 가장 귀여운 AI 퍼스널 메이트.
+              당신의 편안한 일상을 위한 <br className="sm:hidden" /> 가장 귀여운 배변 기록 메이트.
             </p>
           </div>
 

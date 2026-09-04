@@ -26,7 +26,7 @@ public class SystemSettingsUpdateRequest {
   @NotNull
   private boolean signupEnabled;
 
-  @Schema(description = "AI 분석 리포트 생성 허용 여부")
+  @Schema(description = "분석 리포트 생성 허용 여부")
   @NotNull
   private boolean aiReportEnabled;
 }
