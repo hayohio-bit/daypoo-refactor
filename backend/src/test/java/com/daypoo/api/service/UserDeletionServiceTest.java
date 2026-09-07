@@ -64,12 +64,13 @@ class UserDeletionServiceTest {
     visitBeforeRecord.verify(visitLogRepository).deleteAllByUser(user);
     visitBeforeRecord.verify(pooRecordRepository).deleteAllByUser(user);
 
-    // 제거된 기능이 남긴 잔여 행은 subscriptions(payments 참조) → payments 순서를 지켜 직접 삭제되어야 한다
-    InOrder legacyTables = inOrder(jdbcTemplate);
-    legacyTables.verify(jdbcTemplate).update("DELETE FROM inventories WHERE user_id = ?", 1L);
-    legacyTables.verify(jdbcTemplate).update("DELETE FROM user_titles WHERE user_id = ?", 1L);
-    legacyTables.verify(jdbcTemplate).update("DELETE FROM subscriptions WHERE user_id = ?", 1L);
-    legacyTables.verify(jdbcTemplate).update("DELETE FROM payments WHERE user_id = ?", 1L);
+    // 제거된 기능이 남긴 잔여 행 중 users 를 CASCADE 없이 참조하는 테이블만 직접 삭제되어야 한다.
+    // 세 테이블 사이에는 FK 가 없으므로 삭제 순서는 검증하지 않는다.
+    // (subscriptions 는 V14 의 ON DELETE CASCADE 로 DB 가 정리한다)
+    verify(jdbcTemplate).update("DELETE FROM inventories WHERE user_id = ?", 1L);
+    verify(jdbcTemplate).update("DELETE FROM user_titles WHERE user_id = ?", 1L);
+    verify(jdbcTemplate).update("DELETE FROM payments WHERE user_id = ?", 1L);
+    verify(jdbcTemplate, never()).update("DELETE FROM subscriptions WHERE user_id = ?", 1L);
 
     // 회원 본체는 모든 하위 데이터 삭제 후 마지막에 삭제되어야 한다
     InOrder userLast = inOrder(pooRecordRepository, userRepository);

@@ -28,11 +28,12 @@ public class UserDeletionService {
   private final JdbcTemplate jdbcTemplate;
 
   /**
-   * 기능 제거 후 엔티티는 사라졌지만 과거 데이터가 남은 DB 가 있어 테이블은 유지 중인 잔여 테이블. users FK 정합성을 위해 회원 삭제 전에 직접 비운다.
-   * subscriptions 가 payments 를 참조하므로 이 순서를 유지해야 한다.
+   * 기능 제거 후 엔티티는 사라졌지만 과거 데이터가 남은 DB 가 있어 테이블은 유지 중인 잔여 테이블. V1 에서 users 를 ON DELETE 옵션 없이 참조하므로 회원
+   * 삭제 전에 직접 비운다. subscriptions 는 V14 에서 users 를 ON DELETE CASCADE, payments 를 ON DELETE SET NULL 로
+   * 참조하므로 여기서 다루지 않는다.
    */
   private static final List<String> LEGACY_USER_TABLES =
-      List.of("inventories", "user_titles", "subscriptions", "payments");
+      List.of("inventories", "user_titles", "payments");
 
   /** 회원과 연관된 모든 데이터를 FK 의존성 순서에 맞춰 삭제 후 최종적으로 회원 삭제 */
   @Transactional
