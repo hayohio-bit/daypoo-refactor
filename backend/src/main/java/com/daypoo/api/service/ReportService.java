@@ -8,6 +8,8 @@ import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.NotificationType;
 import com.daypoo.api.entity.enums.ReportType;
+import com.daypoo.api.global.exception.BusinessException;
+import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.VisitLogRepository;
 import com.daypoo.api.service.report.ReportCacheStore;
@@ -35,12 +37,16 @@ public class ReportService {
   private final ReportCacheStore cacheStore;
   private final ReportSnapshotStore snapshotStore;
   private final ReportStatisticsCalculator calculator;
+  private final AdminSettingsService adminSettingsService;
 
   /** 기록이 없어 점수를 산출할 수 없을 때 사용하는 기본 건강 점수 */
   private static final int DEFAULT_HEALTH_SCORE = 50;
 
   /** 컨디션 리포트 생성 및 조회 */
   public HealthReportResponse generateReport(User user, ReportType type) {
+    if (!adminSettingsService.isAiReportEnabled()) {
+      throw new BusinessException(ErrorCode.REPORT_DISABLED);
+    }
     String cacheKey = cacheStore.buildKey(user, type);
 
     Optional<PooRecord> lastRecord = recordRepository.findFirstByUserOrderByCreatedAtDesc(user);

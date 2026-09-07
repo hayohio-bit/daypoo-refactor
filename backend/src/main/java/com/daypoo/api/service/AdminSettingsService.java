@@ -71,4 +71,12 @@ public class AdminSettingsService {
   public boolean isSignupEnabled() {
     return systemSettingsRepository.findCurrent().map(SystemSettings::isSignupEnabled).orElse(true);
   }
+
+  @Transactional(readOnly = true)
+  public boolean isAiReportEnabled() {
+    return systemSettingsRepository
+        .findCurrent()
+        .map(SystemSettings::isAiReportEnabled)
+        .orElse(true);
+  }
 }

@@ -7,13 +7,18 @@ export type ReportSubTab = 'daily' | 'weekly' | 'monthly';
  * 선택한 기간의 컨디션 리포트를 조회한다.
  * 오늘 가이드(daily)는 기록이 추가되면 바로 반영돼야 하므로 캐시하지 않는다.
  */
+/** 관리자가 리포트 생성을 중지했을 때 백엔드가 돌려주는 에러 코드 (ErrorCode.REPORT_DISABLED) */
+const REPORT_DISABLED_CODE = 'G003';
+
 export const useHealthReport = (subTab: ReportSubTab) => {
   const [reportData, setReportData] = useState<any>(null);
   const [isFetchLoading, setIsFetchLoading] = useState(false);
+  const [disabledMessage, setDisabledMessage] = useState<string | null>(null);
   const reportCacheRef = useRef<Record<string, any>>({});
 
   const fetchReport = useCallback(async (type: ReportSubTab) => {
     setReportData(null);
+    setDisabledMessage(null);
 
     if (type !== 'daily' && reportCacheRef.current[type]) {
       setReportData(reportCacheRef.current[type]);
@@ -25,8 +30,12 @@ export const useHealthReport = (subTab: ReportSubTab) => {
       const res = await getReport(type);
       reportCacheRef.current[type] = res;
       setReportData(res);
-    } catch (err) {
-      console.error('리포트 조회 실패:', err);
+    } catch (err: any) {
+      if (err?.code === REPORT_DISABLED_CODE) {
+        setDisabledMessage(err.message || '현재 리포트 생성이 중지된 상태입니다.');
+      } else {
+        console.error('리포트 조회 실패:', err);
+      }
     } finally {
       setIsFetchLoading(false);
     }
@@ -36,5 +45,5 @@ export const useHealthReport = (subTab: ReportSubTab) => {
     fetchReport(subTab);
   }, [subTab, fetchReport]);
 
-  return { reportData, isFetchLoading };
+  return { reportData, isFetchLoading, disabledMessage };
 };

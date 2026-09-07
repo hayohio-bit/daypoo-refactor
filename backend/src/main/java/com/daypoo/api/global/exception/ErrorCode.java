@@ -40,7 +40,8 @@ public enum ErrorCode {
 
   // Global Settings
   SIGNUP_DISABLED(HttpStatus.FORBIDDEN, "G001", "현재 신규 회원가입이 제한된 상태입니다."),
-  MAINTENANCE_MODE(HttpStatus.SERVICE_UNAVAILABLE, "G002", "현재 시스템 점검 중입니다. 잠시 후 다시 시도해주세요.");
+  MAINTENANCE_MODE(HttpStatus.SERVICE_UNAVAILABLE, "G002", "현재 시스템 점검 중입니다. 잠시 후 다시 시도해주세요."),
+  REPORT_DISABLED(HttpStatus.SERVICE_UNAVAILABLE, "G003", "현재 리포트 생성이 중지된 상태입니다.");
 
   private final HttpStatus status;
   private final String code;
