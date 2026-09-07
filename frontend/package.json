@@ -18,16 +18,12 @@
     "@dicebear/collection": "^9.4.2",
     "@dicebear/core": "^9.4.2",
     "@tailwindcss/typography": "^0.5.19",
-    "@tosspayments/payment-sdk": "^1.9.2",
     "framer-motion": "^12.36.0",
     "lucide-react": "^0.576.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.1",
-    "recharts": "^3.8.0",
-    "remark-gfm": "^4.0.1",
-    "swiper": "^12.1.2"
+    "recharts": "^3.8.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

@@ -26,7 +26,7 @@ const STATS: StatConfig[] = [
     target: 31400,
     format: (v) => (v >= 1000 ? `${(v / 1000 / 10).toFixed(1)}만+` : `${v}`),
     label: '누적 분석 데이터',
-    desc: 'AI 분석을 위한 거대 데이터셋',
+    desc: '패턴 분석을 위한 거대 데이터셋',
     icon: <Brain size={22} />,
     color: '#52b788',
   },

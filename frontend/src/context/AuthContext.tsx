@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // 서버 로그아웃 API 호출 (토큰 블랙리스트 처리 등)
       await logoutRequest().catch((err) => {
-        console.warn('Backend logout failed or not implemented:', err);
+        console.warn('Backend logout failed:', err);
       });
     } finally {
       removeTokens();

@@ -60,7 +60,7 @@ const FLOW_DOTS = [
 
 const PIPELINE_LABELS = [
   { text: '기록 수집', x: '6%', y: '10%', delay: 0.3 },
-  { text: 'AI 분석 중', x: '42%', y: '84%', delay: 2.0 },
+  { text: '기록 분석 중', x: '42%', y: '84%', delay: 2.0 },
   { text: '패턴 감지', x: '78%', y: '10%', delay: 3.8 },
 ];
 
@@ -108,8 +108,8 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
   const [messageIndex, setMessageIndex] = useState(0);
   // [P1] toilets.length / toiletsLoading 참조 제거 — 하드코딩 메시지로 대체
   const messages = [
-    '근처 최적의 화장실을 AI가 실시간 선별 중',
-    'AI가 분석한 오늘의 최적 쾌변 장소 추천',
+    '근처 최적의 화장실을 실시간으로 선별하는 중',
+    '이용자 평가로 뽑은 오늘의 최적 쾌변 장소 추천',
     '실시간으로 업데이트되는 깨끗한 한 칸 찾기',
     '지금 내 주변 평점 높은 화장실 리스트',
     '급할 때 가장 빠르게 가는 비밀 장소 공개',
@@ -168,7 +168,7 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
               </h1>
 
               <p className="text-base sm:text-lg text-slate-400 font-medium leading-relaxed max-w-lg">
-                단순한 지도가 아닙니다. 사용자의 기록과 AI 분석이 결합된{' '}
+                단순한 지도가 아닙니다. 사용자의 기록과 통계 분석이 결합된{' '}
                 <br className="hidden md:block" />
                 프리미엄 라이프 케어 시스템.
               </p>
@@ -225,7 +225,7 @@ export function HeroSection({ onCtaClick, openAuth }: HeroSectionProps) {
                 <div className="hidden md:block space-y-5">
                   <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
                     <span className="text-slate-500 flex items-center gap-2">
-                      <Activity size={12} className="text-emerald-500" /> 실시간 AI 데이터 분석
+                      <Activity size={12} className="text-emerald-500" /> 실시간 데이터 분석
                       파이프라인
                     </span>
                     <span className="text-emerald-400 animate-pulse flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-md">

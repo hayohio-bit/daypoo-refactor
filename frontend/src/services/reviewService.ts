@@ -69,7 +69,7 @@ export async function getReviews(
 }
 
 /**
- * 리뷰 요약 정보 조회 (AI 요약 + 평균별점 + 최근리뷰)
+ * 리뷰 요약 정보 조회 (요약문 + 평균별점 + 최근리뷰)
  * GET /api/v1/toilets/{toiletId}/reviews/summary
  */
 export async function getReviewSummary(toiletId: number): Promise<ToiletReviewSummaryResponse> {

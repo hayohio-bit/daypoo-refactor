@@ -2,6 +2,8 @@
 
 본 문서는 DayPoo 프로젝트의 전반적인 시스템 아키텍처, 구성요소, 데이터 흐름, 배포 사양 및 개발 규칙을 정의합니다. 본 문서는 프로젝트의 일관성을 유지하고 향후 신규 개발 시 가이드라인 역할을 하기 위해 작성되었습니다.
 
+> **AI 서비스에 관한 주의**: 본 문서에 서술된 AI 서비스(FastAPI + Langchain)는 원본 팀 프로젝트의 계획 사양이며, 현재 저장소에는 구현되어 있지 않습니다. `frontend/`, `backend/`, `terraform/`, `twa/` 만 실재하고, 배변 패턴 리포트는 백엔드의 통계 계산(`ReportService`)으로 생성됩니다. AI 서비스가 등장하는 다이어그램과 절차는 향후 계획으로 읽어 주십시오.
+
 ---
 
 ## 1. 아키텍처 개요 (Architectural Overview)
@@ -156,8 +158,8 @@ Spring Boot 3.4.3 및 Java 21 기반 애플리케이션으로, Gradle 빌드 툴
 
 ---
 
-### 3.3 AI 서비스 (ai-service)
-FastAPI 및 Python 3.12 기반의 LLM 오케스트레이션 서비스입니다.
+### 3.3 AI 서비스 (ai-service) — 미구현 계획
+FastAPI 및 Python 3.12 기반의 LLM 오케스트레이션 서비스로 계획되었으나, 현재 저장소에는 해당 모듈이 존재하지 않습니다.
 
 - **디렉토리 구조 (`app`)**:
   - `api/v1/endpoints/`: 라우터 모듈 (`analysis.py` 배변 이미지 분석, `report.py` 리포트 생성, `review.py` 코멘트)
@@ -394,7 +396,7 @@ public class FeatureController {
 
 ---
 
-### 7.3 AI 서비스 엔드포인트 개발 절차
+### 7.3 AI 서비스 엔드포인트 개발 절차 — 미구현 계획
 
 1. **Pydantic 스키마 정의**: `app/schemas/` 에 데이터 유효성 및 파싱 필드 사양을 선언합니다.
 2. **라우터 생성**: `app/api/v1/endpoints/` 에 신규 파이썬 파일을 추가하고 라우트 함수(`@router.post(...)`)를 작성합니다.

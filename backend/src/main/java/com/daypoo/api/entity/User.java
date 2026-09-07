@@ -29,9 +29,6 @@ public class User extends BaseTimeEntity {
   @Column(nullable = false, unique = true, length = 50)
   private String nickname;
 
-  @Column(name = "equipped_title_id")
-  private Long equippedTitleId;
-
   @Column(name = "home_region", length = 50)
   private String homeRegion;
 
@@ -49,13 +46,7 @@ public class User extends BaseTimeEntity {
   private List<PooRecord> records = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-  private List<UserTitle> titles = new ArrayList<>();
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Notification> notifications = new ArrayList<>();
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-  private List<Inventory> inventories = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<ToiletReview> reviews = new ArrayList<>();
@@ -92,10 +83,6 @@ public class User extends BaseTimeEntity {
       this.exp -= this.level * 100;
       this.level += 1;
     }
-  }
-
-  public void equipTitle(Long titleId) {
-    this.equippedTitleId = titleId;
   }
 
   public void updateHomeRegion(String regionName) {

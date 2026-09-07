@@ -10,12 +10,12 @@ import {
   MapPin,
   MessageSquare,
   Settings,
+  Users,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAdminStats, getSystemLogs } from '../services/adminService';
-import { api } from '../services/apiClient';
 import type { AdminStatsResponse, SystemLog } from '../types/admin';
 
 import { CsView } from './admin/CsView';
@@ -109,34 +109,48 @@ export function AdminPage() {
     return null;
   }
 
-  const menuItems = [
-    { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
+  // 사이드바 메뉴와 헤더(아이콘·제목)가 같은 배열을 참조한다. 'logs' 는 헤더에만 쓰인다.
+  const menuItems: {
+    id: AdminTab;
+    label: string;
+    headerTitle: string;
+    icon: typeof LayoutDashboard;
+    badge?: number;
+    hiddenInSidebar?: boolean;
+  }[] = [
+    { id: 'dashboard', label: '대시보드', headerTitle: '관리자 대시보드', icon: LayoutDashboard },
     {
       id: 'users',
       label: '유저 관리',
-      icon: import('lucide-react').then((m) => m.Users), // 동적으로 lucide-react에서 icon을 들고오는 구조 대응용 (Menu에서 직접 Users 컴포넌트로 전달)
+      headerTitle: '유저 제어 센터',
+      icon: Users,
       badge:
         !visitedTabs.includes('users') && stats?.todayNewUsers && stats.todayNewUsers > 0
           ? stats.todayNewUsers
           : undefined,
     },
-    {
-      id: 'toilets',
-      label: '화장실 관리',
-      icon: MapPin,
-      badge: undefined,
-    },
+    { id: 'toilets', label: '화장실 관리', headerTitle: '맵 엔진 관제', icon: MapPin },
     {
       id: 'cs',
       label: '고객 지원',
+      headerTitle: '고객 통합 지원',
       icon: MessageSquare,
       badge:
         !visitedTabs.includes('cs') && stats?.pendingInquiries && stats.pendingInquiries > 0
           ? stats.pendingInquiries
           : undefined,
     },
-    { id: 'system', label: '시스템 설정', icon: Settings },
+    { id: 'system', label: '시스템 설정', headerTitle: '시스템 인프라 설정', icon: Settings },
+    {
+      id: 'logs',
+      label: '시스템 로그',
+      headerTitle: '시스템 런타임 로그',
+      icon: Settings,
+      hiddenInSidebar: true,
+    },
   ];
+  const activeMenu = menuItems.find((item) => item.id === activeTab) ?? menuItems[0];
+  const ActiveIcon = activeMenu.icon;
 
   return (
     <div
@@ -182,44 +196,46 @@ export function AdminPage() {
         </div>
 
         <nav className="flex-1 w-full space-y-2 px-4">
-          {menuItems.map((item) => {
-            const IconComponent = item.id === 'users' ? require('lucide-react').Users : item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleTabChange(item.id as AdminTab)}
-                className="group relative w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all overflow-hidden"
-                style={{ color: activeTab === item.id ? COLORS.primary : COLORS.textSecondary }}
-              >
-                {activeTab === item.id && (
-                  <motion.div
-                    layoutId="activeTabBg"
-                    className="absolute inset-0 bg-[#1B4332]/5 border-r-[4px] border-[#1B4332]"
-                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <div
-                  className={`relative z-10 p-1.5 rounded-xl transition-all ${
-                    activeTab === item.id
-                      ? 'bg-[#1B4332] text-white shadow-lg shadow-green-900/20'
-                      : 'group-hover:bg-black/5'
-                  }`}
+          {menuItems
+            .filter((item) => !item.hiddenInSidebar)
+            .map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabChange(item.id)}
+                  className="group relative w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all overflow-hidden"
+                  style={{ color: activeTab === item.id ? COLORS.primary : COLORS.textSecondary }}
                 >
-                  <IconComponent size={20} />
-                </div>
-                {!sidebarCollapsed && (
-                  <span className="relative z-10 text-sm font-black tracking-tight flex-1 text-left">
-                    {item.label}
-                  </span>
-                )}
-                {item.badge && !sidebarCollapsed && (
-                  <span className="relative z-10 text-[9px] font-black px-1.5 py-0.5 rounded-md bg-[#FF4B4B] text-white">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                  {activeTab === item.id && (
+                    <motion.div
+                      layoutId="activeTabBg"
+                      className="absolute inset-0 bg-[#1B4332]/5 border-r-[4px] border-[#1B4332]"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 p-1.5 rounded-xl transition-all ${
+                      activeTab === item.id
+                        ? 'bg-[#1B4332] text-white shadow-lg shadow-green-900/20'
+                        : 'group-hover:bg-black/5'
+                    }`}
+                  >
+                    <IconComponent size={20} />
+                  </div>
+                  {!sidebarCollapsed && (
+                    <span className="relative z-10 text-sm font-black tracking-tight flex-1 text-left">
+                      {item.label}
+                    </span>
+                  )}
+                  {item.badge && !sidebarCollapsed && (
+                    <span className="relative z-10 text-[9px] font-black px-1.5 py-0.5 rounded-md bg-[#FF4B4B] text-white">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
         </nav>
 
         <div className="w-full px-4 mt-auto space-y-1">
@@ -256,33 +272,11 @@ export function AdminPage() {
               className="p-2.5 rounded-2xl bg-white shadow-sm border"
               style={{ borderColor: COLORS.border }}
             >
-              {activeTab === 'dashboard' ? (
-                <LayoutDashboard size={20} style={{ color: COLORS.primary }} />
-              ) : activeTab === 'users' ? (
-                <span className="text-[#1B4332] font-black text-sm flex items-center justify-center w-5 h-5">
-                  U
-                </span>
-              ) : activeTab === 'toilets' ? (
-                <MapPin size={20} style={{ color: COLORS.primary }} />
-              ) : activeTab === 'cs' ? (
-                <MessageSquare size={20} style={{ color: COLORS.primary }} />
-              ) : (
-                <Settings size={20} style={{ color: COLORS.primary }} />
-              )}
+              <ActiveIcon size={20} style={{ color: COLORS.primary }} />
             </div>
             <div className="flex flex-col">
               <h2 className="text-sm font-black text-black/90 uppercase tracking-widest leading-none mb-1">
-                {activeTab === 'dashboard'
-                  ? '관리자 대시보드'
-                  : activeTab === 'users'
-                    ? '유저 제어 센터'
-                    : activeTab === 'toilets'
-                      ? '맵 엔진 관제'
-                      : activeTab === 'cs'
-                        ? '고객 통합 지원'
-                        : activeTab === 'logs'
-                          ? '시스템 런타임 로그'
-                          : '시스템 인프라 설정'}
+                {activeMenu.headerTitle}
               </h2>
               <div className="flex items-center gap-2 text-[10px] text-black/40 font-bold">
                 <Calendar size={12} /> {currentTime.toLocaleDateString()}

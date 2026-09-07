@@ -14,7 +14,7 @@ export interface ReportTabProps {
 
 export const ReportTab = ({ onAddRecord }: ReportTabProps) => {
   const [activeSubTab, setActiveSubTab] = useState<ReportSubTab>('daily');
-  const { reportData, isFetchLoading } = useHealthReport(activeSubTab);
+  const { reportData, isFetchLoading, disabledMessage } = useHealthReport(activeSubTab);
 
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
@@ -63,7 +63,20 @@ export const ReportTab = ({ onAddRecord }: ReportTabProps) => {
       </div>
 
       <AnimatePresence mode="wait">
-        {activeSubTab === 'daily' ? (
+        {disabledMessage ? (
+          <motion.div
+            key="disabled"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="rounded-[24px] sm:rounded-[40px] p-8 sm:p-12 bg-white border border-gray-100 shadow-sm text-center"
+          >
+            <p className="text-base sm:text-lg font-black text-[#1A2B27]">{disabledMessage}</p>
+            <p className="text-xs sm:text-sm font-bold text-gray-400 mt-2">
+              잠시 후 다시 시도해 주세요.
+            </p>
+          </motion.div>
+        ) : activeSubTab === 'daily' ? (
           <motion.div
             key="daily"
             initial={{ opacity: 0, y: 15 }}

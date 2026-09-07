@@ -115,7 +115,7 @@ export function LocationConsentBanner() {
                 현위치를 기반으로 가장 가까운{' '}
                 <span className="text-emerald-400 font-bold">안심 화장실</span>을 찾고,
                 <br className="hidden sm:block" />
-                AI 배변 패턴 리포트를 생성하기 위해 위치 정보가 필요합니다.
+                배변 패턴 리포트를 생성하기 위해 위치 정보가 필요합니다.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-2">

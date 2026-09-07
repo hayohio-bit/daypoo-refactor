@@ -12,6 +12,7 @@
 - [x] **apiClient 게스트 폴백에 타임아웃 미적용** — 폴백 fetch가 이미 타임아웃이 해제된 컨트롤러의 signal을 재사용하던 것을 전용 AbortController로 교체하고 테스트를 추가했다 (`e31257e`).
 - [x] **토큰 만료 시간 하드코딩 중복** — 조사 결과 3일은 "로그인 유지" 클라이언트 세션 정책으로 의도된 값이며 백엔드 14일보다 짧아 갱신 동작에는 문제가 없었다. 다만 AuthContext와 apiClient 두 곳에 중복 정의되어 있어 `STAY_LOGGED_IN_DURATION_MS` 단일 상수로 추출했다 (`e31257e`).
 - [x] **BusinessException 체계를 벗어난 예외 정리** — PRO 멤버십 검사(403 B002 신설), 포인트 부족(400 S001), 유저 없음(404 U001)을 `BusinessException`으로 전환하고 테스트를 추가했다 (`9fd1dd9`). `AdminSettingsService`의 "System settings not initialized"는 서버 불변식 위반이라 500이 올바르므로 유지하기로 결정했다.
+- [ ] **관리자 시스템 설정 화면이 서버와 연동되지 않음** — `SystemView.tsx` 의 설정 상태는 초기값이 하드코딩된 로컬 `useState` 이고, 저장 함수는 화면 상태만 바꾼 뒤 "서버 연동은 추후 지원 예정" 토스트를 띄운다. `GET/PUT /admin/settings` 를 호출하는 프론트엔드 코드가 없어 점검 모드·회원가입 허용 토글이 실제 설정에 반영되지 않는다. 백엔드는 `aiReportEnabled` 를 포함해 세 설정을 모두 게이트로 사용하므로, 화면을 열 때 서버 값을 읽고 토글 시 PUT 으로 저장하도록 연결해야 한다.
 - [x] **OpenSearch 인덱스명 이중 정의** — `ToiletIndexingService.INDEX_NAME`을 단일 출처로 삼고 검색 서비스가 참조하도록 변경했다 (`90ba44b`).
 
 ## P2 — 테스트 공백
@@ -36,8 +37,21 @@
 - [x] **공통 에러 UX** — 화면 10곳에 흩어져 있던 `window.alert` 38회를 알림 토스트로 교체했다 (`9ccaf50`). `alert` 는 사용자가 확인을 누를 때까지 렌더링을 멈추고 서비스 화면과 이질적으로 보인다. 이미 알림용으로 쓰이던 `NotificationContext.showToast` 위에 `useFeedback` 훅(`notifyError`·`notifySuccess`·`notifyInfo`)을 얹고, 잡힌 예외에서 표시 문구를 뽑는 `getErrorMessage` 유틸과 단위 테스트를 추가했다. OAuth 실패 처리는 훅이 `NotificationProvider` 하위에서만 동작하므로 `App` 본문에서 `OAuthErrorNotifier` 컴포넌트로 분리했다. 관리자 문의 목록 조회는 기존에 5xx 응답에서만 실패를 알리고 그 밖의 실패는 조용히 넘어갔는데, 이제 모든 실패를 알린다. 에러 바운더리는 `App` 최상단에 이미 적용돼 있어 그대로 두었다.
 - [x] **제거된 엔드포인트를 호출하는 admin 화면 정리** — `061d822`가 shop·title 백엔드 모듈을 제거해 고아가 된 화면 5종을 사용자 결정에 따라 삭제했다 (`16094c4`). StoreView·AddItemView·EditItemView는 import하는 곳이 없어 도달 불가능한 죽은 파일이었고, TitleManagementView·AddTitleView는 AdminPage의 칭호 탭에 마운트되어 있었으나 삭제된 `/admin/titles` 호출로 항상 404가 나던 화면이었다. 칭호 탭 배선, 대시보드의 아이템 등록 퀵 액션, AdminTab의 사어 항목, 미참조 아이템·칭호 타입 8종도 함께 정리했다.
 - [x] **RestTemplateBuilder deprecated API 교체** — `setConnectTimeout`/`setReadTimeout`을 Spring Boot 3.4의 `connectTimeout`/`readTimeout`으로 교체해 removal 경고를 제거했다 (`1b1a85b`).
-- [x] **수익화 기능 제거 (MVP 범위 결정)** — 사용자 결정(2026-08-28 "결제 제거, 적립 삭제, 수익화 미포함")에 따라 Toss 결제·구독 스택과 포인트 경제를 전부 제거했다 (`0d00895`). 기록 보상은 경험치만 남기고, PRO/PREMIUM 게이트·포인트 차감이 걸려 있던 리포트는 전면 공개로 전환했다(마스킹 제거, 캐시 v19). 관리자 통계에서 매출·플랜 분포를 제거하고 주간 트렌드는 일별 신규 가입자로 재정의했다. **스키마는 무변경**: payments·subscriptions 테이블과 users.points 컬럼은 남기고, 회원 삭제 시 잔여 행은 JDBC로 정리한다. 선행으로 AI 모듈 제거 후 404가 나던 관리자 "AI 요약 일괄 생성" 버튼도 정리했다 (`aa083c5`).
+- [x] **수익화 기능 제거 (MVP 범위 결정)** — 사용자 결정(2026-08-28 "결제 제거, 적립 삭제, 수익화 미포함")에 따라 Toss 결제·구독 스택과 포인트 경제를 전부 제거했다 (`0d00895`). 기록 보상은 경험치만 남기고, PRO/PREMIUM 게이트·포인트 차감이 걸려 있던 리포트는 전면 공개로 전환했다(마스킹 제거, 캐시 v19). 관리자 통계에서 매출·플랜 분포를 제거하고 주간 트렌드는 일별 신규 가입자로 재정의했다. **스키마는 무변경**: payments·subscriptions 테이블과 users.points 컬럼은 남기고, 회원 삭제 시 잔여 행은 JDBC로 정리한다(subscriptions 는 V14 의 ON DELETE CASCADE 에 맡기고 payments 만 직접 삭제한다). 선행으로 AI 모듈 제거 후 404가 나던 관리자 "AI 요약 일괄 생성" 버튼도 정리했다 (`aa083c5`).
 - [x] **수익화 잔재 콘텐츠·배포 설정 정리** — 사용자 확인 후 코드 밖 잔재를 정리했다 (`7d09846`). `InquiryType.PAYMENT_ITEM`을 삭제하고 기존 DB 행은 V33 마이그레이션으로 OTHERS에 이관했다. FAQ는 결제·환불 안내를 삭제하고 '결제/아바타' 카테고리의 나머지 항목을 '이용방법'으로 이동했다(DB 데이터는 V33, 프론트는 SupportPage FALLBACK·카테고리 목록). 문의 테스트 데이터 생성기의 결제·포인트·아이템 문구도 교체했다. 배포 쪽은 `deploy-oci.yml`·`docker-compose.prod.yml`·`frontend/Dockerfile`·`docs/infrastructure/*`·README에서 TOSS_SECRET_KEY·VITE_TOSS_CLIENT_KEY·OPENAI_API_KEY 참조를 제거했다. terraform 시뮬레이션 봇 Lambda의 OPENAI_API_KEY는 리뷰 문구 생성용 별도 인프라(키 없이도 동작)라 유지했다.
+
+## 2026-08-31 재조사분
+
+- [x] **AI 표기 정리** — 구현되지 않은 AI 분석을 가리키던 제품 문구·Swagger 설명·주석을 실제 동작(통계 계산)에 맞게 고치고, 문서의 미구현 LLM 아키텍처에 미구현 계획임을 명시했다 (`26344fd`·`36113a6`). FAQ 카테고리 표기 변경은 기존 DB 행에도 V34 로 반영했다 (`d8daa56`). DB 컬럼과 API 필드인 `aiSummary`·`aiReportEnabled` 는 계약이라 이름을 유지했다.
+- [x] **도달 불가능한 코드·미사용 의존성 제거** — 프론트엔드 미참조 컴포넌트 7개와 훅 1개(1,170줄), 백엔드 고아 DTO 7종, npm 의존성 4종(`@tosspayments/payment-sdk`·`react-markdown`·`remark-gfm`·`swiper`)을 삭제했다 (`943e68f`).
+- [x] **커버리지 임계치 정상화** — `vite.config.ts` 의 커버리지 `include` 가 두 파일(`useToilets.ts`·`HeroSection.tsx`)만 대상으로 삼고 있어 70% 임계치가 나머지 143개 파일을 전혀 보호하지 못했다. 측정 대상을 `src/**/*.{ts,tsx}` 전체로 넓히고, 임계치는 실측치(lines 9.52 / branches 7.10 / functions 6.78) 바로 아래로 잡은 래칫으로 교체했다. 테스트를 추가할 때마다 함께 올린다 (`6043477`).
+
+### 사용자 결정 후 처리 (2026-08-31)
+
+- [x] **리뷰 요약 이벤트 사슬 제거** — `toilets.ai_summary` 에 값을 쓰는 코드가 없어, 이벤트 발행 → 비동기 리스너(로그만 남김) → 컬럼으로 이어지던 사슬이 전부 비어 있었다. 발행부와 `ToiletReviewCreatedEvent`·`ToiletReviewEventListener`, 호출부가 없던 `findToiletsNeedingAiSummary()` 를 삭제했다 (`cd0c2ba`). 사용자 결정에 따라 응답 필드 `aiSummary` 와 DB 컬럼은 향후 구현 여지를 남겨 유지하고, 조회 지점에는 새 값이 쓰이지 않지만 제거된 AI 모듈이 과거에 채운 값은 남을 수 있다는 점을 주석으로 남겼다.
+- [x] **todayApiCalls 제거** — 집계 기준인 `SystemLog.source == "AI"` 로 로그를 쓰는 곳이 없어 값이 항상 0 이었고 화면에도 표시되지 않았다. 집계 로직과 `AdminStatsResponse` 응답 필드, 프론트엔드 타입 선언을 함께 삭제했다 (`d7cde35`).
+- [x] **상점·칭호 코드 제거 (테이블 유지)** — 엔티티 4종·리포지토리 4종·`ItemType`, `AuthService` 의 장착 칭호·아바타 조회와 기본 아바타 지급, `SystemSettings.defaultAvatarItemId`, `User.equippedTitleId` 와 연관 컬렉션, `UserResponse` 의 세 필드를 삭제했다. 프론트엔드는 MyPage 의 장착 아이템 렌더링 분기와 칭호 배지를 지우고 아바타는 Dicebear 자동 생성 경로만 남겼다 (`722f89c`). 사용자 결정에 따라 테이블은 수익화 제거 때와 같은 방침으로 유지하며, 회원 탈퇴 시 남는 `inventories`·`user_titles` 행은 `JdbcTemplate` 으로 직접 삭제한다.
+- [ ] **호출되지 않는 리포트 엔드포인트** — `GET /reports/history`, `GET /reports/patterns` 는 프론트엔드 호출부가 없으나, 구현이 완결되어 있고 Swagger 에 노출되므로 사용자 결정에 따라 그대로 둔다. `GET /admin/toilets/reindex` 는 운영자가 수동으로 쓰는 도구다.
 
 ## 완료
 

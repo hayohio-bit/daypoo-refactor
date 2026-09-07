@@ -73,10 +73,10 @@ public class AdminSettingsService {
   }
 
   @Transactional(readOnly = true)
-  public Long getDefaultAvatarItemId() {
+  public boolean isAiReportEnabled() {
     return systemSettingsRepository
         .findCurrent()
-        .map(SystemSettings::getDefaultAvatarItemId)
-        .orElse(null);
+        .map(SystemSettings::isAiReportEnabled)
+        .orElse(true);
   }
 }

@@ -98,7 +98,6 @@ export interface AdminStatsResponse {
   pendingInquiries: number;
   todayNewUsers: number;
   todayInquiries: number;
-  todayApiCalls?: number;
   weeklyTrend: DailyStat[];
 }
 

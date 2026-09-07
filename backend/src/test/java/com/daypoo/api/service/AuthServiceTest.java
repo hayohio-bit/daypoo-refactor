@@ -15,10 +15,7 @@ import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
-import com.daypoo.api.repository.InventoryRepository;
-import com.daypoo.api.repository.ItemRepository;
 import com.daypoo.api.repository.PooRecordRepository;
-import com.daypoo.api.repository.TitleRepository;
 import com.daypoo.api.repository.UserRepository;
 import com.daypoo.api.security.JwtProvider;
 import java.util.Optional;
@@ -45,12 +42,9 @@ class AuthServiceTest {
   @Mock private JwtProvider jwtProvider;
   @Mock private EmailService emailService;
   @Mock private StringRedisTemplate redisTemplate;
-  @Mock private TitleRepository titleRepository;
   @Mock private UserDeletionService userDeletionService;
   @Mock private PooRecordRepository pooRecordRepository;
   @Mock private SystemLogService systemLogService;
-  @Mock private InventoryRepository inventoryRepository;
-  @Mock private ItemRepository itemRepository;
   @Mock private AdminSettingsService adminSettingsService;
 
   private SignUpRequest signUpRequest;
