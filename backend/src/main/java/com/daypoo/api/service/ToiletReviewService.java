@@ -99,8 +99,8 @@ public class ToiletReviewService {
 
     List<ToiletReviewResponse> recentReviews = getRecentReviews(toiletId);
     long actualCount = toiletReviewRepository.countByToiletId(toiletId);
-    // 요약문을 생성하는 경로는 아직 구현되어 있지 않아 현재는 항상 null 이다.
-    // 컬럼과 응답 필드는 향후 구현을 위해 유지한다.
+    // 요약문을 쓰는 코드 경로는 제거되어 새 값이 생기지 않지만, 제거된 AI 모듈이 과거에 채운
+    // 값이 남은 DB 에서는 여전히 반환된다. 컬럼과 응답 필드는 향후 구현을 위해 유지한다.
     String aiSummary = actualCount >= 5 ? toilet.getAiSummary() : null;
 
     return ToiletReviewSummaryResponse.builder()
