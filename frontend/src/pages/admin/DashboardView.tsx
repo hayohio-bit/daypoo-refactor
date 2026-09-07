@@ -1,12 +1,5 @@
 import { motion } from 'framer-motion';
-import {
-  Activity,
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Shield,
-  Zap,
-} from 'lucide-react';
+import { Activity, MessageSquare, Plus, RefreshCw, Shield, Zap } from 'lucide-react';
 import { useState } from 'react';
 import {
   Area,

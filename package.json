@@ -19,7 +19,7 @@
   },
   "lint-staged": {
     "frontend/**/*.{js,jsx,ts,tsx,css}": [
-      "frontend/node_modules/.bin/prettier --write"
+      "frontend/node_modules/.bin/biome check --write --config-path frontend --no-errors-on-unmatched"
     ],
     "backend/**/*.java": [
       "bash -c 'cd backend && ./gradlew spotlessApply'"
