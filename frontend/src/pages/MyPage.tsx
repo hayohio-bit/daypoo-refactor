@@ -1,14 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Activity,
-  BarChart3,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-  Settings,
-  Sparkles,
-} from 'lucide-react';
+import { BarChart3, RefreshCw, Settings, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CountUp } from '../components/common/CountUp';
