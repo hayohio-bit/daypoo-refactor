@@ -119,3 +119,12 @@ export interface SyncStatusResponse {
   completedAt: string | null;
   errorMessage: string | null;
 }
+
+/** GET·PUT /api/v1/admin/settings 응답. PUT 요청 본문도 같은 형태다. */
+export interface SystemSettings {
+  noticeMessage: string;
+  noticeEnabled: boolean;
+  maintenanceMode: boolean;
+  signupEnabled: boolean;
+  aiReportEnabled: boolean;
+}

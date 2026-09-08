@@ -15,16 +15,9 @@ import {
 import { useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { useFeedback } from '../../hooks/useFeedback';
-import type { AdminStatsResponse, SystemLog } from '../../types/admin';
+import { getSystemSettings, updateSystemSettings } from '../../services/adminService';
+import type { AdminStatsResponse, SystemLog, SystemSettings } from '../../types/admin';
 import { type AdminTab, COLORS } from './adminCommons';
-
-export interface SystemSettings {
-  noticeEnabled: boolean;
-  noticeMessage: string;
-  maintenanceMode: boolean;
-  signupEnabled: boolean;
-  aiReportEnabled: boolean;
-}
 
 export interface SystemViewProps {
   stats: AdminStatsResponse | null;
@@ -35,39 +28,57 @@ export interface SystemViewProps {
 }
 
 export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: SystemViewProps) => {
-  const [settings, setSettings] = useState<SystemSettings>({
-    noticeEnabled: true,
-    noticeMessage: '🎉 Day.Poo 서비스가 정식 오픈했습니다!',
-    maintenanceMode: false,
-    signupEnabled: true,
-    aiReportEnabled: true,
-  });
-  const { notifySuccess } = useFeedback();
+  /** 서버에서 읽기 전에는 null 이다. 이 동안에는 설정 조작을 막는다. */
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
+  const { notifySuccess, notifyError } = useFeedback();
   const [saving, setSaving] = useState(false);
   const [editingNotice, setEditingNotice] = useState(false);
   const [tempNoticeMessage, setTempNoticeMessage] = useState('');
 
   useEffect(() => {
-    if (settings.noticeMessage) {
+    let cancelled = false;
+    getSystemSettings()
+      .then((loaded) => {
+        if (!cancelled) setSettings(loaded);
+      })
+      .catch((error) => {
+        if (!cancelled) notifyError(error, '시스템 설정을 불러오지 못했어요');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [notifyError]);
+
+  useEffect(() => {
+    if (settings?.noticeMessage) {
       setTempNoticeMessage(settings.noticeMessage);
     }
-  }, [settings.noticeMessage]);
+  }, [settings?.noticeMessage]);
 
-  const updateSettings = async (newSettings: Partial<SystemSettings>) => {
+  /**
+   * 바뀐 값을 먼저 화면에 반영하고 서버에 저장한다. PUT 은 다섯 항목을 모두 요구하므로
+   * 현재 값과 합쳐 보낸다. 저장에 실패하면 이전 값으로 되돌린다.
+   */
+  const updateSettings = async (changes: Partial<SystemSettings>) => {
+    if (!settings || saving) return;
+    const previous = settings;
+    const next = { ...previous, ...changes };
+    setSettings(next);
     setSaving(true);
     try {
-      const updated = { ...settings, ...newSettings };
-      setSettings(updated);
-      notifySuccess('설정이 로컬에 반영되었습니다. 서버 연동은 추후 지원 예정입니다.');
-    } catch (error: any) {
-      console.error('설정 저장 실패:', error);
+      const saved = await updateSystemSettings(next);
+      setSettings(saved);
+      notifySuccess('설정을 저장했어요.');
+    } catch (error) {
+      setSettings(previous);
+      notifyError(error, '설정 저장에 실패했어요');
     } finally {
       setSaving(false);
     }
   };
 
   const handleToggle = (key: keyof SystemSettings) => {
-    if (typeof settings[key] === 'boolean') {
+    if (settings && typeof settings[key] === 'boolean') {
       updateSettings({ [key]: !settings[key] });
     }
   };
@@ -205,112 +216,127 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
             </h3>
           </div>
 
-          <div className="space-y-6">
-            <div className="p-4 rounded-xl bg-black/[0.02]">
-              <div className="flex items-center justify-between mb-4">
+          {!settings ? (
+            <div className="py-16 text-center text-xs font-black uppercase tracking-widest text-black/30">
+              설정을 불러오는 중입니다
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="p-4 rounded-xl bg-black/[0.02]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Bell size={18} className="text-[#1B4332]" />
+                    <h4 className="font-black text-black">공지사항 배너</h4>
+                  </div>
+                  <button
+                    onClick={() => handleToggle('noticeEnabled')}
+                    disabled={saving}
+                    aria-label="공지사항 배너"
+                    aria-pressed={settings.noticeEnabled}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${
+                      settings.noticeEnabled ? 'bg-[#1B4332]' : 'bg-gray-300'
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                        settings.noticeEnabled ? 'left-7' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {settings.noticeEnabled && (
+                  <div
+                    className={`mt-4 p-3 border rounded-xl border-dashed transition-all ${
+                      editingNotice ? 'bg-yellow-50/50 border-yellow-200' : 'bg-white'
+                    }`}
+                  >
+                    {editingNotice ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={tempNoticeMessage}
+                          onChange={(e) => setTempNoticeMessage(e.target.value)}
+                          className="flex-1 text-sm font-bold bg-transparent border-none focus:ring-0"
+                        />
+                        <button
+                          onClick={handleNoticeMessageSave}
+                          className="text-xs font-black text-blue-500"
+                        >
+                          저장
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-bold text-black/70 truncate">
+                          {settings.noticeMessage}
+                        </p>
+                        <button
+                          onClick={() => setEditingNotice(true)}
+                          className="text-xs font-black text-black/30"
+                        >
+                          수정
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
                 <div className="flex items-center gap-3">
-                  <Bell size={18} className="text-[#1B4332]" />
-                  <h4 className="font-black text-black">공지사항 배너</h4>
+                  <Lock size={18} className="text-red-500" />
+                  <div>
+                    <h4 className="font-black text-black">점검 모드 (Maintenance)</h4>
+                    <p className="text-[10px] font-bold text-black/40">
+                      활성화 시 모든 유저의 접속이 차단됩니다
+                    </p>
+                  </div>
                 </div>
                 <button
-                  onClick={() => handleToggle('noticeEnabled')}
+                  onClick={() => handleToggle('maintenanceMode')}
+                  disabled={saving}
+                  aria-label="점검 모드"
+                  aria-pressed={settings.maintenanceMode}
                   className={`w-12 h-6 rounded-full transition-colors relative ${
-                    settings.noticeEnabled ? 'bg-[#1B4332]' : 'bg-gray-300'
+                    settings.maintenanceMode ? 'bg-red-500' : 'bg-gray-300'
                   }`}
                 >
                   <div
                     className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                      settings.noticeEnabled ? 'left-7' : 'left-1'
+                      settings.maintenanceMode ? 'left-7' : 'left-1'
                     }`}
                   />
                 </button>
               </div>
-              {settings.noticeEnabled && (
-                <div
-                  className={`mt-4 p-3 border rounded-xl border-dashed transition-all ${
-                    editingNotice ? 'bg-yellow-50/50 border-yellow-200' : 'bg-white'
+
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
+                <div className="flex items-center gap-3">
+                  <UserPlus size={18} className="text-blue-500" />
+                  <div>
+                    <h4 className="font-black text-black">신규 회원가입 허용</h4>
+                    <p className="text-[10px] font-bold text-black/40">
+                      신규 사용자의 가입 가능 여부를 결정합니다
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleToggle('signupEnabled')}
+                  disabled={saving}
+                  aria-label="신규 회원가입 허용"
+                  aria-pressed={settings.signupEnabled}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${
+                    settings.signupEnabled ? 'bg-blue-500' : 'bg-gray-300'
                   }`}
                 >
-                  {editingNotice ? (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={tempNoticeMessage}
-                        onChange={(e) => setTempNoticeMessage(e.target.value)}
-                        className="flex-1 text-sm font-bold bg-transparent border-none focus:ring-0"
-                      />
-                      <button
-                        onClick={handleNoticeMessageSave}
-                        className="text-xs font-black text-blue-500"
-                      >
-                        저장
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm font-bold text-black/70 truncate">
-                        {settings.noticeMessage}
-                      </p>
-                      <button
-                        onClick={() => setEditingNotice(true)}
-                        className="text-xs font-black text-black/30"
-                      >
-                        수정
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
-              <div className="flex items-center gap-3">
-                <Lock size={18} className="text-red-500" />
-                <div>
-                  <h4 className="font-black text-black">점검 모드 (Maintenance)</h4>
-                  <p className="text-[10px] font-bold text-black/40">
-                    활성화 시 모든 유저의 접속이 차단됩니다
-                  </p>
-                </div>
+                  <div
+                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                      settings.signupEnabled ? 'left-7' : 'left-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => handleToggle('maintenanceMode')}
-                className={`w-12 h-6 rounded-full transition-colors relative ${
-                  settings.maintenanceMode ? 'bg-red-500' : 'bg-gray-300'
-                }`}
-              >
-                <div
-                  className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                    settings.maintenanceMode ? 'left-7' : 'left-1'
-                  }`}
-                />
-              </button>
             </div>
-
-            <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
-              <div className="flex items-center gap-3">
-                <UserPlus size={18} className="text-blue-500" />
-                <div>
-                  <h4 className="font-black text-black">신규 회원가입 허용</h4>
-                  <p className="text-[10px] font-bold text-black/40">
-                    신규 사용자의 가입 가능 여부를 결정합니다
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleToggle('signupEnabled')}
-                className={`w-12 h-6 rounded-full transition-colors relative ${
-                  settings.signupEnabled ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
-              >
-                <div
-                  className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                    settings.signupEnabled ? 'left-7' : 'left-1'
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
+          )}
         </GlassCard>
 
         <GlassCard>

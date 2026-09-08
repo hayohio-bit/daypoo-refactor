@@ -9,6 +9,7 @@ import type {
   Role,
   SyncStatusResponse,
   SystemLog,
+  SystemSettings,
 } from '../types/admin';
 import { api } from './apiClient';
 
@@ -22,6 +23,18 @@ export async function getAdminStats(): Promise<AdminStatsResponse> {
 /** GET /api/v1/admin/logs */
 export async function getSystemLogs(): Promise<SystemLog[]> {
   return api.get<SystemLog[]>('/admin/logs');
+}
+
+// ── 시스템 설정 ───────────────────────────────────────────────────
+
+/** GET /api/v1/admin/settings */
+export async function getSystemSettings(): Promise<SystemSettings> {
+  return api.get<SystemSettings>('/admin/settings');
+}
+
+/** PUT /api/v1/admin/settings — 다섯 항목을 모두 보내야 하며, 저장된 값을 돌려받는다 */
+export async function updateSystemSettings(settings: SystemSettings): Promise<SystemSettings> {
+  return api.put<SystemSettings>('/admin/settings', settings);
 }
 
 // ── 사용자 ────────────────────────────────────────────────────────
