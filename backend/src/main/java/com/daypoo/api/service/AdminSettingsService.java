@@ -1,5 +1,6 @@
 package com.daypoo.api.service;
 
+import com.daypoo.api.dto.PublicSettingsResponse;
 import com.daypoo.api.dto.SystemSettingsResponse;
 import com.daypoo.api.dto.SystemSettingsUpdateRequest;
 import com.daypoo.api.entity.SystemSettings;
@@ -57,6 +58,20 @@ public class AdminSettingsService {
         request.isAiReportEnabled());
 
     return SystemSettingsResponse.from(settings);
+  }
+
+  /**
+   * 비로그인 사용자에게도 내려보내는 공개 설정값을 조회한다.
+   *
+   * <p>{@link #getSettings()} 와 달리 설정 행이 없어도 예외를 던지지 않는다. 공지 배너는 부가 기능이므로, 설정을 읽지 못했다고 해서 화면 진입을 막을
+   * 이유가 없기 때문이다.
+   */
+  @Transactional(readOnly = true)
+  public PublicSettingsResponse getPublicSettings() {
+    return systemSettingsRepository
+        .findCurrent()
+        .map(PublicSettingsResponse::from)
+        .orElseGet(PublicSettingsResponse::disabled);
   }
 
   @Transactional(readOnly = true)
