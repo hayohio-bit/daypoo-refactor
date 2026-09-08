@@ -127,6 +127,25 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
     if (settings) updateSettings({ [key]: !settings[key] });
   };
 
+  /**
+   * 점검 모드를 켜면 `MaintenanceModeFilter` 가 관리자 외 모든 요청에 503 을 돌려주므로,
+   * 다른 관리자 뷰의 파괴적 작업과 같이 켤 때만 확인을 받는다. 끄는 것은 바로 반영한다.
+   */
+  const handleMaintenanceToggle = () => {
+    if (!settings) return;
+    if (
+      !settings.maintenanceMode &&
+      !window.confirm(
+        '점검 모드를 켜면 관리자를 제외한 모든 사용자의 요청이 차단됩니다.\n' +
+          '지도 조회·기록·로그인이 모두 중단됩니다.\n\n' +
+          '점검 모드를 켜시겠습니까?',
+      )
+    ) {
+      return;
+    }
+    handleToggle('maintenanceMode');
+  };
+
   const startEditingNotice = () => {
     if (!settings) return;
     setTempNoticeMessage(settings.noticeMessage ?? '');
@@ -343,7 +362,7 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                     on={settings.maintenanceMode}
                     onColor="bg-red-500"
                     disabled={saving}
-                    onToggle={() => handleToggle('maintenanceMode')}
+                    onToggle={handleMaintenanceToggle}
                   />
                 }
               />

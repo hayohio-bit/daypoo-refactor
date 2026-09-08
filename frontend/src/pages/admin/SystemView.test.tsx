@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SystemSettings } from '../../types/admin';
 import { SystemView } from './SystemView';
 
@@ -49,6 +49,11 @@ describe('SystemView', () => {
     vi.clearAllMocks();
     getSystemSettings.mockResolvedValue(serverSettings);
     updateSystemSettings.mockImplementation(async (next: SystemSettings) => next);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   /**
@@ -102,6 +107,34 @@ describe('SystemView', () => {
     expect(maintenance).toHaveAttribute('aria-pressed', 'true');
     expect(await screen.findByText('서버가 정규화한 공지')).toBeInTheDocument();
     expect(notifySuccess).toHaveBeenCalled();
+  });
+
+  it('점검 모드를 켤 때 확인을 거절하면 저장하지 않는다', async () => {
+    vi.mocked(window.confirm).mockReturnValue(false);
+    renderView();
+    const maintenance = await screen.findByRole('button', { name: '점검 모드' });
+
+    await userEvent.click(maintenance);
+
+    expect(window.confirm).toHaveBeenCalledTimes(1);
+    expect(updateSystemSettings).not.toHaveBeenCalled();
+    expect(maintenance).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('점검 모드를 끌 때는 확인 없이 바로 저장한다', async () => {
+    getSystemSettings.mockResolvedValue({ ...serverSettings, maintenanceMode: true });
+    renderView();
+    const maintenance = await screen.findByRole('button', { name: '점검 모드' });
+
+    await userEvent.click(maintenance);
+
+    expect(window.confirm).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(updateSystemSettings).toHaveBeenCalledWith({
+        ...serverSettings,
+        maintenanceMode: false,
+      }),
+    );
   });
 
   it('공지 문구 저장에 실패하면 편집 상태와 입력값을 유지한다', async () => {
