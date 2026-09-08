@@ -12,7 +12,7 @@ import {
   UserPlus,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { useFeedback } from '../../hooks/useFeedback';
 import { getSystemSettings, updateSystemSettings } from '../../services/adminService';
@@ -27,7 +27,10 @@ export interface SystemViewProps {
   setActiveTab: (tab: AdminTab) => void;
 }
 
-type ToggleKey = 'noticeEnabled' | 'maintenanceMode' | 'signupEnabled';
+/** `SystemSettings` 중 토글로 다루는 boolean 항목. 새 항목이 생기면 자동으로 포함된다. */
+type ToggleKey = {
+  [K in keyof SystemSettings]: SystemSettings[K] extends boolean ? K : never;
+}[keyof SystemSettings];
 
 interface ToggleSwitchProps {
   label: string;
@@ -53,34 +56,55 @@ const ToggleSwitch = ({ label, on, onColor, disabled, onToggle }: ToggleSwitchPr
   </button>
 );
 
+interface SettingRowProps {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  toggle: ReactNode;
+}
+
+const SettingRow = ({ icon, title, description, toggle }: SettingRowProps) => (
+  <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
+    <div className="flex items-center gap-3">
+      {icon}
+      <div>
+        <h4 className="font-black text-black">{title}</h4>
+        <p className="text-[10px] font-bold text-black/40">{description}</p>
+      </div>
+    </div>
+    {toggle}
+  </div>
+);
+
 export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: SystemViewProps) => {
   /** 서버에서 읽기 전에는 null 이다. 이 동안에는 설정 조작을 막는다. */
   const [settings, setSettings] = useState<SystemSettings | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const { notifySuccess, notifyError } = useFeedback();
   const [saving, setSaving] = useState(false);
   const [editingNotice, setEditingNotice] = useState(false);
   const [tempNoticeMessage, setTempNoticeMessage] = useState('');
 
-  useEffect(() => {
-    let cancelled = false;
-    getSystemSettings()
-      .then((loaded) => {
-        if (!cancelled) setSettings(loaded);
-      })
-      .catch((error) => {
-        if (!cancelled) notifyError(error, '시스템 설정을 불러오지 못했어요');
-      });
-    return () => {
-      cancelled = true;
-    };
+  const loadSettings = useCallback(async () => {
+    setLoadFailed(false);
+    try {
+      setSettings(await getSystemSettings());
+    } catch (error) {
+      setLoadFailed(true);
+      notifyError(error, '시스템 설정을 불러오지 못했어요');
+    }
   }, [notifyError]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   /**
    * 바뀐 값을 먼저 화면에 반영하고 서버에 저장한다. PUT 은 다섯 항목을 모두 요구하므로
-   * 현재 값과 합쳐 보낸다. 저장에 실패하면 이전 값으로 되돌린다.
+   * 현재 값과 합쳐 보낸다. 저장에 실패하면 이전 값으로 되돌린다. 저장 성공 여부를 돌려준다.
    */
-  const updateSettings = async (changes: Partial<SystemSettings>) => {
-    if (!settings || saving) return;
+  const updateSettings = async (changes: Partial<SystemSettings>): Promise<boolean> => {
+    if (!settings || saving) return false;
     const previous = settings;
     const next = { ...previous, ...changes };
     setSettings(next);
@@ -89,9 +113,11 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
       const saved = await updateSystemSettings(next);
       setSettings(saved);
       notifySuccess('설정을 저장했어요.');
+      return true;
     } catch (error) {
       setSettings(previous);
       notifyError(error, '설정 저장에 실패했어요');
+      return false;
     } finally {
       setSaving(false);
     }
@@ -103,13 +129,15 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
 
   const startEditingNotice = () => {
     if (!settings) return;
-    setTempNoticeMessage(settings.noticeMessage);
+    setTempNoticeMessage(settings.noticeMessage ?? '');
     setEditingNotice(true);
   };
 
-  const handleNoticeMessageSave = () => {
-    updateSettings({ noticeMessage: tempNoticeMessage });
-    setEditingNotice(false);
+  /** 저장이 실패하거나 다른 저장이 진행 중이면 편집 상태를 유지해 입력한 문구를 잃지 않는다. */
+  const handleNoticeMessageSave = async () => {
+    if (await updateSettings({ noticeMessage: tempNoticeMessage })) {
+      setEditingNotice(false);
+    }
   };
 
   const getLogIcon = (level: SystemLog['level']) => {
@@ -242,7 +270,13 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
 
           {!settings ? (
             <div className="py-16 text-center text-xs font-black uppercase tracking-widest text-black/30">
-              설정을 불러오는 중입니다
+              {loadFailed ? (
+                <button onClick={loadSettings} className="underline hover:text-black">
+                  설정을 불러오지 못했습니다. 다시 시도
+                </button>
+              ) : (
+                '설정을 불러오는 중입니다'
+              )}
             </div>
           ) : (
             <div className="space-y-6">
@@ -276,7 +310,8 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                         />
                         <button
                           onClick={handleNoticeMessageSave}
-                          className="text-xs font-black text-blue-500"
+                          disabled={saving}
+                          className="text-xs font-black text-blue-500 disabled:opacity-40"
                         >
                           저장
                         </button>
@@ -298,43 +333,35 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
-                <div className="flex items-center gap-3">
-                  <Lock size={18} className="text-red-500" />
-                  <div>
-                    <h4 className="font-black text-black">점검 모드 (Maintenance)</h4>
-                    <p className="text-[10px] font-bold text-black/40">
-                      활성화 시 모든 유저의 접속이 차단됩니다
-                    </p>
-                  </div>
-                </div>
-                <ToggleSwitch
-                  label="점검 모드"
-                  on={settings.maintenanceMode}
-                  onColor="bg-red-500"
-                  disabled={saving}
-                  onToggle={() => handleToggle('maintenanceMode')}
-                />
-              </div>
+              <SettingRow
+                icon={<Lock size={18} className="text-red-500" />}
+                title="점검 모드 (Maintenance)"
+                description="활성화 시 모든 유저의 접속이 차단됩니다"
+                toggle={
+                  <ToggleSwitch
+                    label="점검 모드"
+                    on={settings.maintenanceMode}
+                    onColor="bg-red-500"
+                    disabled={saving}
+                    onToggle={() => handleToggle('maintenanceMode')}
+                  />
+                }
+              />
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
-                <div className="flex items-center gap-3">
-                  <UserPlus size={18} className="text-blue-500" />
-                  <div>
-                    <h4 className="font-black text-black">신규 회원가입 허용</h4>
-                    <p className="text-[10px] font-bold text-black/40">
-                      신규 사용자의 가입 가능 여부를 결정합니다
-                    </p>
-                  </div>
-                </div>
-                <ToggleSwitch
-                  label="신규 회원가입 허용"
-                  on={settings.signupEnabled}
-                  onColor="bg-blue-500"
-                  disabled={saving}
-                  onToggle={() => handleToggle('signupEnabled')}
-                />
-              </div>
+              <SettingRow
+                icon={<UserPlus size={18} className="text-blue-500" />}
+                title="신규 회원가입 허용"
+                description="신규 사용자의 가입 가능 여부를 결정합니다"
+                toggle={
+                  <ToggleSwitch
+                    label="신규 회원가입 허용"
+                    on={settings.signupEnabled}
+                    onColor="bg-blue-500"
+                    disabled={saving}
+                    onToggle={() => handleToggle('signupEnabled')}
+                  />
+                }
+              />
             </div>
           )}
         </GlassCard>

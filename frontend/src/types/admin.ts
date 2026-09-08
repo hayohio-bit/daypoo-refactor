@@ -120,9 +120,12 @@ export interface SyncStatusResponse {
   errorMessage: string | null;
 }
 
-/** GET·PUT /api/v1/admin/settings 응답. PUT 요청 본문도 같은 형태다. */
+/**
+ * GET·PUT /api/v1/admin/settings 응답. PUT 요청 본문도 같은 형태다.
+ * `noticeMessage` 는 DB 컬럼(V31)에 NOT NULL 제약이 없어 null 로 올 수 있다.
+ */
 export interface SystemSettings {
-  noticeMessage: string;
+  noticeMessage: string | null;
   noticeEnabled: boolean;
   maintenanceMode: boolean;
   signupEnabled: boolean;

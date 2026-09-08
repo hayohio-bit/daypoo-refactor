@@ -81,6 +81,13 @@ describe('SystemView', () => {
   });
 
   it('토글을 누르면 다섯 항목을 모두 담아 PUT 하고 응답값을 화면에 반영한다', async () => {
+    // 서버가 요청과 다른 값을 돌려주면 화면은 서버 값을 따라야 한다.
+    updateSystemSettings.mockResolvedValue({
+      ...serverSettings,
+      maintenanceMode: true,
+      noticeEnabled: true,
+      noticeMessage: '서버가 정규화한 공지',
+    });
     renderView();
     const maintenance = await screen.findByRole('button', { name: '점검 모드' });
 
@@ -93,7 +100,36 @@ describe('SystemView', () => {
       }),
     );
     expect(maintenance).toHaveAttribute('aria-pressed', 'true');
+    expect(await screen.findByText('서버가 정규화한 공지')).toBeInTheDocument();
     expect(notifySuccess).toHaveBeenCalled();
+  });
+
+  it('공지 문구 저장에 실패하면 편집 상태와 입력값을 유지한다', async () => {
+    getSystemSettings.mockResolvedValue({ ...serverSettings, noticeEnabled: true });
+    updateSystemSettings.mockRejectedValue(new Error('서버 오류'));
+    renderView();
+    await userEvent.click(await screen.findByRole('button', { name: '수정' }));
+    const input = screen.getByRole('textbox');
+    await userEvent.clear(input);
+    await userEvent.type(input, '새 공지');
+
+    await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalled());
+    expect(screen.getByRole('textbox')).toHaveValue('새 공지');
+  });
+
+  it('공지 문구가 null 이어도 수정 입력창을 빈 문자열로 연다', async () => {
+    getSystemSettings.mockResolvedValue({
+      ...serverSettings,
+      noticeEnabled: true,
+      noticeMessage: null,
+    });
+    renderView();
+
+    await userEvent.click(await screen.findByRole('button', { name: '수정' }));
+
+    expect(screen.getByRole('textbox')).toHaveValue('');
   });
 
   it('저장에 실패하면 이전 값으로 되돌리고 오류를 알린다', async () => {
@@ -107,11 +143,16 @@ describe('SystemView', () => {
     expect(signup).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('설정 조회에 실패하면 오류를 알리고 조작 영역을 열지 않는다', async () => {
-    getSystemSettings.mockRejectedValue(new Error('서버 오류'));
+  it('설정 조회에 실패하면 오류를 알리고, 다시 시도 버튼으로 재조회한다', async () => {
+    getSystemSettings.mockRejectedValueOnce(new Error('서버 오류'));
     renderView();
 
     await waitFor(() => expect(notifyError).toHaveBeenCalled());
     expect(screen.queryByRole('button', { name: '점검 모드' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /다시 시도/ }));
+
+    expect(await screen.findByRole('button', { name: '점검 모드' })).toBeInTheDocument();
+    expect(getSystemSettings).toHaveBeenCalledTimes(2);
   });
 });
