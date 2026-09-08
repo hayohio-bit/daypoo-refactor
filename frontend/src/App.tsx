@@ -40,6 +40,7 @@ import { LoadingPage } from './pages/LoadingPage';
 import { AuthModal } from './components/AuthModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LocationConsentBanner } from './components/LocationConsentBanner';
+import { NoticeBanner } from './components/NoticeBanner';
 import { NotificationSubscriber } from './components/NotificationSubscriber';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -175,6 +176,7 @@ function App() {
                   <NavigationHelper authOpen={authOpen} />
                   <OAuthErrorNotifier />
                   <NotificationSubscriber />
+                  <NoticeBanner />
                   <LocationConsentBanner />
                   <Suspense fallback={<LoadingPage />}>
                     <Routes>

@@ -77,10 +77,13 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
 
   return (
     <>
+      {/* --notice-banner-height 는 NoticeBanner 가 떠 있을 때만 설정된다. */}
       <div
         ref={navRef}
         className="fixed left-1/2 -translate-x-1/2 z-[100] w-full flex justify-center px-4 pointer-events-none"
-        style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+        style={{
+          top: 'calc(1.5rem + env(safe-area-inset-top, 0px) + var(--notice-banner-height, 0px))',
+        }}
       >
         <m.nav
           variants={{
