@@ -41,18 +41,16 @@ export function useNotice() {
     };
   }, []);
 
+  // 상태 업데이터는 순수해야 하므로(StrictMode 에서 두 번 호출된다) 저장은 바깥에서 한다.
   const dismiss = useCallback(() => {
-    setNotice((current) => {
-      if (current) {
-        try {
-          localStorage.setItem(DISMISSED_KEY, current);
-        } catch {
-          // 저장에 실패해도 이번 세션 동안은 닫힌 상태를 유지한다.
-        }
-      }
-      return null;
-    });
-  }, []);
+    if (!notice) return;
+    try {
+      localStorage.setItem(DISMISSED_KEY, notice);
+    } catch {
+      // 저장에 실패해도 이번 세션 동안은 닫힌 상태를 유지한다.
+    }
+    setNotice(null);
+  }, [notice]);
 
   /** `notice` 는 노출할 공지 문구다. 공지가 없거나 사용자가 이미 닫았으면 null 이다. */
   return { notice, dismiss };
