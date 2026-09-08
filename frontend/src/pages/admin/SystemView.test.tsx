@@ -4,18 +4,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SystemSettings } from '../../types/admin';
 import { SystemView } from './SystemView';
 
-const notifyError = vi.fn();
-const notifySuccess = vi.fn();
+const { notifyError, notifySuccess, getSystemSettings, updateSystemSettings } = vi.hoisted(() => ({
+  notifyError: vi.fn(),
+  notifySuccess: vi.fn(),
+  getSystemSettings: vi.fn(),
+  updateSystemSettings: vi.fn(),
+}));
 vi.mock('../../hooks/useFeedback', () => ({
   useFeedback: () => ({ notifyError, notifySuccess, notifyInfo: vi.fn() }),
 }));
-
-const getSystemSettings = vi.fn();
-const updateSystemSettings = vi.fn();
-vi.mock('../../services/adminService', () => ({
-  getSystemSettings: (...args: unknown[]) => getSystemSettings(...args),
-  updateSystemSettings: (...args: unknown[]) => updateSystemSettings(...args),
-}));
+vi.mock('../../services/adminService', () => ({ getSystemSettings, updateSystemSettings }));
 
 const stats = {
   totalUsers: 120,

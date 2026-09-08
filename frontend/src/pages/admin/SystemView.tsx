@@ -27,6 +27,32 @@ export interface SystemViewProps {
   setActiveTab: (tab: AdminTab) => void;
 }
 
+type ToggleKey = 'noticeEnabled' | 'maintenanceMode' | 'signupEnabled';
+
+interface ToggleSwitchProps {
+  label: string;
+  on: boolean;
+  onColor: string;
+  disabled: boolean;
+  onToggle: () => void;
+}
+
+const ToggleSwitch = ({ label, on, onColor, disabled, onToggle }: ToggleSwitchProps) => (
+  <button
+    onClick={onToggle}
+    disabled={disabled}
+    aria-label={label}
+    aria-pressed={on}
+    className={`w-12 h-6 rounded-full transition-colors relative ${on ? onColor : 'bg-gray-300'}`}
+  >
+    <div
+      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+        on ? 'left-7' : 'left-1'
+      }`}
+    />
+  </button>
+);
+
 export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: SystemViewProps) => {
   /** 서버에서 읽기 전에는 null 이다. 이 동안에는 설정 조작을 막는다. */
   const [settings, setSettings] = useState<SystemSettings | null>(null);
@@ -48,12 +74,6 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
       cancelled = true;
     };
   }, [notifyError]);
-
-  useEffect(() => {
-    if (settings?.noticeMessage) {
-      setTempNoticeMessage(settings.noticeMessage);
-    }
-  }, [settings?.noticeMessage]);
 
   /**
    * 바뀐 값을 먼저 화면에 반영하고 서버에 저장한다. PUT 은 다섯 항목을 모두 요구하므로
@@ -77,10 +97,14 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
     }
   };
 
-  const handleToggle = (key: keyof SystemSettings) => {
-    if (settings && typeof settings[key] === 'boolean') {
-      updateSettings({ [key]: !settings[key] });
-    }
+  const handleToggle = (key: ToggleKey) => {
+    if (settings) updateSettings({ [key]: !settings[key] });
+  };
+
+  const startEditingNotice = () => {
+    if (!settings) return;
+    setTempNoticeMessage(settings.noticeMessage);
+    setEditingNotice(true);
   };
 
   const handleNoticeMessageSave = () => {
@@ -228,21 +252,13 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                     <Bell size={18} className="text-[#1B4332]" />
                     <h4 className="font-black text-black">공지사항 배너</h4>
                   </div>
-                  <button
-                    onClick={() => handleToggle('noticeEnabled')}
+                  <ToggleSwitch
+                    label="공지사항 배너"
+                    on={settings.noticeEnabled}
+                    onColor="bg-[#1B4332]"
                     disabled={saving}
-                    aria-label="공지사항 배너"
-                    aria-pressed={settings.noticeEnabled}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${
-                      settings.noticeEnabled ? 'bg-[#1B4332]' : 'bg-gray-300'
-                    }`}
-                  >
-                    <div
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                        settings.noticeEnabled ? 'left-7' : 'left-1'
-                      }`}
-                    />
-                  </button>
+                    onToggle={() => handleToggle('noticeEnabled')}
+                  />
                 </div>
                 {settings.noticeEnabled && (
                   <div
@@ -271,7 +287,7 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                           {settings.noticeMessage}
                         </p>
                         <button
-                          onClick={() => setEditingNotice(true)}
+                          onClick={startEditingNotice}
                           className="text-xs font-black text-black/30"
                         >
                           수정
@@ -292,21 +308,13 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleToggle('maintenanceMode')}
+                <ToggleSwitch
+                  label="점검 모드"
+                  on={settings.maintenanceMode}
+                  onColor="bg-red-500"
                   disabled={saving}
-                  aria-label="점검 모드"
-                  aria-pressed={settings.maintenanceMode}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    settings.maintenanceMode ? 'bg-red-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                      settings.maintenanceMode ? 'left-7' : 'left-1'
-                    }`}
-                  />
-                </button>
+                  onToggle={() => handleToggle('maintenanceMode')}
+                />
               </div>
 
               <div className="flex items-center justify-between p-4 rounded-xl bg-black/[0.02]">
@@ -319,21 +327,13 @@ export const SystemView = ({ stats, logs, loading, onRefresh, setActiveTab }: Sy
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleToggle('signupEnabled')}
+                <ToggleSwitch
+                  label="신규 회원가입 허용"
+                  on={settings.signupEnabled}
+                  onColor="bg-blue-500"
                   disabled={saving}
-                  aria-label="신규 회원가입 허용"
-                  aria-pressed={settings.signupEnabled}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    settings.signupEnabled ? 'bg-blue-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                      settings.signupEnabled ? 'left-7' : 'left-1'
-                    }`}
-                  />
-                </button>
+                  onToggle={() => handleToggle('signupEnabled')}
+                />
               </div>
             </div>
           )}
