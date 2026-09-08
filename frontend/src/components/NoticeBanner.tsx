@@ -1,6 +1,6 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { Megaphone, X } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useNotice } from '../hooks/useNotice';
 
 /**
@@ -21,20 +21,22 @@ export function NoticeBanner() {
   const { notice, dismiss } = useNotice();
   const barRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const root = document.documentElement;
+  const clearHeight = useCallback(() => {
+    document.documentElement.style.removeProperty('--notice-banner-height');
+    window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
+  }, []);
 
-    if (!notice) {
-      root.style.removeProperty('--notice-banner-height');
-      window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
-      return;
-    }
+  useEffect(() => {
+    if (!notice) return;
 
     const element = barRef.current;
     if (!element) return;
 
     const syncHeight = () => {
-      root.style.setProperty('--notice-banner-height', `${element.offsetHeight}px`);
+      document.documentElement.style.setProperty(
+        '--notice-banner-height',
+        `${element.offsetHeight}px`,
+      );
       window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
     };
 
@@ -44,15 +46,15 @@ export function NoticeBanner() {
     const observer = new ResizeObserver(syncHeight);
     observer.observe(element);
 
-    return () => {
-      observer.disconnect();
-      root.style.removeProperty('--notice-banner-height');
-      window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
-    };
+    return () => observer.disconnect();
   }, [notice]);
 
+  // 배너가 붙어 있는 채로 화면이 바뀌면 퇴장 애니메이션이 돌지 않으므로, 언마운트 시에는 여기서 지운다.
+  useEffect(() => clearHeight, [clearHeight]);
+
   return (
-    <AnimatePresence>
+    // 퇴장 애니메이션이 끝난 뒤에 높이를 지운다. 먼저 지우면 배너가 아직 보이는 동안 Navbar 가 위로 올라와 겹친다.
+    <AnimatePresence onExitComplete={clearHeight}>
       {notice && (
         <m.div
           ref={barRef}

@@ -64,6 +64,10 @@ describe('NoticeBanner', () => {
 
     await waitFor(() => expect(screen.queryByText('점검 예정 안내')).not.toBeInTheDocument());
     expect(localStorage.getItem('notice_dismissed_message')).toBe('점검 예정 안내');
+    // 퇴장 애니메이션이 끝나면 높이 변수도 지워져야 Navbar 가 원래 자리로 돌아간다.
+    await waitFor(() =>
+      expect(document.documentElement.style.getPropertyValue('--notice-banner-height')).toBe(''),
+    );
   });
 
   it('이미 닫은 문구와 같으면 다시 노출하지 않는다', async () => {
