@@ -12,7 +12,7 @@
 - [x] **apiClient 게스트 폴백에 타임아웃 미적용** — 폴백 fetch가 이미 타임아웃이 해제된 컨트롤러의 signal을 재사용하던 것을 전용 AbortController로 교체하고 테스트를 추가했다 (`e31257e`).
 - [x] **토큰 만료 시간 하드코딩 중복** — 조사 결과 3일은 "로그인 유지" 클라이언트 세션 정책으로 의도된 값이며 백엔드 14일보다 짧아 갱신 동작에는 문제가 없었다. 다만 AuthContext와 apiClient 두 곳에 중복 정의되어 있어 `STAY_LOGGED_IN_DURATION_MS` 단일 상수로 추출했다 (`e31257e`).
 - [x] **BusinessException 체계를 벗어난 예외 정리** — PRO 멤버십 검사(403 B002 신설), 포인트 부족(400 S001), 유저 없음(404 U001)을 `BusinessException`으로 전환하고 테스트를 추가했다 (`9fd1dd9`). `AdminSettingsService`의 "System settings not initialized"는 서버 불변식 위반이라 500이 올바르므로 유지하기로 결정했다.
-- [ ] **관리자 시스템 설정 화면이 서버와 연동되지 않음** — `SystemView.tsx` 의 설정 상태는 초기값이 하드코딩된 로컬 `useState` 이고, 저장 함수는 화면 상태만 바꾼 뒤 "서버 연동은 추후 지원 예정" 토스트를 띄운다. `GET/PUT /admin/settings` 를 호출하는 프론트엔드 코드가 없어 점검 모드·회원가입 허용 토글이 실제 설정에 반영되지 않는다. 백엔드는 `aiReportEnabled` 를 포함해 세 설정을 모두 게이트로 사용하므로, 화면을 열 때 서버 값을 읽고 토글 시 PUT 으로 저장하도록 연결해야 한다.
+- [x] **관리자 시스템 설정 화면이 서버와 연동되지 않음** — `SystemView.tsx` 의 설정 상태는 초기값이 하드코딩된 로컬 `useState` 이고, 저장 함수는 화면 상태만 바꾼 뒤 "서버 연동은 추후 지원 예정" 토스트를 띄웠다. 마운트 시 `GET /admin/settings` 로 서버 값을 읽고, 토글·공지 수정 시 다섯 항목을 모두 담아 `PUT` 으로 저장한 뒤 응답값을 반영하도록 연결했다. 저장 실패 시 이전 값으로 되돌리고 오류 토스트를 띄운다. `SystemSettings` 타입은 `types/admin.ts` 로 옮겼고 조회·저장·실패 복구 테스트 4건을 추가했다 (`501674e`).
 - [x] **OpenSearch 인덱스명 이중 정의** — `ToiletIndexingService.INDEX_NAME`을 단일 출처로 삼고 검색 서비스가 참조하도록 변경했다 (`90ba44b`).
 
 ## P2 — 테스트 공백
