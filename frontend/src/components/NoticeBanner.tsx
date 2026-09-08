@@ -4,6 +4,14 @@ import { useEffect, useRef } from 'react';
 import { useNotice } from '../hooks/useNotice';
 
 /**
+ * `--notice-banner-height` 가 바뀐 것을 알리는 이벤트다.
+ *
+ * `Navbar` 는 이 값만큼 내려가면서 `--navbar-bottom` 도 다시 발행해야 하는데, 위치만 바뀌고 크기는 그대로라
+ * ResizeObserver 로는 감지할 수 없다. 그래서 `LocationConsentBanner` 가 쓰는 것과 같은 방식으로 이벤트를 띄운다.
+ */
+export const NOTICE_BANNER_HEIGHT_CHANGE = 'noticeBannerHeightChange';
+
+/**
  * 관리자가 게시한 공지를 화면 최상단에 노출한다.
  *
  * 배너가 떠 있는 동안 `Navbar` 가 가려지지 않도록, 자기 높이를 `--notice-banner-height` 로 문서 루트에 실어 둔다.
@@ -18,6 +26,7 @@ export function NoticeBanner() {
 
     if (!notice) {
       root.style.removeProperty('--notice-banner-height');
+      window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
       return;
     }
 
@@ -26,6 +35,7 @@ export function NoticeBanner() {
 
     const syncHeight = () => {
       root.style.setProperty('--notice-banner-height', `${element.offsetHeight}px`);
+      window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
     };
 
     syncHeight();
@@ -37,6 +47,7 @@ export function NoticeBanner() {
     return () => {
       observer.disconnect();
       root.style.removeProperty('--notice-banner-height');
+      window.dispatchEvent(new Event(NOTICE_BANNER_HEIGHT_CHANGE));
     };
   }, [notice]);
 

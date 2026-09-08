@@ -19,8 +19,7 @@ function readDismissedMessage(): string | null {
  * 공지는 부가 기능이므로 조회에 실패해도 화면에 오류를 알리지 않고 배너만 감춘다.
  */
 export function useNotice() {
-  const [message, setMessage] = useState<string | null>(null);
-  const [dismissedMessage, setDismissedMessage] = useState<string | null>(readDismissedMessage);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,12 +28,12 @@ export function useNotice() {
       .then((settings) => {
         if (cancelled) return;
         const next = settings.noticeEnabled ? settings.noticeMessage?.trim() : null;
-        setMessage(next ? next : null);
+        setNotice(next && next !== readDismissedMessage() ? next : null);
       })
       .catch((error) => {
         if (cancelled) return;
         console.warn('공지 설정을 불러오지 못했습니다.', error);
-        setMessage(null);
+        setNotice(null);
       });
 
     return () => {
@@ -43,18 +42,18 @@ export function useNotice() {
   }, []);
 
   const dismiss = useCallback(() => {
-    if (!message) return;
-    setDismissedMessage(message);
-    try {
-      localStorage.setItem(DISMISSED_KEY, message);
-    } catch {
-      // 저장에 실패해도 이번 세션 동안은 닫힌 상태를 유지한다.
-    }
-  }, [message]);
+    setNotice((current) => {
+      if (current) {
+        try {
+          localStorage.setItem(DISMISSED_KEY, current);
+        } catch {
+          // 저장에 실패해도 이번 세션 동안은 닫힌 상태를 유지한다.
+        }
+      }
+      return null;
+    });
+  }, []);
 
-  return {
-    /** 노출할 공지 문구. 공지가 없거나 사용자가 이미 닫았으면 null 이다. */
-    notice: message !== null && message !== dismissedMessage ? message : null,
-    dismiss,
-  };
+  /** `notice` 는 노출할 공지 문구다. 공지가 없거나 사용자가 이미 닫았으면 null 이다. */
+  return { notice, dismiss };
 }

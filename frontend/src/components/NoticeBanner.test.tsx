@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { NoticeBanner } from './NoticeBanner';
+import { NOTICE_BANNER_HEIGHT_CHANGE, NoticeBanner } from './NoticeBanner';
 
 const { getPublicSettings } = vi.hoisted(() => ({ getPublicSettings: vi.fn() }));
 vi.mock('../services/settingsService', () => ({ getPublicSettings }));
@@ -74,6 +74,22 @@ describe('NoticeBanner', () => {
 
     await waitFor(() => expect(getPublicSettings).toHaveBeenCalled());
     expect(screen.queryByText('점검 예정 안내')).not.toBeInTheDocument();
+  });
+
+  it('배너가 뜨고 질 때 Navbar 가 위치를 다시 재도록 이벤트를 알린다', async () => {
+    getPublicSettings.mockResolvedValue({ noticeEnabled: true, noticeMessage: '점검 예정 안내' });
+    const onHeightChange = vi.fn();
+    window.addEventListener(NOTICE_BANNER_HEIGHT_CHANGE, onHeightChange);
+
+    render(<NoticeBanner />);
+    await screen.findByText('점검 예정 안내');
+    expect(onHeightChange).toHaveBeenCalled();
+
+    onHeightChange.mockClear();
+    await userEvent.click(screen.getByRole('button', { name: '공지 닫기' }));
+
+    await waitFor(() => expect(onHeightChange).toHaveBeenCalled());
+    window.removeEventListener(NOTICE_BANNER_HEIGHT_CHANGE, onHeightChange);
   });
 
   it('공지 문구가 바뀌면 이전에 닫았더라도 다시 노출한다', async () => {

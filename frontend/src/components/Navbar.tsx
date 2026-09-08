@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { isTouchDevice } from '../hooks/useIsTouchDevice';
 import { AnimatedUnderlink } from './AnimatedUnderlink';
+import { NOTICE_BANNER_HEIGHT_CHANGE } from './NoticeBanner';
 import { NotificationPanel } from './NotificationPanel';
 
 const NAV_LINKS = [
@@ -32,9 +33,16 @@ export function Navbar({ openAuth }: { openAuth: (mode: 'login' | 'signup') => v
         document.documentElement.style.setProperty('--navbar-bottom', `${rect.bottom + 16}px`);
       }
     };
+    // 공지 배너가 뜨고 지면 이 요소의 top 이 달라진다. 새 위치가 스타일에 반영된 뒤 재도록 프레임을 한 번 넘긴다.
+    const updateAfterLayout = () => requestAnimationFrame(updateNavHeight);
+
     updateNavHeight();
     window.addEventListener('resize', updateNavHeight);
-    return () => window.removeEventListener('resize', updateNavHeight);
+    window.addEventListener(NOTICE_BANNER_HEIGHT_CHANGE, updateAfterLayout);
+    return () => {
+      window.removeEventListener('resize', updateNavHeight);
+      window.removeEventListener(NOTICE_BANNER_HEIGHT_CHANGE, updateAfterLayout);
+    };
   }, []);
 
   useMotionValueEvent(scrollY, 'change', (latest) => {

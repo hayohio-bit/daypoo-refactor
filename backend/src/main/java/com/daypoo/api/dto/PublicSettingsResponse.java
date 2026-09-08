@@ -25,9 +25,6 @@ public class PublicSettingsResponse {
   private String noticeMessage;
 
   public static PublicSettingsResponse from(SystemSettings entity) {
-    if (entity == null) {
-      return disabled();
-    }
     boolean enabled = entity.isNoticeEnabled();
     return PublicSettingsResponse.builder()
         .noticeEnabled(enabled)
