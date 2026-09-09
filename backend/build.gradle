@@ -9,6 +9,10 @@ group = 'com.daypoo'
 version = '0.0.1-SNAPSHOT'
 description = 'DayPoo Backend'
 
+// Spring Boot 3.4.3 이 지정하는 1.20.5 는 최신 Docker Engine 의 API 를 인식하지 못해
+// "Could not find a valid Docker environment" 로 실패한다.
+ext['testcontainers.version'] = '1.21.4'
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
@@ -88,6 +92,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// 데이터베이스에 실제로 붙는 테스트용. 일회용 컨테이너를 띄우므로 로컬 개발 DB 를 건드리지 않는다.
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:postgresql'
 }
 
 tasks.named('test') {
