@@ -9,6 +9,7 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",

@@ -35,6 +35,9 @@ jobs:
       - name: Lint and format check
         run: npx biome ci .
 
+      - name: Type check
+        run: npm run typecheck
+
       - name: Test with coverage thresholds
         run: npm run test:coverage
 
