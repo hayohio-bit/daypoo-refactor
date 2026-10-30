@@ -18,6 +18,7 @@ import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.UserRepository;
 import com.daypoo.api.security.JwtProvider;
+import com.daypoo.api.security.RefreshTokenStore;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,7 @@ class AuthServiceTest {
   @Mock private JwtProvider jwtProvider;
   @Mock private EmailService emailService;
   @Mock private StringRedisTemplate redisTemplate;
+  @Mock private RefreshTokenStore refreshTokenStore;
   @Mock private UserDeletionService userDeletionService;
   @Mock private PooRecordRepository pooRecordRepository;
   @Mock private SystemLogService systemLogService;

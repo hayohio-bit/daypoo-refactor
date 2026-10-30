@@ -22,6 +22,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   private final JwtProvider jwtProvider;
   private final com.daypoo.api.repository.UserRepository userRepository;
   private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+  private final RefreshTokenStore refreshTokenStore;
 
   @org.springframework.beans.factory.annotation.Value("${app.frontend.url}")
   private String frontendUrl;
@@ -93,6 +94,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
       String accessToken = jwtProvider.createAccessToken(email, user.getRole().name());
       String refreshToken = jwtProvider.createRefreshToken(email);
+      // 재발급(AuthService.refresh)이 저장값과 대조하므로 일반 로그인과 같은 규칙으로 저장한다
+      refreshTokenStore.save(email, refreshToken);
 
       // 보안 개선: JWT를 직접 노출하지 않고 일회용 코드로 교환
       String authCode = java.util.UUID.randomUUID().toString();
