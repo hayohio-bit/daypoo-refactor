@@ -25,6 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -117,61 +119,21 @@ class PooRecordServiceTest {
     verify(recordRepository, times(1)).save(any(PooRecord.class));
   }
 
-  @Test
-  @DisplayName("실패: 화장실 반경 밖에서 인증 시도")
-  void createRecord_fail_distance() {
+  @ParameterizedTest(name = "[{index}] {0}")
+  @ValueSource(strings = {"test@test.com", "bot_abuser@example.com"})
+  @DisplayName("실패: 화장실 반경 밖에서 인증 시도 (bot_ 접두사 이메일도 검증을 건너뛰지 않는다)")
+  void createRecord_fail_distance(String email) {
     // given
-    given(userService.getByEmail("test@test.com")).willReturn(testUser);
+    givenUser(email);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
     given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
         .willReturn(new LocationVerificationService.DistanceCheck(500.0, false));
 
     // when & then
-    assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
+    assertThatThrownBy(() -> pooRecordService.createRecord(email, request))
         .isInstanceOf(BusinessException.class)
         .extracting("errorCode")
         .isEqualTo(ErrorCode.OUT_OF_RANGE);
-    verify(recordRepository, never()).save(any(PooRecord.class));
-  }
-
-  @Test
-  @DisplayName("실패: 이메일이 bot_ 로 시작해도 반경 검증을 건너뛰지 않는다")
-  void createRecord_botPrefixEmail_stillValidatesDistance() {
-    // given
-    User botUser =
-        User.builder().email("bot_abuser@example.com").nickname("Bot").password("pw").build();
-    ReflectionTestUtils.setField(botUser, "id", 2L);
-    given(userService.getByEmail("bot_abuser@example.com")).willReturn(botUser);
-    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(new LocationVerificationService.DistanceCheck(500.0, false));
-
-    // when & then
-    assertThatThrownBy(() -> pooRecordService.createRecord("bot_abuser@example.com", request))
-        .isInstanceOf(BusinessException.class)
-        .extracting("errorCode")
-        .isEqualTo(ErrorCode.OUT_OF_RANGE);
-    verify(recordRepository, never()).save(any(PooRecord.class));
-  }
-
-  @Test
-  @DisplayName("실패: 이메일이 bot_ 로 시작해도 체류 시간 검증을 건너뛰지 않는다")
-  void createRecord_botPrefixEmail_stillValidatesStayTime() {
-    // given
-    User botUser =
-        User.builder().email("bot_abuser@example.com").nickname("Bot").password("pw").build();
-    ReflectionTestUtils.setField(botUser, "id", 2L);
-    given(userService.getByEmail("bot_abuser@example.com")).willReturn(botUser);
-    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
-    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
-        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
-    given(locationVerificationService.hasStayedLongEnough(eq(2L), eq(100L))).willReturn(false);
-
-    // when & then
-    assertThatThrownBy(() -> pooRecordService.createRecord("bot_abuser@example.com", request))
-        .isInstanceOf(BusinessException.class)
-        .extracting("errorCode")
-        .isEqualTo(ErrorCode.STAY_TIME_NOT_MET);
     verify(recordRepository, never()).save(any(PooRecord.class));
   }
 
@@ -192,21 +154,28 @@ class PooRecordServiceTest {
         .hasMessageContaining("이미 최근 코인/경험치를 획득한 화장실");
   }
 
-  @Test
-  @DisplayName("실패: 최소 체류 시간(1분) 미달")
-  void createRecord_fail_stay_time() {
+  @ParameterizedTest(name = "[{index}] {0}")
+  @ValueSource(strings = {"test@test.com", "bot_abuser@example.com"})
+  @DisplayName("실패: 최소 체류 시간(1분) 미달 (bot_ 접두사 이메일도 검증을 건너뛰지 않는다)")
+  void createRecord_fail_stay_time(String email) {
     // given
-    given(userService.getByEmail("test@test.com")).willReturn(testUser);
+    givenUser(email);
     given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
     given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
         .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(false);
 
     // when & then
-    assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
+    assertThatThrownBy(() -> pooRecordService.createRecord(email, request))
         .isInstanceOf(BusinessException.class)
         .extracting("errorCode")
         .isEqualTo(ErrorCode.STAY_TIME_NOT_MET);
     verify(recordRepository, never()).save(any(PooRecord.class));
+  }
+
+  private void givenUser(String email) {
+    User user = User.builder().email(email).nickname("PoopKing").password("password").build();
+    ReflectionTestUtils.setField(user, "id", 1L);
+    given(userService.getByEmail(email)).willReturn(user);
   }
 }
