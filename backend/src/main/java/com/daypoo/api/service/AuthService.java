@@ -62,10 +62,6 @@ public class AuthService {
     return Role.ROLE_USER;
   }
 
-  private void storeRefreshToken(String email, String refreshToken) {
-    refreshTokenStore.save(email, refreshToken);
-  }
-
   @Transactional
   public TokenResponse socialSignUp(SocialSignUpRequest request) {
     if (!adminSettingsService.isSignupEnabled()) {
@@ -110,8 +106,7 @@ public class AuthService {
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
-    // Refresh token을 Redis에 저장하여 서버측 검증 지원
-    storeRefreshToken(user.getEmail(), refreshToken);
+    refreshTokenStore.save(user.getEmail(), refreshToken);
 
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -205,7 +200,7 @@ public class AuthService {
     // 회원가입 성공 시 바로 토큰 발급 (별도 login 호출 불필요 → BCrypt 1회로 성능 개선)
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
-    storeRefreshToken(user.getEmail(), refreshToken);
+    refreshTokenStore.save(user.getEmail(), refreshToken);
 
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -282,8 +277,7 @@ public class AuthService {
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
-    // Refresh token을 Redis에 저장하여 서버측 검증 지원
-    storeRefreshToken(user.getEmail(), refreshToken);
+    refreshTokenStore.save(user.getEmail(), refreshToken);
 
     systemLogService.info("Auth", "User login: " + user.getEmail());
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();

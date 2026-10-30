@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RefreshTokenStore {
 
-  static final String KEY_PREFIX = "refresh_token:";
+  private static final String KEY_PREFIX = "refresh_token:";
 
   private final StringRedisTemplate redisTemplate;
   private final JwtProvider jwtProvider;

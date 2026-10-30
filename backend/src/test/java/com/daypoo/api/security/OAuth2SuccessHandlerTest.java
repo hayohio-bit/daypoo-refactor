@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.entity.enums.Role;
 import com.daypoo.api.repository.UserRepository;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,7 @@ class OAuth2SuccessHandlerTest {
   private OAuth2AuthenticationToken googleLogin(String email) {
     DefaultOAuth2User principal =
         new DefaultOAuth2User(
-            java.util.List.of(new SimpleGrantedAuthority("ROLE_USER")),
+            List.of(new SimpleGrantedAuthority("ROLE_USER")),
             Map.of("sub", "google-123", "email", email),
             "sub");
     return new OAuth2AuthenticationToken(principal, principal.getAuthorities(), "google");
