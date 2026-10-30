@@ -242,6 +242,8 @@ docker logs -f postgres
 
 ### 5.2 자동 배포 확인
 - [ ] `main` 브랜치에 커밋/푸시 시 자동 배포 확인
+  - 문서(`docs/**`, `*.md`), 다른 워크플로 파일, `terraform/`·`twa/`, 테스트 파일만 바뀐 푸시는 배포를 건너뛴다(`deploy-oci.yml` 의 `paths-ignore`). 이런 변경 뒤 배포가 필요하면 Actions 탭에서 `workflow_dispatch` 로 수동 실행한다.
+  - 배포는 `concurrency` 로 직렬화되어 연속 푸시 시 뒤의 배포가 앞의 배포를 기다린다.
 - [ ] GitHub Actions 탭에서 워크플로우 실행 내역 확인
 
 ### 5.3 비용 모니터링
