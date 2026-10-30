@@ -14,9 +14,13 @@ export const NotificationSubscriber: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const { fetchNotifications } = useNotification();
   const { showToast } = useToast();
-  const [retryCount, setRetryCount] = useState(0);
+  // 재시도 횟수는 ref 로 들고, 재연결은 tick 상태로만 유발한다.
+  // 횟수를 state 로 두고 connectSSE 가 그 값을 읽으면 useCallback 클로저가 낡은 값을 보거나,
+  // 성공 시 0 으로 되돌릴 때 effect 가 다시 실행되어 방금 연 연결을 끊고 다시 연결한다.
+  const retryCountRef = useRef(0);
+  const [reconnectTick, setReconnectTick] = useState(0);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const timeoutRef = useRef<any>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connectSSE = useCallback(async () => {
     // SSE 기능 활성화
@@ -52,7 +56,7 @@ export const NotificationSubscriber: React.FC = () => {
       // F4: 연결 성공 시 재시도 카운트 리셋
       eventSource.onopen = () => {
         console.log('SSE 연결 성공');
-        setRetryCount(0);
+        retryCountRef.current = 0;
       };
 
       eventSource.addEventListener('notification', (event) => {
@@ -78,6 +82,7 @@ export const NotificationSubscriber: React.FC = () => {
         eventSource.close();
 
         // F4: 최대 재시도 횟수 체크
+        const retryCount = retryCountRef.current;
         if (retryCount >= MAX_RETRY_COUNT) {
           console.error('SSE 최대 재시도 횟수 초과');
           showToast(
@@ -94,7 +99,8 @@ export const NotificationSubscriber: React.FC = () => {
 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-          setRetryCount((prev) => prev + 1);
+          retryCountRef.current += 1;
+          setReconnectTick((tick) => tick + 1);
         }, delay);
       };
     } catch (err) {
@@ -108,7 +114,7 @@ export const NotificationSubscriber: React.FC = () => {
       if (eventSourceRef.current) eventSourceRef.current.close();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [connectSSE, retryCount]);
+  }, [connectSSE, reconnectTick]);
 
   return null;
 };
