@@ -8,20 +8,20 @@ function jsonResponse(status: number, body: unknown): Response {
   });
 }
 
+const fetchMock = vi.fn();
+
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+  vi.stubGlobal('fetch', fetchMock);
+  fetchMock.mockReset();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('apiClient 게스트 폴백', () => {
-  const fetchMock = vi.fn();
-
-  beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-    vi.stubGlobal('fetch', fetchMock);
-    fetchMock.mockReset();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it('토큰 리프레시 실패 시 Authorization 없이 재요청하고, 폴백 요청에는 새 타임아웃 signal을 사용한다', async () => {
     localStorage.setItem('accessToken', 'expired-access');
     localStorage.setItem('refreshToken', 'expired-refresh');
@@ -62,6 +62,59 @@ describe('apiClient 게스트 폴백', () => {
       status: 401,
     });
     // 원 요청 1회만 발생 (리프레시 토큰이 없어 리프레시 시도도 실패로 즉시 귀결)
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('apiClient 재시도', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('GET 은 5xx 응답 뒤 1초 뒤에 한 번 더 요청한다', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(503, { message: 'unavailable' }))
+      .mockResolvedValueOnce(jsonResponse(200, { data: { ok: true } }));
+
+    const pending = api.get<{ ok: boolean }>('/toilets');
+    await vi.advanceTimersByTimeAsync(1000);
+
+    await expect(pending).resolves.toEqual({ ok: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('POST 는 5xx 응답에도 다시 보내지 않고 그대로 실패한다', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(502, { message: 'bad gateway' }));
+
+    const pending = api.post('/records', { toiletId: 1 }).catch((e) => e);
+    await vi.runAllTimersAsync();
+
+    const error = await pending;
+    expect(error).toMatchObject({ status: 502 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('POST 는 타임아웃에도 다시 보내지 않는다', async () => {
+    fetchMock.mockImplementation(
+      (_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () => {
+            reject(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+          });
+        }),
+    );
+
+    const pending = api.post('/records/check-in', { toiletId: 1 }).catch((e) => e);
+    await vi.runAllTimersAsync();
+
+    const error = await pending;
+    expect(error).toMatchObject({ code: 'TIMEOUT' });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -263,12 +263,11 @@ class ApiClient {
     maxRetries = 1,
     retryDelay = 1000,
   ): Promise<T> {
-    // 재시도하지 않아야 하는 엔드포인트 (인증 관련은 모두 제외)
-    const noRetryEndpoints = ['/auth/'];
-    const shouldSkipRetry = noRetryEndpoints.some((path) => endpoint.includes(path));
-
-    if (shouldSkipRetry) {
-      // 로그인/회원가입 등은 재시도하지 않음
+    // GET 만 재시도한다. 응답이 늦어 타임아웃이 났을 뿐 서버는 처리를 마친 경우,
+    // 기록 등록·체크인·문의 같은 쓰기 요청을 다시 보내면 중복 생성된다.
+    // 인증 관련 엔드포인트(/auth/me, check-email 등 GET 포함)는 재시도하지 않는다.
+    const retryable = method === 'GET' && !endpoint.includes('/auth/');
+    if (!retryable) {
       return this.request<T>(method, endpoint, body);
     }
 
