@@ -29,13 +29,11 @@ vi.mock('../services/notificationService', () => ({ issueSseToken }));
 /** jsdom 에는 EventSource 가 없다. 생성된 인스턴스를 모아 두고 테스트가 onerror/onopen 을 직접 발생시킨다. */
 class FakeEventSource {
   static instances: FakeEventSource[] = [];
-  url: string;
   onopen: (() => void) | null = null;
   onerror: ((err: unknown) => void) | null = null;
   closed = false;
 
-  constructor(url: string) {
-    this.url = url;
+  constructor() {
     FakeEventSource.instances.push(this);
   }
 
@@ -82,26 +80,14 @@ describe('NotificationSubscriber SSE 재연결', () => {
     await advance(0);
     expect(FakeEventSource.instances).toHaveLength(1);
 
-    // 1차 실패 → 1초 뒤 재연결
-    await failLatestConnection();
-    await advance(999);
-    expect(FakeEventSource.instances).toHaveLength(1);
-    await advance(1);
-    expect(FakeEventSource.instances).toHaveLength(2);
-
-    // 2차 실패 → 2초 뒤 재연결 (1초 시점에는 아직 재연결하지 않는다)
-    await failLatestConnection();
-    await advance(1000);
-    expect(FakeEventSource.instances).toHaveLength(2);
-    await advance(1000);
-    expect(FakeEventSource.instances).toHaveLength(3);
-
-    // 3차 실패 → 4초 뒤 재연결
-    await failLatestConnection();
-    await advance(3999);
-    expect(FakeEventSource.instances).toHaveLength(3);
-    await advance(1);
-    expect(FakeEventSource.instances).toHaveLength(4);
+    // n차 실패 → delay 직전까지는 재연결하지 않고, delay 시점에 재연결한다
+    for (const [i, delay] of [1000, 2000, 4000].entries()) {
+      await failLatestConnection();
+      await advance(delay - 1);
+      expect(FakeEventSource.instances).toHaveLength(i + 1);
+      await advance(1);
+      expect(FakeEventSource.instances).toHaveLength(i + 2);
+    }
   });
 
   it('10회 재시도 뒤에는 재연결을 멈추고 안내 토스트를 띄운다', async () => {

@@ -8,20 +8,20 @@ function jsonResponse(status: number, body: unknown): Response {
   });
 }
 
+const fetchMock = vi.fn();
+
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+  vi.stubGlobal('fetch', fetchMock);
+  fetchMock.mockReset();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('apiClient 게스트 폴백', () => {
-  const fetchMock = vi.fn();
-
-  beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-    vi.stubGlobal('fetch', fetchMock);
-    fetchMock.mockReset();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it('토큰 리프레시 실패 시 Authorization 없이 재요청하고, 폴백 요청에는 새 타임아웃 signal을 사용한다', async () => {
     localStorage.setItem('accessToken', 'expired-access');
     localStorage.setItem('refreshToken', 'expired-refresh');
@@ -67,19 +67,12 @@ describe('apiClient 게스트 폴백', () => {
 });
 
 describe('apiClient 재시도', () => {
-  const fetchMock = vi.fn();
-
   beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-    vi.stubGlobal('fetch', fetchMock);
-    fetchMock.mockReset();
     vi.useFakeTimers();
     vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
