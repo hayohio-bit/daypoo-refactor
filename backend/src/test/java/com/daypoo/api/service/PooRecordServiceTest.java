@@ -12,6 +12,8 @@ import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.entity.User;
 import com.daypoo.api.global.config.RewardProperties;
+import com.daypoo.api.global.exception.BusinessException;
+import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.mapper.PooRecordMapper;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
@@ -115,7 +117,7 @@ class PooRecordServiceTest {
     verify(recordRepository, times(1)).save(any(PooRecord.class));
   }
 
-  @org.junit.jupiter.api.Disabled("개발 모드로 인해 예외 발생 비활성화됨")
+  @Test
   @DisplayName("실패: 화장실 반경 밖에서 인증 시도")
   void createRecord_fail_distance() {
     // given
@@ -126,8 +128,51 @@ class PooRecordServiceTest {
 
     // when & then
     assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
-        .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("화장실 반경(150m) 밖");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.OUT_OF_RANGE);
+    verify(recordRepository, never()).save(any(PooRecord.class));
+  }
+
+  @Test
+  @DisplayName("실패: 이메일이 bot_ 로 시작해도 반경 검증을 건너뛰지 않는다")
+  void createRecord_botPrefixEmail_stillValidatesDistance() {
+    // given
+    User botUser =
+        User.builder().email("bot_abuser@example.com").nickname("Bot").password("pw").build();
+    ReflectionTestUtils.setField(botUser, "id", 2L);
+    given(userService.getByEmail("bot_abuser@example.com")).willReturn(botUser);
+    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(500.0, false));
+
+    // when & then
+    assertThatThrownBy(() -> pooRecordService.createRecord("bot_abuser@example.com", request))
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.OUT_OF_RANGE);
+    verify(recordRepository, never()).save(any(PooRecord.class));
+  }
+
+  @Test
+  @DisplayName("실패: 이메일이 bot_ 로 시작해도 체류 시간 검증을 건너뛰지 않는다")
+  void createRecord_botPrefixEmail_stillValidatesStayTime() {
+    // given
+    User botUser =
+        User.builder().email("bot_abuser@example.com").nickname("Bot").password("pw").build();
+    ReflectionTestUtils.setField(botUser, "id", 2L);
+    given(userService.getByEmail("bot_abuser@example.com")).willReturn(botUser);
+    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
+    given(locationVerificationService.hasStayedLongEnough(eq(2L), eq(100L))).willReturn(false);
+
+    // when & then
+    assertThatThrownBy(() -> pooRecordService.createRecord("bot_abuser@example.com", request))
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.STAY_TIME_NOT_MET);
+    verify(recordRepository, never()).save(any(PooRecord.class));
   }
 
   @Test
@@ -148,7 +193,6 @@ class PooRecordServiceTest {
   }
 
   @Test
-  @org.junit.jupiter.api.Disabled("개발 모드로 인해 예외 발생 비활성화됨")
   @DisplayName("실패: 최소 체류 시간(1분) 미달")
   void createRecord_fail_stay_time() {
     // given
@@ -160,7 +204,9 @@ class PooRecordServiceTest {
 
     // when & then
     assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
-        .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("최소 1분 이상 화장실에 머물러야 합니다");
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.STAY_TIME_NOT_MET);
+    verify(recordRepository, never()).save(any(PooRecord.class));
   }
 }
