@@ -3,7 +3,34 @@ name: Deploy to Oracle Cloud (DayPoo)
 on:
   push:
     branches: [ main ]
+    # 운영 이미지·배포 설정에 영향이 없는 변경은 재배포(1~3분 중단)를 일으키지 않는다.
+    # 백엔드 이미지는 `bootJar -x test`, 프론트엔드 이미지는 `npm run build` 로 만들어지므로
+    # 테스트 파일은 이미지에 포함되지 않는다. 변경에 아래 경로 밖 파일이 하나라도 섞이면 실행된다.
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.husky/**'
+      - 'commitlint.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'skills-lock.json'
+      - 'terraform/**'
+      - 'twa/**'
+      - '.github/workflows/backend-ci.yml'
+      - '.github/workflows/frontend-ci.yml'
+      - '.github/workflows/deploy.yml'
+      - 'backend/src/test/**'
+      - 'frontend/src/**/*.test.ts'
+      - 'frontend/src/**/*.test.tsx'
+      - 'frontend/src/test-setup.ts'
   workflow_dispatch:
+
+# 같은 서버에서 두 배포가 겹치지 않도록 직렬화한다. 진행 중인 배포는 끊지 않고 뒤의 배포가 기다린다.
+concurrency:
+  group: deploy-oci
+  cancel-in-progress: false
 
 jobs:
   # ── Job 1: 백엔드, 프론트엔드 Docker 이미지 빌드 및 푸시 ──
@@ -161,10 +188,12 @@ jobs:
             REDIS_PORT=6379
             ENVEOF
 
+            # 새 이미지를 먼저 받아 두어, 컨테이너가 내려가 있는 시간에 다운로드가 포함되지 않게 한다
+            docker compose -f docker-compose.prod.yml pull
+
             # 기존 컨테이너 이름 충돌 방지
             docker rm -f daypoo-frontend daypoo-backend daypoo-redis daypoo-postgres 2>/dev/null || true
 
-            docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down --remove-orphans
             docker compose -f docker-compose.prod.yml up -d
 
