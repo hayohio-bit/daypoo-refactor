@@ -246,6 +246,11 @@ docker logs -f postgres
   - 배포는 `concurrency` 로 직렬화되어 연속 푸시 시 뒤의 배포가 앞의 배포를 기다린다.
 - [ ] GitHub Actions 탭에서 워크플로우 실행 내역 확인
 
+### 5.2.1 롤백
+- 배포마다 이미지가 `:latest` 와 커밋 SHA 태그(`<사용자>/daypoo-backend:<커밋 SHA>` 등)로 함께 푸시된다. Docker Hub 의 태그 목록에서 되돌릴 시점의 SHA 를 찾는다.
+- 서버의 `/opt/daypoo/docker-compose.prod.yml` 에서 문제가 된 서비스의 `image:` 태그를 `latest` 대신 해당 SHA 로 바꾸고 `docker compose -f docker-compose.prod.yml up -d` 를 실행한다. 다음 자동 배포는 compose 파일을 다시 복사하므로 `latest` 로 돌아간다.
+- DB 스키마(Flyway 마이그레이션)가 앞선 버전으로 이미 올라간 경우 이미지만 되돌려서는 부족할 수 있다.
+
 ### 5.3 비용 모니터링
 - [ ] AWS Billing 대시보드 정기 확인
 - [ ] 프리티어 한도 초과 알림 설정
