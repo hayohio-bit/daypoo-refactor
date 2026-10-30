@@ -13,6 +13,7 @@ import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
 import com.daypoo.api.repository.*;
 import com.daypoo.api.security.JwtProvider;
+import com.daypoo.api.security.RefreshTokenStore;
 import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class AuthService {
   private final JwtProvider jwtProvider;
   private final EmailService emailService;
   private final StringRedisTemplate redisTemplate;
+  private final RefreshTokenStore refreshTokenStore;
   private final UserDeletionService userDeletionService;
   private final PooRecordRepository pooRecordRepository;
   private final SystemLogService systemLogService;
@@ -58,16 +60,6 @@ public class AuthService {
       return Role.ROLE_ADMIN;
     }
     return Role.ROLE_USER;
-  }
-
-  /** Refresh token을 Redis에 저장. refresh-token-validity-in-seconds 값을 TTL로 사용. */
-  private void storeRefreshToken(String email, String refreshToken) {
-    long remainingTime = jwtProvider.getRemainingTime(refreshToken);
-    if (remainingTime > 0) {
-      redisTemplate
-          .opsForValue()
-          .set("refresh_token:" + email, refreshToken, remainingTime, TimeUnit.MILLISECONDS);
-    }
   }
 
   @Transactional
@@ -114,8 +106,7 @@ public class AuthService {
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
-    // Refresh token을 Redis에 저장하여 서버측 검증 지원
-    storeRefreshToken(user.getEmail(), refreshToken);
+    refreshTokenStore.save(user.getEmail(), refreshToken);
 
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -209,7 +200,7 @@ public class AuthService {
     // 회원가입 성공 시 바로 토큰 발급 (별도 login 호출 불필요 → BCrypt 1회로 성능 개선)
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
-    storeRefreshToken(user.getEmail(), refreshToken);
+    refreshTokenStore.save(user.getEmail(), refreshToken);
 
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -286,8 +277,7 @@ public class AuthService {
     String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().name());
     String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
-    // Refresh token을 Redis에 저장하여 서버측 검증 지원
-    storeRefreshToken(user.getEmail(), refreshToken);
+    refreshTokenStore.save(user.getEmail(), refreshToken);
 
     systemLogService.info("Auth", "User login: " + user.getEmail());
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
@@ -348,8 +338,7 @@ public class AuthService {
     String email = claims.getSubject();
 
     // Redis에 저장된 refresh token과 비교 검증 (탈취된 토큰 차단)
-    String storedToken = redisTemplate.opsForValue().get("refresh_token:" + email);
-    if (storedToken == null || !storedToken.equals(refreshToken)) {
+    if (!refreshTokenStore.matches(email, refreshToken)) {
       log.warn("Refresh token mismatch or not found for email: {}", email);
       throw new BusinessException(ErrorCode.INVALID_TOKEN);
     }
@@ -375,7 +364,7 @@ public class AuthService {
       }
     }
     // 로그아웃 시 refresh token도 Redis에서 삭제
-    redisTemplate.delete("refresh_token:" + email);
+    refreshTokenStore.delete(email);
     systemLogService.info("Auth", "User logout: " + email);
     log.info("User {} logged out and token blacklisted", email);
   }
