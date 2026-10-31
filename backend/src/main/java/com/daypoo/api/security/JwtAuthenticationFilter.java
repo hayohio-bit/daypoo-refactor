@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String email = claims.getSubject();
         String role = claims.get("role", String.class);
 
-        if (email != null && role != null) {
+        if (email != null && role != null && isUsableOnPath(claims, request)) {
           Authentication authentication =
               new UsernamePasswordAuthenticationToken(
                   email, null, Collections.singleton(new SimpleGrantedAuthority(role)));
@@ -65,6 +65,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
+  /**
+   * 용도가 정해진 토큰(type 클레임이 있는 것)은 그 용도에서만 인증으로 인정한다. 가입 대기용 registration 토큰은 어떤 경로도 인증하지 않고, sse 토큰은
+   * 구독 경로에서만 인증한다. type 이 없는 일반 액세스 토큰은 제한하지 않는다.
+   */
+  private boolean isUsableOnPath(Claims claims, HttpServletRequest request) {
+    String type = claims.get("type", String.class);
+    if (type == null) {
+      return true;
+    }
+    return "sse".equals(type) && isSubscribePath(request.getRequestURI());
+  }
+
+  private boolean isSubscribePath(String path) {
+    return path != null && path.contains("/notifications/subscribe");
+  }
+
   private String resolveToken(HttpServletRequest request) {
     // 1. Authorization 헤더에서 토큰 추출
     String bearerToken = request.getHeader("Authorization");
@@ -73,8 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // 2. 쿼리 파라미터에서 토큰 추출 (SSE용: /api/v1/notifications/subscribe 경로만 허용)
-    String path = request.getRequestURI();
-    if (path != null && path.contains("/notifications/subscribe")) {
+    if (isSubscribePath(request.getRequestURI())) {
       String tokenParam = request.getParameter("token");
       if (!StringUtils.hasText(tokenParam)) {
         tokenParam = request.getParameter("sseToken");

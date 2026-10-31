@@ -158,12 +158,8 @@ public class NotificationService {
 
   /** 알림 읽음 처리 */
   @Transactional
-  public void markAsRead(Long notificationId) {
-    Notification notification =
-        notificationRepository
-            .findById(notificationId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-    notification.markAsRead();
+  public void markAsRead(Long notificationId, User user) {
+    getOwnedNotification(notificationId, user).markAsRead();
   }
 
   /** 모든 알림 일괄 읽음 처리 */
@@ -176,16 +172,18 @@ public class NotificationService {
   /** 알림 삭제 (본인 확인) */
   @Transactional
   public void deleteNotification(Long notificationId, User user) {
+    notificationRepository.delete(getOwnedNotification(notificationId, user));
+  }
+
+  /** 알림을 조회하고 본인의 알림인지 확인한다. */
+  private Notification getOwnedNotification(Long notificationId, User user) {
     Notification notification =
         notificationRepository
             .findById(notificationId)
             .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-
-    // 본인의 알림인지 확인
     if (!notification.getUser().getId().equals(user.getId())) {
       throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
     }
-
-    notificationRepository.delete(notification);
+    return notification;
   }
 }

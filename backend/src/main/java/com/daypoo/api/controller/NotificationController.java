@@ -58,8 +58,10 @@ public class NotificationController {
   /** 알림 읽음 처리 */
   @PatchMapping("/{notificationId}/read")
   @Operation(summary = "알림 읽음 처리", description = "특정 알림의 읽음 상태를 true로 변경합니다.")
-  public ResponseEntity<Void> markAsRead(@PathVariable Long notificationId) {
-    notificationService.markAsRead(notificationId);
+  public ResponseEntity<Void> markAsRead(
+      @PathVariable Long notificationId, @AuthenticationPrincipal String email) {
+    User user = userService.getByEmail(email);
+    notificationService.markAsRead(notificationId, user);
     return ResponseEntity.ok().build();
   }
 
