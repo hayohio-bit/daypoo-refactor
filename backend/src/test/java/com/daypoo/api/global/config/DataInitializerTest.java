@@ -60,8 +60,24 @@ class DataInitializerTest {
   }
 
   @Test
-  @DisplayName("기존 계정이 관리자 역할이 아니면 비밀번호 설정과 무관하게 역할을 승격한다")
-  void run_existingUserWithoutAdminRole_promotesRole() {
+  @DisplayName("기존 계정의 비밀번호가 ADMIN_PASSWORD 와 일치하면 관리자로 승격한다")
+  void run_existingUserWithMatchingPassword_promotesRole() {
+    ReflectionTestUtils.setField(dataInitializer, "adminPassword", "secret");
+    User existing = mock(User.class);
+    given(existing.getRole()).willReturn(Role.ROLE_USER);
+    given(existing.getPassword()).willReturn("encoded-secret");
+    given(passwordEncoder.matches("secret", "encoded-secret")).willReturn(true);
+    given(userRepository.findByEmail(ADMIN_EMAIL)).willReturn(Optional.of(existing));
+
+    dataInitializer.run();
+
+    verify(existing).updateRole(Role.ROLE_ADMIN);
+    verify(userRepository).save(existing);
+  }
+
+  @Test
+  @DisplayName("ADMIN_PASSWORD 가 비어 있으면 관리자 이메일로 선점된 기존 계정을 승격하지 않는다")
+  void run_existingUserWithoutConfiguredPassword_doesNotPromote() {
     ReflectionTestUtils.setField(dataInitializer, "adminPassword", "");
     User existing = mock(User.class);
     given(existing.getRole()).willReturn(Role.ROLE_USER);
@@ -69,7 +85,38 @@ class DataInitializerTest {
 
     dataInitializer.run();
 
-    verify(existing).updateRole(Role.ROLE_ADMIN);
-    verify(userRepository).save(existing);
+    verify(existing, never()).updateRole(any());
+    verify(userRepository, never()).save(any());
+    verify(passwordEncoder, never()).matches(any(), any());
+  }
+
+  @Test
+  @DisplayName("ADMIN_PASSWORD 가 null 이어도 기존 계정을 승격하지 않는다")
+  void run_existingUserWithNullConfiguredPassword_doesNotPromote() {
+    ReflectionTestUtils.setField(dataInitializer, "adminPassword", null);
+    User existing = mock(User.class);
+    given(existing.getRole()).willReturn(Role.ROLE_USER);
+    given(userRepository.findByEmail(ADMIN_EMAIL)).willReturn(Optional.of(existing));
+
+    dataInitializer.run();
+
+    verify(existing, never()).updateRole(any());
+    verify(passwordEncoder, never()).matches(any(), any());
+  }
+
+  @Test
+  @DisplayName("기존 계정의 비밀번호가 ADMIN_PASSWORD 와 다르면 승격하지 않는다")
+  void run_existingUserWithDifferentPassword_doesNotPromote() {
+    ReflectionTestUtils.setField(dataInitializer, "adminPassword", "secret");
+    User existing = mock(User.class);
+    given(existing.getRole()).willReturn(Role.ROLE_USER);
+    given(existing.getPassword()).willReturn("encoded-other");
+    given(passwordEncoder.matches("secret", "encoded-other")).willReturn(false);
+    given(userRepository.findByEmail(ADMIN_EMAIL)).willReturn(Optional.of(existing));
+
+    dataInitializer.run();
+
+    verify(existing, never()).updateRole(any());
+    verify(userRepository, never()).save(any());
   }
 }
