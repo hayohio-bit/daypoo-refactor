@@ -58,7 +58,9 @@ jobs:
           context: ./database
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-postgres:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-postgres:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-postgres:${{ github.sha }}
 
       # 백엔드 이미지 빌드
       - name: Build and push Backend Image
@@ -67,7 +69,9 @@ jobs:
           context: ./backend
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-backend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-backend:${{ github.sha }}
 
       # 프론트엔드 이미지 빌드 (VITE 환경변수 빌드타임 주입)
       - name: Build and push Frontend Image
@@ -76,7 +80,9 @@ jobs:
           context: ./frontend
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-frontend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/daypoo-frontend:${{ github.sha }}
           build-args: |
             VITE_KAKAO_MAP_KEY=${{ secrets.VITE_KAKAO_MAP_KEY }}
 
