@@ -30,3 +30,10 @@ logging:
     com.daypoo: INFO
     # 인증 지연/오류 원인 추적용. 안정화 이후 INFO로 되돌릴 것
     com.daypoo.api.service.AuthService: DEBUG
+
+management:
+  endpoint:
+    health:
+      # 비로그인 요청에는 UP/DOWN 상태만 돌려준다. DB·디스크 경로·용량 같은 상세는 관리자에게만 보인다.
+      show-details: when-authorized
+      roles: ADMIN

@@ -117,7 +117,7 @@ GitHub Actions Runner(AMD64)에서 OCI 대상(ARM64) 이미지를 생성할 때,
 
 ### 5.2 헬스체크 경로 호출 실패
 * **현상**: docker-compose.prod.yml 내부의 healthcheck wget 경로가 응답하지 않음.
-* **확인 사항**: 백엔드 포트(8080)와 Actuator 헬스 엔드포인트(`/actuator/health`) 활성화 여부를 확인합니다.
+* **확인 사항**: 백엔드 포트(8080)와 Actuator 헬스 엔드포인트(`/actuator/health`) 활성화 여부를 확인합니다. 운영 프로파일에서 비로그인 응답은 `{"status":"UP"}` 만 돌려주고, 구성 요소별 상세(`db`, `redis` 등)는 관리자 토큰으로 호출할 때만 보입니다. `/actuator/health` 이외의 actuator 경로도 관리자 전용입니다.
 
 ### 5.3 OCI 인스턴스 외부 접속 불가 (도메인 접속 타임아웃)
 * **현상**: 배포 완료 메시지는 정상적이나 도메인(예: `daypoo.ssunhy.com`) 또는 IP 주소로 접속 시 `Connection timed out` 발생.

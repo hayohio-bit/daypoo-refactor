@@ -31,9 +31,11 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
       @lombok.NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
-    // 관리자 관련 API나 스웨거 등은 점검 모드에서도 허용
+    // 관리자 관련 API나 스웨거 등은 점검 모드에서도 허용.
+    // 헬스체크도 허용한다. 막으면 점검 중에 컨테이너가 unhealthy 로 표시되고 배포 대기 루프가 실패한다.
     String path = request.getRequestURI();
-    if (path.startsWith("/api/v1/admin")
+    if (path.equals("/actuator/health")
+        || path.startsWith("/api/v1/admin")
         || path.startsWith("/api/docs")
         || path.contains("swagger")
         || path.contains("api-docs")
