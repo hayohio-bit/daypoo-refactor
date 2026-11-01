@@ -249,12 +249,13 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       // 테스트 파일과 setupFiles 는 vitest 가 항상 제외하므로 타입 선언만 명시한다.
       exclude: ['src/**/*.d.ts'],
-      // 현재 실측치(2026-08-31: lines 9.52 / branches 7.10 / functions 6.78)
+      // 현재 실측치(2026-11-01: statements 18.62 / lines 19.45 / branches 15.95 / functions 13.57)
       // 바로 아래로 잡은 래칫이다. 테스트를 늘릴 때마다 함께 올린다.
       thresholds: {
-        lines: 9,
-        branches: 7,
-        functions: 6,
+        statements: 18,
+        lines: 19,
+        branches: 15,
+        functions: 13,
       },
     },
   },
