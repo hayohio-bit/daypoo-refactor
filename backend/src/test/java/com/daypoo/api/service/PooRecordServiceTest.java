@@ -18,7 +18,6 @@ import com.daypoo.api.mapper.PooRecordMapper;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.UserRepository;
-import com.daypoo.api.repository.VisitLogRepository;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -50,7 +50,7 @@ class PooRecordServiceTest {
   @Mock private GeocodingService geocodingService;
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private PooRecordMapper recordMapper;
-  @Mock private VisitLogRepository visitLogRepository;
+  @Mock private VisitLogRecorder visitLogRecorder;
   @Mock private UserRepository userRepository;
 
   @Spy private RewardProperties rewardProperties = new RewardProperties();
@@ -89,7 +89,7 @@ class PooRecordServiceTest {
     given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
         .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
     given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
-    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong(), any()))
+    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong()))
         .willReturn(System.currentTimeMillis());
     given(geocodingService.reverseGeocode(anyDouble(), anyDouble())).willReturn("역삼1동");
 
@@ -119,6 +119,40 @@ class PooRecordServiceTest {
     verify(recordRepository, times(1)).save(any(PooRecord.class));
   }
 
+  @Test
+  @DisplayName("성공: 방문 로그용 도착 시각은 타이머 리셋 전에 읽고, 리셋 뒤에는 다시 만들지 않는다")
+  void createRecord_readsArrivalTimeBeforeReset() {
+    // given
+    given(userService.getByEmail("test@test.com")).willReturn(testUser);
+    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(10.0, true));
+    given(locationVerificationService.hasStayedLongEnough(eq(1L), eq(100L))).willReturn(true);
+    given(locationVerificationService.getOrSetArrivalTime(anyLong(), anyLong()))
+        .willReturn(System.currentTimeMillis() - 90_000);
+    given(geocodingService.reverseGeocode(anyDouble(), anyDouble())).willReturn("역삼1동");
+    PooRecord savedRecord =
+        PooRecord.builder()
+            .user(testUser)
+            .toilet(testToilet)
+            .bristolScale(5)
+            .color("Golden")
+            .build();
+    given(recordRepository.save(any(PooRecord.class))).willReturn(savedRecord);
+    given(userRepository.save(any(User.class))).willReturn(testUser);
+    given(recordMapper.toResponse(any(PooRecord.class)))
+        .willReturn(PooRecordResponse.builder().bristolScale(5).color("Golden").build());
+
+    // when
+    pooRecordService.createRecord("test@test.com", request);
+
+    // then: 조회(1회) → 리셋 순서이고, 리셋 뒤에는 도착 시각 키를 다시 건드리지 않는다
+    InOrder inOrder = inOrder(locationVerificationService);
+    inOrder.verify(locationVerificationService).getOrSetArrivalTime(anyLong(), anyLong());
+    inOrder.verify(locationVerificationService).resetArrivalTime(1L, 100L);
+    inOrder.verifyNoMoreInteractions();
+  }
+
   @ParameterizedTest(name = "[{index}] {0}")
   @ValueSource(strings = {"test@test.com", "bot_abuser@example.com"})
   @DisplayName("실패: 화장실 반경 밖에서 인증 시도 (bot_ 접두사 이메일도 검증을 건너뛰지 않는다)")
@@ -135,6 +169,26 @@ class PooRecordServiceTest {
         .extracting("errorCode")
         .isEqualTo(ErrorCode.OUT_OF_RANGE);
     verify(recordRepository, never()).save(any(PooRecord.class));
+    // 실패 로그는 롤백되지 않도록 별도 트랜잭션 경로로 저장한다
+    verify(visitLogRecorder).saveInNewTransaction(any(VisitLogRecorder.Entry.class));
+    verify(visitLogRecorder, never()).save(any(VisitLogRecorder.Entry.class));
+  }
+
+  @Test
+  @DisplayName("실패: 실패 로그 저장이 예외를 던져도 원래 검증 실패 예외가 그대로 나간다")
+  void createRecord_logFailureDoesNotMaskValidationError() {
+    given(userService.getByEmail("test@test.com")).willReturn(testUser);
+    given(toiletRepository.findById(100L)).willReturn(Optional.of(testToilet));
+    given(locationVerificationService.checkDistance(eq(100L), anyDouble(), anyDouble()))
+        .willReturn(new LocationVerificationService.DistanceCheck(500.0, false));
+    org.mockito.Mockito.doThrow(new org.springframework.core.task.TaskRejectedException("큐 포화"))
+        .when(visitLogRecorder)
+        .saveInNewTransaction(any(VisitLogRecorder.Entry.class));
+
+    assertThatThrownBy(() -> pooRecordService.createRecord("test@test.com", request))
+        .isInstanceOf(BusinessException.class)
+        .extracting("errorCode")
+        .isEqualTo(ErrorCode.OUT_OF_RANGE);
   }
 
   @Test

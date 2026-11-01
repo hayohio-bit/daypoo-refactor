@@ -6,7 +6,6 @@ import com.daypoo.api.dto.PooRecordResponse;
 import com.daypoo.api.entity.PooRecord;
 import com.daypoo.api.entity.Toilet;
 import com.daypoo.api.entity.User;
-import com.daypoo.api.entity.VisitLog;
 import com.daypoo.api.entity.enums.VisitEventType;
 import com.daypoo.api.event.PooRecordCreatedEvent;
 import com.daypoo.api.global.config.RewardProperties;
@@ -16,7 +15,6 @@ import com.daypoo.api.mapper.PooRecordMapper;
 import com.daypoo.api.repository.PooRecordRepository;
 import com.daypoo.api.repository.ToiletRepository;
 import com.daypoo.api.repository.VisitCountProjection;
-import com.daypoo.api.repository.VisitLogRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,7 +25,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,14 +42,13 @@ public class PooRecordService {
   private final GeocodingService geocodingService;
   private final ApplicationEventPublisher eventPublisher;
   private final PooRecordMapper recordMapper;
-  private final VisitLogRepository visitLogRepository;
+  private final VisitLogRecorder visitLogRecorder;
   private final com.daypoo.api.repository.UserRepository userRepository;
   private final RewardProperties rewardProperties;
 
   /** 화장실 도착 체크인 담당 */
   @Transactional
-  public PooCheckInResponse checkIn(
-      String email, Long toiletId, double lat, double lon, Long enteredAt) {
+  public PooCheckInResponse checkIn(String email, Long toiletId, double lat, double lon) {
     User user = userService.getByEmail(email);
 
     // 위치 검증. 반경 정책은 LocationVerificationService 가 소유한다.
@@ -77,7 +73,7 @@ public class PooRecordService {
 
     // 도착 시간 기록 및 반환 (Fast Check-in 로직 대응)
     long arrivalTimeMillis =
-        locationVerificationService.getOrSetArrivalTime(user.getId(), toiletId, enteredAt);
+        locationVerificationService.getOrSetArrivalTime(user.getId(), toiletId);
     log.info(
         "User {} checked-in at toilet {}. Arrival Time: {}", email, toiletId, arrivalTimeMillis);
 
@@ -125,8 +121,12 @@ public class PooRecordService {
     // 수동 입력값 결정
     PoopAttributes attrs = resolvePoopAttributes(request);
 
-    // 기록 저장 성공 후, 방문 인증인 경우에만 타이머 리셋
+    // 방문 로그에 남길 도착 시각은 타이머를 리셋하기 전에 읽는다. 리셋 뒤에 읽으면 키가 현재 시각으로 다시 만들어져
+    // 체류 시간이 0 에 가깝게 남고, 체크인 없이 다시 기록할 수 있게 된다.
+    Long arrivalTimeMillis = null;
     if (isVisitAuth && toilet != null) {
+      arrivalTimeMillis =
+          locationVerificationService.getOrSetArrivalTime(user.getId(), toilet.getId());
       locationVerificationService.resetArrivalTime(user.getId(), toilet.getId());
     }
 
@@ -154,7 +154,7 @@ public class PooRecordService {
 
     // Visit Log 기록 (방문 인증 시에만)
     if (isVisitAuth) {
-      logVisitOnSuccess(user, toilet, request, saved);
+      logVisitOnSuccess(user, toilet, request, saved, arrivalTimeMillis);
     }
 
     return recordMapper.toResponse(saved);
@@ -177,9 +177,11 @@ public class PooRecordService {
   }
 
   private void logVisitOnSuccess(
-      User user, Toilet toilet, PooRecordCreateRequest request, PooRecord saved) {
-    long arrivalTimeMillis =
-        locationVerificationService.getOrSetArrivalTime(user.getId(), toilet.getId(), null);
+      User user,
+      Toilet toilet,
+      PooRecordCreateRequest request,
+      PooRecord saved,
+      long arrivalTimeMillis) {
     LocalDateTime arrivalAt =
         LocalDateTime.ofInstant(Instant.ofEpochMilli(arrivalTimeMillis), ZoneId.systemDefault());
 
@@ -242,29 +244,27 @@ public class PooRecordService {
       PooRecord record,
       String failureReason) {
     try {
-      Toilet toilet = toiletRepository.findById(toiletId).orElse(null);
-      if (toilet == null) return;
-
-      VisitLog visitLog =
-          VisitLog.builder()
-              .user(user)
-              .toilet(toilet)
-              .eventType(eventType)
-              .arrivalAt(arrivalAt)
-              .completedAt(completedAt)
-              .userLatitude(lat)
-              .userLongitude(lon)
-              .distanceMeters(distance)
-              .pooRecord(record)
-              .failureReason(failureReason)
-              .dwellSeconds(
-                  arrivalAt != null && completedAt != null
-                      ? (int) java.time.Duration.between(arrivalAt, completedAt).toSeconds()
-                      : null)
-              .build();
-
-      visitLogRepository.save(visitLog);
-    } catch (DataAccessException e) {
+      VisitLogRecorder.Entry entry =
+          new VisitLogRecorder.Entry(
+              user,
+              toiletId,
+              eventType,
+              arrivalAt,
+              completedAt,
+              lat,
+              lon,
+              distance,
+              record,
+              failureReason);
+      // 실패 로그는 곧이어 예외가 던져져 호출 트랜잭션이 롤백되므로 별도 트랜잭션으로 저장한다.
+      // 성공 로그는 아직 커밋되지 않은 기록 행을 참조하므로 호출 트랜잭션에 참여시킨다.
+      if (eventType == VisitEventType.VERIFICATION_FAILED) {
+        visitLogRecorder.saveInNewTransaction(entry);
+      } else {
+        visitLogRecorder.save(entry);
+      }
+    } catch (RuntimeException e) {
+      // 로그 저장 실패(DB 오류, 비동기 작업 큐 포화 등)가 원래 응답(예: 검증 실패 예외)을 바꾸지 않도록 삼킨다
       log.error("Failed to log visit: {}", e.getMessage());
     }
   }

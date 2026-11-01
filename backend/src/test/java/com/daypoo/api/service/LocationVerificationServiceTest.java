@@ -1,16 +1,21 @@
 package com.daypoo.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import com.daypoo.api.global.config.CheckInProperties;
 import com.daypoo.api.repository.ToiletRepository;
+import java.time.Duration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("위치 검증 서비스 단위 테스트")
@@ -75,5 +80,20 @@ class LocationVerificationServiceTest {
 
     assertThat(serviceWithRadius(150.0).checkDistance(TOILET_ID, LAT, LON).withinAllowedRadius())
         .isFalse();
+  }
+
+  @Test
+  @DisplayName("도착 시각은 항상 서버 시각으로 기록된다")
+  void 도착_시각은_서버_시각으로_기록된다() {
+    @SuppressWarnings("unchecked")
+    ValueOperations<String, String> ops = mock(ValueOperations.class);
+    given(redisTemplate.opsForValue()).willReturn(ops);
+    given(ops.setIfAbsent(anyString(), anyString(), any(Duration.class))).willReturn(true);
+
+    long before = System.currentTimeMillis();
+    long arrival = serviceWithRadius(150.0).getOrSetArrivalTime(1L, TOILET_ID);
+    long after = System.currentTimeMillis();
+
+    assertThat(arrival).isBetween(before, after);
   }
 }
