@@ -9,9 +9,6 @@ ARG VITE_KAKAO_MAP_KEY
 # package.json, package-lock.json 복사 (npm ci 캐시 최적화)
 COPY package*.json ./
 
-# 네이티브 모듈 빌드 의존성 설치 (gifsicle 등)
-RUN apk add --no-cache python3 make g++ autoconf automake libtool pkgconfig nasm zlib-dev libpng-dev libjpeg-turbo-dev
-
 # 의존성 설치
 RUN npm ci
 
