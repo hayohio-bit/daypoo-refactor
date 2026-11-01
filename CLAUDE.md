@@ -44,11 +44,12 @@ npm run test                         # vitest (watch)
 npx vitest run src/hooks/useToilets.test.ts   # 단일 파일
 npm run test:coverage                # 커버리지 (vite.config.ts에 임계치 정의)
 npm run lint                         # biome lint
+npm run typecheck                    # tsc --noEmit (CI 에서도 실행)
 npm run check                        # biome lint+format 자동 수정
 npm run build                        # tsc 없이 vite build
 ```
 
-커밋 규칙: commitlint(conventional commits)가 husky 훅으로 강제된다(`feat:`, `fix:`, `chore:` 등). lint-staged가 프론트엔드에 prettier, 백엔드에 spotless를 적용한다.
+커밋 규칙: commitlint(conventional commits)가 husky 훅으로 강제된다(`feat:`, `fix:`, `chore:` 등). lint-staged가 프론트엔드에 biome, 백엔드에 spotless를 적용한다. 훅은 저장소 루트에서 `npm install`(또는 `npm ci`)을 한 번 실행해야 켜진다. `prepare` 스크립트가 husky 를 실행해 저장소 로컬 `core.hooksPath` 를 `.husky/_` 로 설정하는 방식이라, 설치 전에는 훅이 실행되지 않는다. 훅에 기대지 말고 푸시 전에 CI 와 같은 검증을 직접 실행한다: `cd frontend && npx biome ci . && npm run typecheck && npm run test:coverage`, `cd backend && ./gradlew build`(`npm run check` 는 파일을 자동 수정하므로 CI 와 같은 검사가 아니다).
 
 ## 아키텍처
 
