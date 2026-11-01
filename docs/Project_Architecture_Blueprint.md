@@ -140,7 +140,7 @@ React 19.2.0, Vite 7.3.1 기반 SPA 구조입니다. 스타일링에는 Tailwind
 ---
 
 ### 3.2 백엔드 (backend)
-Spring Boot 3.4.3 및 Java 21 기반 애플리케이션으로, Gradle 빌드 툴을 사용합니다.
+Spring Boot 3.4.13 및 Java 21 기반 애플리케이션으로, Gradle 빌드 툴을 사용합니다.
 
 - **디렉토리 구조 (`com.daypoo.api`)**:
   - `controller`: HTTP 요청 수신, API 파라미터 유효성 검증 (`@Valid`), 응답 DTO 포맷팅을 수행합니다.

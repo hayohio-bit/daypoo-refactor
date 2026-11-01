@@ -8,7 +8,7 @@
 
 | 항목           | 기술/버전                                      |
 | -------------- | -------------------------------------------- |
-| **Framework**  | Spring Boot 3.4.3 / Java 21                  |
+| **Framework**  | Spring Boot 3.4.13 / Java 21                  |
 | **Build Tool** | Gradle 8.x                                   |
 | **Database**   | PostgreSQL 16 / PostGIS (Spatial Data)      |
 | **Caching**    | Redis (JWT, Ranking, RateLimit)             |

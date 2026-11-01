@@ -8,7 +8,7 @@ _React · Spring Boot 3.4 (Virtual Threads) · PostgreSQL + PostGIS · Redis_
 
 [![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/jhyeon9185/daypoo)
 [![Frontend](https://img.shields.io/badge/Frontend-React_18+_TypeScript-61DAFB?logo=react&logoColor=white)](./frontend)
-[![Backend](https://img.shields.io/badge/Backend-Spring_Boot_3.4.3-6DB33F?logo=springboot&logoColor=white)](./backend)
+[![Backend](https://img.shields.io/badge/Backend-Spring_Boot_3.4.13-6DB33F?logo=springboot&logoColor=white)](./backend)
 [![License](https://img.shields.io/badge/License-ISC-yellow)](./LICENSE)
 
 **원본 팀 프로젝트**: [jhyeon9185/daypoo](https://github.com/jhyeon9185/daypoo)
@@ -91,7 +91,7 @@ graph TB
 | 파트           | 기술                        | 설명                                                      |
 | :------------- | :-------------------------- | :-------------------------------------------------------- |
 | **Frontend**   | React 19.2, TypeScript, Vite | 고성능 지도 UI 구현 (Port: 5173) |
-| **Backend**    | Spring Boot 3.4.3 (Java 21) | **가상 스레드(Virtual Threads)** 기반 고성능 병렬 처리    |
+| **Backend**    | Spring Boot 3.4.13 (Java 21) | **가상 스레드(Virtual Threads)** 기반 고성능 병렬 처리    |
 |                | QueryDSL 5.0 / Flyway       | 타입 세이프한 쿼리 작성 및 DB 형상 관리 자동화            |
 | **Data Layer** | PostgreSQL 16 + PostGIS     | 5만 건 공간 데이터 처리 및 공간 인덱싱(GIST)              |
 |                | Redis (Geo, ZSET, Cache)    | **지역별 실시간 랭킹** 및 JWT 세션 관리                   |
@@ -166,7 +166,7 @@ cp .env.example .env
 ```text
 daypoo/
 ├── frontend/             # React + Vite SPA
-├── backend/              # Spring Boot 3.4.3 (Core Business Logic)
+├── backend/              # Spring Boot 3.4.13 (Core Business Logic)
 ├── terraform/            # Infrastructure as Code (AWS)  ※ 운영 배포는 OCI 워크플로 사용
 ├── docs/                 # 통합 문서 저장소
 ├── scripts/              # 유틸리티 및 배포 스크립트

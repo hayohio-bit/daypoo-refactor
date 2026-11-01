@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.3'
+	id 'org.springframework.boot' version '3.4.13'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'com.diffplug.spotless' version '6.25.0'
 }
@@ -9,7 +9,7 @@ group = 'com.daypoo'
 version = '0.0.1-SNAPSHOT'
 description = 'DayPoo Backend'
 
-// Spring Boot 3.4.3 이 지정하는 1.20.5 는 최신 Docker Engine 의 API 를 인식하지 못해
+// Spring Boot 3.4.x 가 지정하는 Testcontainers 1.20.x 는 최신 Docker Engine 의 API 를 인식하지 못해
 // "Could not find a valid Docker environment" 로 실패한다.
 ext['testcontainers.version'] = '1.21.4'
 

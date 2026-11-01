@@ -13,7 +13,7 @@
 
 ## 2. 기술 스택 (Updated)
 
-- **Backend:** Spring Boot 3.4.3 (Java 21) + Spring Data JPA + QueryDSL 5.0
+- **Backend:** Spring Boot 3.4.13 (Java 21) + Spring Data JPA + QueryDSL 5.0
 - **Database:**
   - **PostgreSQL 16 + PostGIS:** 공간 인덱싱을 통한 GPS 거리 계산 및 위치 기반 로직.
   - **Redis:** 실시간 랭킹(Sorted Set), JWT Refresh Token 관리, API Rate Limiting.
