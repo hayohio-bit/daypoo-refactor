@@ -3,12 +3,16 @@ package com.daypoo.api.global.aop;
 import com.daypoo.api.global.exception.BusinessException;
 import com.daypoo.api.global.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -27,6 +31,12 @@ public class RateLimitAspect {
     Long count = redisTemplate.opsForValue().increment("rate:" + key);
 
     if (count != null && count > rateLimit.maxAttempts()) {
+      // increment 와 expire 가 별개 호출이라 그 사이에 끊기면 만료 없는 키가 남아 해당 사용자가 영구히 막힌다.
+      // 거절하는 경로에서만 만료 여부를 확인해 복구하므로 정상 요청의 Redis 호출 수는 늘지 않는다.
+      Long ttl = redisTemplate.getExpire("rate:" + key);
+      if (ttl != null && ttl < 0) {
+        redisTemplate.expire("rate:" + key, rateLimit.windowSeconds(), TimeUnit.SECONDS);
+      }
       // 429 Too Many Requests -> BusinessException 체계 활용 (사용자 정의 ErrorCode 필요 가능성)
       throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS);
     }
@@ -39,9 +49,23 @@ public class RateLimitAspect {
   private String resolveKey(ProceedingJoinPoint joinPoint, RateLimit rateLimit) {
     HttpServletRequest request =
         ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-    String ip = resolveClientIp(request);
+    String subject = rateLimit.perUser() ? resolveUser() : null;
+    if (subject == null) {
+      subject = resolveClientIp(request);
+    }
     String method = joinPoint.getSignature().toShortString();
-    return ip + ":" + method;
+    return subject + ":" + method;
+  }
+
+  /** 로그인한 사용자 이름(이메일). 익명이면 null. */
+  private String resolveUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null
+        || !authentication.isAuthenticated()
+        || authentication instanceof AnonymousAuthenticationToken) {
+      return null;
+    }
+    return "user:" + authentication.getName().toLowerCase(Locale.ROOT);
   }
 
   /**

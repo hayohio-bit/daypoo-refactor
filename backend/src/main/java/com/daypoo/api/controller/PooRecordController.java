@@ -4,6 +4,7 @@ import com.daypoo.api.dto.PooCheckInRequest;
 import com.daypoo.api.dto.PooCheckInResponse;
 import com.daypoo.api.dto.PooRecordCreateRequest;
 import com.daypoo.api.dto.PooRecordResponse;
+import com.daypoo.api.global.aop.RateLimit;
 import com.daypoo.api.service.PooRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,6 +35,7 @@ public class PooRecordController {
       summary = "화장실 도착 체크인 / Fast Check-in",
       description = "화장실 반경 내에 도착했음을 기록하고 남은 대기 시간을 반환합니다. 다중 요청 시 최초 도착 시간으로 계산됩니다.")
   @ApiResponse(responseCode = "200", description = "체크인 성공 및 대기 시간 반환")
+  @RateLimit(maxAttempts = 30, windowSeconds = 60, perUser = true)
   @PostMapping("/check-in")
   public ResponseEntity<PooCheckInResponse> checkIn(
       Authentication authentication, @Valid @RequestBody PooCheckInRequest request) {
@@ -47,6 +49,7 @@ public class PooRecordController {
   @Operation(summary = "배변 기록 생성", description = "화장실 방문 인증 및 배변 상태를 기록합니다. 위치 검증이 포함됩니다.")
   @ApiResponse(responseCode = "200", description = "기록 생성 및 보상 지급 완료")
   @ApiResponse(responseCode = "400", description = "위치 검증 실패 또는 어뷰징 감지")
+  @RateLimit(maxAttempts = 10, windowSeconds = 60, perUser = true)
   @PostMapping
   public ResponseEntity<PooRecordResponse> createRecord(
       Authentication authentication, @Valid @RequestBody PooRecordCreateRequest request) {
