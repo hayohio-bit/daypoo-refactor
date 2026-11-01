@@ -70,7 +70,8 @@ function toTransportError(err: any): any {
   if (err?.name === 'AbortError') {
     return createApiError('요청 시간이 초과되었습니다.', 'TIMEOUT', 408);
   }
-  if (err instanceof TypeError && err.message.includes('fetch')) {
+  // fetch 는 네트워크 실패를 TypeError 로 던지지만 문구는 브라우저마다 다르다(Chrome 'Failed to fetch', Safari 'Load failed', Firefox 'NetworkError ...').
+  if (err instanceof TypeError && /fetch|load failed|networkerror/i.test(err.message)) {
     return createApiError('네트워크 연결에 실패했습니다.', 'NETWORK_ERROR', 0);
   }
   return err;
@@ -85,6 +86,7 @@ class ApiClient {
     endpoint: string,
     body?: any,
     timeout = 30000,
+    afterRefresh = false,
   ): Promise<T> {
     const headers = buildHeaders(getToken('accessToken'));
 
@@ -93,7 +95,14 @@ class ApiClient {
 
       // 401 인증 에러 발생 시 토큰 리프레시 시도
       if (response.status === 401 && !endpoint.includes('/auth/login')) {
-        return await this.handleUnauthorized<T>(method, endpoint, headers, body, timeout);
+        return await this.handleUnauthorized<T>(
+          method,
+          endpoint,
+          headers,
+          body,
+          timeout,
+          afterRefresh,
+        );
       }
 
       if (!response.ok) {
@@ -138,13 +147,17 @@ class ApiClient {
     headers: Record<string, string>,
     body: any,
     timeout: number,
+    afterRefresh: boolean,
   ): Promise<T> {
-    if (await this.tryRefreshToken()) {
-      return this.request<T>(method, endpoint, body, timeout);
+    // 방금 리프레시한 토큰으로 보낸 재요청이 또 401 이면 서버가 그 토큰을 받아들이지 않는 것이다.
+    // 다시 리프레시하면 갱신 → 재요청 → 401 이 끝없이 반복되므로 한 번만 시도한다.
+    if (!afterRefresh && (await this.tryRefreshToken())) {
+      return this.request<T>(method, endpoint, body, timeout, true);
     }
 
-    // 리프레시 실패(만료된 리프레시 토큰 등) 또는 리프레시 토큰이 아예 없는 경우
-    removeTokens();
+    // 리프레시 실패(만료된 리프레시 토큰 등) 또는 리프레시 토큰이 아예 없는 경우.
+    // 방금 갱신한 토큰으로 보낸 재요청이 401 이면 그 요청 하나의 문제일 수 있으므로 갱신한 토큰은 지우지 않는다.
+    if (!afterRefresh) removeTokens();
 
     // 이미 Authorization 없이 보냈는데도 401이 났다면 바로 에러 (서버가 무조건 인증을 요구하는 경로)
     if (!headers['Authorization']) {

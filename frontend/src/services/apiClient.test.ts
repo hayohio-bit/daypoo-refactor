@@ -118,3 +118,59 @@ describe('apiClient 재시도', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('apiClient 인증·네트워크 오류 처리', () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    vi.stubGlobal('fetch', fetchMock);
+    fetchMock.mockReset();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('리프레시에 성공한 뒤의 재요청이 다시 401 이면 리프레시를 반복하지 않는다', async () => {
+    localStorage.setItem('accessToken', 'old');
+    localStorage.setItem('refreshToken', 'refresh');
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    fetchMock.mockImplementation((url: string) => {
+      if (String(url).includes('/auth/refresh')) {
+        return Promise.resolve(
+          jsonResponse(200, { data: { accessToken: 'new', refreshToken: 'refresh2' } }),
+        );
+      }
+      return Promise.resolve(jsonResponse(401, { message: 'unauthorized' }));
+    });
+
+    await expect(api.get('/favorites')).rejects.toMatchObject({ code: 'AUTHENTICATION_REQUIRED' });
+
+    const refreshCalls = fetchMock.mock.calls.filter(([url]) =>
+      String(url).includes('/auth/refresh'),
+    );
+    expect(refreshCalls).toHaveLength(1);
+    // 원 요청 + 리프레시 + 재요청 + 게스트 폴백 = 최대 4번에서 끝난다
+    expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(4);
+    // 방금 갱신한 토큰은 특정 요청 하나의 401 때문에 지우지 않는다
+    expect(localStorage.getItem('accessToken')).toBe('new');
+  });
+
+  it('Safari 의 "Load failed" 도 네트워크 오류로 정규화한다', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Load failed'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.useFakeTimers();
+    try {
+      const pending = api.post('/records', { toiletId: 1 }).catch((e) => e);
+      await vi.runAllTimersAsync();
+
+      expect(await pending).toMatchObject({ code: 'NETWORK_ERROR', status: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
